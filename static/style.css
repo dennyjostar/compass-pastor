@@ -64,9 +64,10 @@ header {
 }
 
 .header-subtitle {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     letter-spacing: 3px;
     color: var(--text-dim);
+    margin-top: 5px;
     margin-bottom: 2px;
 }
 
