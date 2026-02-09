@@ -10,11 +10,18 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 # API Key 설정 (환경변수 필수)
 def get_openai_client():
     key = os.getenv("OPENAI_API_KEY")
-    if not key:
-        raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다. Railway 설정(Variables)에서 변수를 추가했는지, 그리고 배포가 완료되었는지 확인해주세요.")
+    project_name = os.getenv("RAILWAY_PROJECT_NAME", "알 수 없는 프로젝트")
     
-    # 디버깅을 위해 키의 앞부분만 살짝 로그에 남깁니다 (보안 유지)
-    print(f"[DEBUG] API Key found (starts with: {key[:7]}...)")
+    if not key:
+        raise ValueError(f"OPENAI_API_KEY 환경 변수가 없습니다. (현재 프로젝트명: {project_name}) Railway 설정(Variables)에서 키를 넣었는지 다시 확인해주세요.")
+    
+    # 앞뒤 공백 제거 (부장님의 편의를 위해!)
+    key = key.strip()
+    
+    if len(key) < 20: # 너무 짧으면 잘못된 키일 가능성
+        raise ValueError(f"입력된 API 키가 지나치게 짧습니다. (현재 프로젝트명: {project_name}) 키 전체를 정확히 복사했는지 확인해주세요.")
+        
+    print(f"[DEBUG] API Key valid. Starts with: {key[:7]}...")
     return openai.OpenAI(api_key=key)
 
 # 경로 설정 (배포 환경 호환)
