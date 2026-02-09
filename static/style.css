@@ -321,11 +321,15 @@ main::-webkit-scrollbar {
     background: rgba(0, 0, 0, 0.92);
     z-index: 100;
     display: none;
-    align-items: center;
+    align-items: flex-start;
+    /* 위에서부터 정렬 (잘림 방지) */
     justify-content: center;
     backdrop-filter: blur(12px);
-    padding: 30px;
+    padding: 20px 30px;
+    /* 상단 여백 조절 */
     box-sizing: border-box;
+    overflow-y: auto;
+    /* 내용이 길면 스크롤 가능하게 */
 }
 
 .modal-content {
