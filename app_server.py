@@ -9,7 +9,11 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # API Key 설정 (환경변수 필수)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-openai.api_key = OPENAI_API_KEY
+
+def get_openai_client():
+    if not OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다. Railway 설정에서 변수를 추가해주세요.")
+    return openai.OpenAI(api_key=OPENAI_API_KEY)
 
 # 경로 설정 (배포 환경 호환)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -69,7 +73,7 @@ def ask():
         user_data = get_user_data(user_id)
         user_data['profile'] = profile
 
-        client = openai.OpenAI(api_key=OPENAI_API_KEY)
+        client = get_openai_client()
         
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
