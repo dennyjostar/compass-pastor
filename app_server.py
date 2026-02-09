@@ -8,12 +8,14 @@ import difflib
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # API Key 설정 (환경변수 필수)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 def get_openai_client():
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다. Railway 설정에서 변수를 추가해주세요.")
-    return openai.OpenAI(api_key=OPENAI_API_KEY)
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        raise ValueError("OPENAI_API_KEY 환경 변수가 설정되지 않았습니다. Railway 설정(Variables)에서 변수를 추가했는지, 그리고 배포가 완료되었는지 확인해주세요.")
+    
+    # 디버깅을 위해 키의 앞부분만 살짝 로그에 남깁니다 (보안 유지)
+    print(f"[DEBUG] API Key found (starts with: {key[:7]}...)")
+    return openai.OpenAI(api_key=key)
 
 # 경로 설정 (배포 환경 호환)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
