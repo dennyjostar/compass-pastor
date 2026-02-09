@@ -1,0 +1,415 @@
+/* 나침반 V5.2 - 서머나 커스텀 에디션 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap');
+
+:root {
+    --bg-dark: #0a0e17;
+    --gold: #FFD700;
+    --gold-bright: #FFFB00;
+    --gold-dim: #D4AF37;
+    --text-white: #e2e8f0;
+    --text-dim: #94a3b8;
+    --accent: #FFEA00;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-dark);
+    font-family: 'Pretendard', sans-serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+    height: 100dvh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%);
+    position: relative;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* 헤더 */
+header {
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-control {
+    color: var(--gold-dim);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.btn-control:active {
+    transform: scale(0.9);
+    opacity: 0.7;
+}
+
+.header-title-box {
+    text-align: center;
+    flex: 1;
+}
+
+.header-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+}
+
+.header-main-title {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 1.5rem;
+    color: var(--gold-dim);
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+/* 메인 영역 */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: none;
+}
+
+main::-webkit-scrollbar {
+    display: none;
+}
+
+/* 홈 뷰 */
+.home-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.compass-logo-img {
+    width: 140px;
+    height: 140px;
+    filter: drop-shadow(0 0 20px rgba(197, 160, 89, 0.4));
+    animation: float 6s infinite ease-in-out;
+    margin-bottom: 20px;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+.welcome-box {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.welcome-box b {
+    color: var(--accent);
+    font-size: 1.15rem;
+}
+
+.welcome-box p {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    margin: 8px 0 0;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+}
+
+/* 그리드 네비 */
+.nav-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+}
+
+.nav-card {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 22px 10px;
+    border-radius: 18px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nav-card i {
+    font-size: 1.5rem;
+    color: var(--gold-dim);
+    margin-bottom: 10px;
+    display: block;
+}
+
+.nav-card span {
+    font-size: 0.85rem;
+    color: var(--text-white);
+    font-weight: 500;
+}
+
+.nav-card:active {
+    background: rgba(255, 234, 0, 0.1);
+    border-color: var(--accent);
+}
+
+/* 테스크 입력 화면 (별도 입력창 느낌) */
+.task-view {
+    display: none;
+    flex-direction: column;
+    padding-top: 20px;
+    animation: fadeIn 0.4s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--gold-dim);
+}
+
+.task-header i {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.task-header h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    font-family: 'Nanum Myeongjo';
+}
+
+.task-guide {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    border-left: 3px solid var(--gold-dim);
+}
+
+/* 채팅 결과 창 */
+.chat-view {
+    display: none;
+    padding-top: 10px;
+    animation: fadeIn 0.4s;
+}
+
+.chat-bubble {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 24px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-label {
+    color: var(--gold-dim);
+    font-family: 'Nanum Myeongjo';
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    display: block;
+    letter-spacing: 1px;
+}
+
+.chat-body {
+    color: #cbd5e1;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+/* 하단 입력창 */
+.bottom-bar {
+    padding: 15px 0 30px;
+    background: linear-gradient(to top, var(--bg-dark) 80%, transparent);
+    flex-shrink: 0;
+}
+
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-main {
+    width: 100%;
+    padding: 16px 50px 16px 60px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid rgba(197, 160, 89, 0.3);
+    border-radius: 35px;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-main:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(255, 234, 0, 0.15);
+}
+
+.icon-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.mic-btn {
+    left: 18px;
+    color: var(--accent);
+    font-size: 1.8rem;
+}
+
+.send-btn {
+    right: 18px;
+    color: var(--text-dim);
+    font-size: 1.3rem;
+}
+
+.send-btn.active {
+    color: var(--accent);
+}
+
+/* 모달 시리즈 (프로필, 마이크 안내) */
+.modal-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.modal-content {
+    width: 100%;
+    background: #16213e;
+    padding: 30px;
+    border-radius: 25px;
+    border: 1px solid var(--gold-dim);
+    color: white;
+}
+
+.modal-content h3 {
+    font-family: 'Nanum Myeongjo';
+    color: var(--gold-dim);
+    margin-top: 0;
+    text-align: center;
+}
+
+.input-item {
+    margin-bottom: 20px;
+}
+
+.input-item label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+
+.input-item input,
+.input-item select {
+    width: 100%;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+}
+
+.btn-finish {
+    width: 100%;
+    padding: 16px;
+    background: var(--gold-dim);
+    border: none;
+    border-radius: 12px;
+    color: #000;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+/* 신비로운 노란 원 스피너 */
+.divine-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 234, 0, 0.1);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: divine-rotate 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite, divine-glow 2s ease-in-out infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes divine-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes divine-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(255, 234, 0, 0.2);
+        border-top-color: var(--accent);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(255, 234, 0, 0.6);
+        border-top-color: #fff;
+    }
+}

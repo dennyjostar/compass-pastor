@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Compass V5.5 - 서머나 영혼의 길잡이</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <div class="btn-control" id="goHome"><i class="fas fa-home"></i></div>
+            <div class="header-title-box">
+                <div class="header-subtitle">서머나 영혼의 길잡이</div>
+                <h1 class="header-main-title">COMPASS</h1>
+            </div>
+            <div class="btn-control" id="openProfile"><i class="fas fa-user-circle"></i></div>
+        </header>
+
+        <main id="mainScroll">
+            <!-- 1. 홈 화면 -->
+            <div class="home-view" id="viewHome">
+                <img src="/static/compass_logo.svg" class="compass-logo-img" alt="나침반">
+                <div class="welcome-box">
+                    <p>평안하십니까, <b id="userNameLarge">님</b></p>
+                    <p>나침반이 당신의 영적 여정을 기억합니다</p>
+                    <!-- 프라이버시 안심 문구 -->
+                    <div
+                        style="margin-top: 20px; font-size: 0.7rem; color: #4ade80; opacity: 0.9; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(74, 222, 128, 0.1); padding: 8px 15px; border-radius: 20px;">
+                        <i class="fas fa-shield-halved"></i>
+                        <span>모든 상담 내용은 본인 기기에만 암호화되어 보관됩니다.</span>
+                    </div>
+                </div>
+                <div class="nav-grid">
+                    <div class="nav-card" data-mode="scripture"><i class="fas fa-compass"></i><span>말씀 찾기</span></div>
+                    <div class="nav-card" data-mode="prayer"><i class="fas fa-hands-praying"></i><span>기도문</span></div>
+                    <div class="nav-card" data-mode="meditation"><i class="fas fa-book-open"></i><span>오늘의 묵상</span>
+                    </div>
+                    <div class="nav-card" data-mode="chat"><i class="fas fa-comment-dots"></i><span>목사님 대화</span></div>
+                </div>
+            </div>
+
+            <!-- 2. 테스크 전용 입력 화면 -->
+            <div class="task-view" id="viewTask">
+                <div class="task-header">
+                    <i id="taskIcon" class="fas fa-compass"></i>
+                    <h2 id="taskTitle">말씀 찾기</h2>
+                </div>
+                <div class="task-guide" id="taskGuide">
+                    성경 말씀이 필요한 상황을 구체적으로 말씀해주시면,<br>목사님이 당신의 삶에 꼭 맞는 말씀을 찾아드립니다.
+                </div>
+                <div style="text-align:center; opacity:0.3; margin-top:50px;">
+                    <i class="fas fa-keyboard" style="font-size:3rem;"></i>
+                    <p style="font-size:0.8rem;">하단 입력창에 내용을 적어주세요</p>
+                </div>
+            </div>
+
+            <!-- 3. 상담 결과 출력 화면 -->
+            <div class="chat-view" id="viewChat">
+                <div class="chat-bubble">
+                    <span class="chat-label" id="currentChatLabel">🔔 상담 결과</span>
+                    <div class="chat-body" id="chatText"></div>
+                </div>
+                <div style="text-align:center; margin-top:20px; opacity:0.5; font-size:0.7rem; color:var(--text-dim);">
+                    <i class="fas fa-lock"></i> 이 대화는 닫을 때 자동으로 보호됩니다.
+                </div>
+            </div>
+        </main>
+
+        <!-- 하단 고정 입력 섹션 -->
+        <div class="bottom-bar">
+            <div class="input-group">
+                <button class="icon-btn mic-btn" id="micBtn"><i class="fas fa-microphone"></i></button>
+                <input type="text" class="input-main" id="mainInput" placeholder="고민이나 상황을 말씀해주세요...">
+                <button class="icon-btn send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- 모달: 프로필 설정 -->
+        <div class="modal-bg" id="profileModal">
+            <div class="modal-content">
+                <h3>내 정보 설정</h3>
+                <p style="font-size:0.75rem; color:var(--text-dim); text-align:center; margin-bottom:20px;">더 깊은 상담을 위해
+                    최소한의 정보만 사용됩니다.</p>
+                <div class="input-item">
+                    <label>성함</label>
+                    <input type="text" id="inName" placeholder="성함을 입력하세요">
+                </div>
+                <div class="input-item">
+                    <label>연령대 및 성별</label>
+                    <div style="display:flex; gap:10px;">
+                        <select id="inAge" style="flex:1;">
+                            <option value="20대">20대</option>
+                            <option value="30대">30대</option>
+                            <option value="40대">40대</option>
+                            <option value="50대">50대</option>
+                            <option value="60대 이상">60대 이상</option>
+                        </select>
+                        <select id="inGender" style="flex:1;">
+                            <option value="남성">남성</option>
+                            <option value="여성">여성</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-item">
+                    <label>거주 지역</label>
+                    <input type="text" id="inRegion" placeholder="예: 서울 구로구">
+                </div>
+                <div class="input-item">
+                    <label>직업 (선택)</label>
+                    <input type="text" id="inJob" placeholder="하시는 일을 알려주세요">
+                </div>
+                <button class="btn-finish" id="saveProfile">정보 저장하고 시작하기</button>
+                <div style="margin-top:15px; font-size:0.65rem; color:#4ade80; text-align:center;">
+                    <i class="fas fa-check-circle"></i> 입력하신 정보는 서버로 전송되지 않습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>
