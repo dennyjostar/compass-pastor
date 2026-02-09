@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('inRegion').value = userProfile.region || "";
             document.getElementById('inJob').value = userProfile.job || "";
             el.modal.style.display = 'flex';
+            el.modal.scrollTop = 0; // 모달을 열 때 항상 맨 위로 스크롤 강제 (할렐루야! 보이게)
         } else {
             el.modal.style.display = 'none';
         }
