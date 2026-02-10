@@ -127,10 +127,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    el.send.addEventListener('click', sendMessage);
-    el.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    // --- 음성 인식 (STT) 기능 구현 ---
+    const recognition = window.webkitSpeechRecognition ? new webkitSpeechRecognition() : (window.SpeechRecognition ? new SpeechRecognition() : null);
 
-    el.mic.addEventListener('click', () => {
-        alert("⚠️ 마이크 기능 안내\n음성 인식은 보안 연결(HTTPS) 환경에서만 작동합니다. 현재는 텍스트 입력으로 이용해 주세요!");
-    });
+    if (recognition) {
+        recognition.lang = 'ko-KR';
+        recognition.interimResults = false;
+        recognition.continuous = false;
+
+        recognition.onstart = () => {
+            el.mic.classList.add('recording');
+            el.input.placeholder = "말씀하세요... (듣고 있습니다)";
+        };
+
+        recognition.onend = () => {
+            el.mic.classList.remove('recording');
+            el.input.placeholder = "고민이나 상황을 말씀해주세요...";
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            el.input.value = transcript;
+            // 인식이 성공하면 자동으로 전송을 시도할 수도 있지만, 확인을 위해 입력만 함
+            console.log("🎤 음성 인식 결과:", transcript);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("🎤 음성 인식 오류:", event.error);
+            el.mic.classList.remove('recording');
+        };
+
+        el.mic.addEventListener('click', () => {
+            if (el.mic.classList.contains('recording')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+    } else {
+        el.mic.addEventListener('click', () => {
+            alert("⚠️ 마이크 기능 안내\n죄송합니다. 현재 브라우저가 음성 인식을 지원하지 않습니다. 텍스트 입력을 이용해 주세요!");
+        });
+    }
 });
