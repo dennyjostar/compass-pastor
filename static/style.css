@@ -299,6 +299,25 @@ main::-webkit-scrollbar {
     left: 18px;
     color: var(--accent);
     font-size: 1.8rem;
+    transition: all 0.3s;
+}
+
+.mic-btn.recording {
+    color: #ff4d4d;
+    filter: drop-shadow(0 0 10px #ff4d4d);
+    animation: mic-pulse 1s infinite alternate;
+}
+
+@keyframes mic-pulse {
+    from {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+
+    to {
+        opacity: 0.6;
+        transform: translateY(-50%) scale(1.2);
+    }
 }
 
 .send-btn {
