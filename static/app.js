@@ -111,19 +111,52 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json();
 
-            // 링크 처리 (강력한 새 창 열기 적용)
-            let formatted = data.response.replace(/\n/g, '<br>');
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            formatted = formatted.replace(urlRegex, (url) => {
-                let cleanUrl = url.replace(/[.,)]+$/, "");
-                // target="_blank"와 rel="noopener noreferrer"로 새 창 열기 강제
-                return `<br><br><a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block; background:rgba(255,234,0,0.1); border:1px solid #FFEA00; color:#FFEA00; padding:12px 20px; border-radius:12px; font-weight:800; text-decoration:none; margin-top:5px; box-shadow: 0 4px 15px rgba(255, 234, 0, 0.2);">[ 설교 영상 새 창에서 보기 ▶ ]</a><br>`;
-            });
+            // [2단계 응답 처리] 일반 답변과 심층 분석 분리
+            let fullText = data.response;
+            let formatted = fullText.replace(/\n/g, '<br>');
 
-            el.chatText.innerHTML = formatted;
+            if (formatted.includes('[심층 분석]')) {
+                const parts = formatted.split('[심층 분석]');
+                const generalPart = parts[0].replace(/\[일반 답변\]/g, '').trim();
+                const deepPart = parts[1].trim();
+
+                el.chatText.innerHTML = `
+                    <div class="general-content">${generalPart}</div>
+                    <div class="deep-container">
+                        <button class="deep-btn" onclick="toggleDeepAnalysis(this)">
+                            <i class="fas fa-chevron-down"></i> 목사님의 심층 분석 보기
+                        </button>
+                        <div class="deep-content">
+                            <b style="color:var(--gold-bright); display:block; margin-bottom:10px;">[ 김성수 목사의 심층 분석 ]</b>
+                            ${deepPart}
+                        </div>
+                    </div>
+                `;
+            } else {
+                el.chatText.innerHTML = formatted.replace(/\[일반 답변\]/g, '');
+            }
+
             el.input.value = '';
         } catch (e) {
             el.chatText.innerHTML = "통신 연결 오류가 발생했습니다.";
+        }
+    };
+
+    // 글로벌 함수로 등록 (onclick 사용을 위해)
+    window.toggleDeepAnalysis = (btn) => {
+        const content = btn.nextElementSibling;
+        const isOpen = content.style.display === 'block';
+
+        if (isOpen) {
+            content.style.display = 'none';
+            btn.classList.remove('open');
+        } else {
+            content.style.display = 'block';
+            btn.classList.add('open');
+            // 부드러운 스크롤 이동
+            setTimeout(() => {
+                content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
     };
 
