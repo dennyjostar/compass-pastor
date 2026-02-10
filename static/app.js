@@ -169,4 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("⚠️ 마이크 기능 안내\n죄송합니다. 현재 브라우저가 음성 인식을 지원하지 않습니다. 텍스트 입력을 이용해 주세요!");
         });
     }
+
+    // [복구] 전송 버튼 및 엔터 키 리스너
+    el.send.addEventListener('click', sendMessage);
+    el.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 });
