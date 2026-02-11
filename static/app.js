@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     el.send.addEventListener('click', sendMessage);
     el.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // --- 카톡 공유 기능 구현 (완결판 V2 - 텍스트 전용) ---
+    // --- 카톡 공유 기능 구현 (최종 최적화) ---
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
@@ -224,49 +224,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // [정밀 추출] 클래스 기반으로 내용을 분리하여 가져옴 (가시성 상관없음)
+            // [정밀 텍스트 추출 로직]
+            let genText = "";
+            let deepText = "";
+
             const genEl = chatBody.querySelector('.general-content');
-            const deepEl = chatBody.querySelector('.deep-content');
-
-            let messageBody = "";
-
             if (genEl) {
-                messageBody += `[일반 답변]\n${genEl.innerText.trim()}\n\n`;
+                // <br> 태그를 줄바꿈(\n)으로 안전하게 치환
+                genText = genEl.innerHTML.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?[^>]+(>|$)/g, "").trim();
             }
 
+            const deepEl = chatBody.querySelector('.deep-content');
             if (deepEl) {
-                // 심층 분석 버튼 문구 등 제거하고 순수 텍스트만
-                let deepPureText = deepEl.textContent.replace("[ 김성수 목사의 심층 분석 ]", "").trim();
-                messageBody += `[심층 분석]\n${deepPureText}\n\n`;
+                // <br> 태그와 [ 김성수 목사의 심층 분석 ] 문구 제거
+                deepText = deepEl.innerHTML.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?[^>]+(>|$)/g, "").replace("[ 김성수 목사의 심층 분석 ]", "").trim();
             }
 
-            // 구조가 없을 경우 전체 텍스트에서 불필요한 문구만 제거
-            if (!messageBody) {
-                messageBody = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
+            let resultText = "";
+            if (genText) resultText += `[일반 답변]\n${genText}\n\n`;
+            if (deepText) resultText += `[심층 분석]\n${deepText}\n\n`;
+
+            if (!resultText) {
+                resultText = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
             }
 
-            const finalShareText = `[🧭 서머나 영혼의 길잡이 상담 결과]\n\n${messageBody.trim()}\n\n📖 영혼의 길잡이, Compass`;
+            const finalMsg = `[🧭 나침반 상담 결과]\n\n${resultText.trim()}\n\n📖 서머나 영혼의 길잡이, Compass`;
+
+            // [핵심] 클립보드 복사를 무조건 먼저 수행 (보험)
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = finalMsg;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                console.log("클립보드 우선 복사 완료");
+            } catch (e) {
+                console.error("복사 실패:", e);
+            }
 
             try {
-                // 1. 모바일 앱 공유 (텍스트 필드만 사용)
+                // 모바일에서 navigator.share 시도
                 if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
                     await navigator.share({
-                        text: finalShareText
-                        // title과 url을 아예 제거하여 텍스트가 바로 카톡창에 입력되도록 함
+                        text: finalMsg
+                        // title, url 생략으로 텍스트 전송 확률 극대화
                     });
-                }
-                // 2. PC 혹은 미지원 환경 (클립보드 복사 유도)
-                else {
-                    const t = document.createElement("textarea");
-                    t.value = finalShareText;
-                    document.body.appendChild(t);
-                    t.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(t);
-                    alert("✅ 말씀 내용이 복사되었습니다!\n카카오톡 대화방에 '붙여넣기'해 주세요. 😇");
+                } else {
+                    alert("✅ 말씀 내용이 복사되었습니다!\n카카오톡 대화방에 '붙여넣기' 하세요. 😇");
                 }
             } catch (e) {
-                console.log("공유 시스템 중단:", e);
+                // 공유 취소 시에도 이미 복사는 되어있음
+                console.log("공유 시도 종료");
             }
         });
     }
