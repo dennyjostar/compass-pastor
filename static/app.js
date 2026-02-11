@@ -211,4 +211,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // [복구] 전송 버튼 및 엔터 키 리스너
     el.send.addEventListener('click', sendMessage);
     el.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    // --- 카톡 공유 기능 구현 ---
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const rawText = el.chatText.innerText;
+            if (!rawText || rawText.includes("묵상 중이십니다")) return;
+
+            // 공유 텍스트 포맷팅
+            const shareTitle = "🧭 서머나 영적 나침반 상담 결과";
+            const shareText = `[${shareTitle}]\n\n${rawText.trim()}\n\n📖 영혼의 길잡이, Compass`;
+
+            try {
+                if (navigator.share) {
+                    // 모바일 등 Web Share API 지원 브라우저
+                    await navigator.share({
+                        title: shareTitle,
+                        text: shareText,
+                        url: window.location.href
+                    });
+                } else {
+                    // PC 등 미지원 브라우저 (클립보드 복사)
+                    await navigator.clipboard.writeText(shareText);
+                    alert("✅ 답변 내용이 복사되었습니다!\n카카오톡 대화창에 '붙여넣기'하여 공유해 주세요. 😇");
+                }
+            } catch (e) {
+                console.log("공유 API 오류 (취소 등):", e);
+            }
+        });
+    }
 });
