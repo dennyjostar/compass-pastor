@@ -3,7 +3,7 @@ from playwright.async_api import async_playwright
 import sys
 
 async def run_qa_test(target_url):
-    print(f"🚀 [나침반 QA 에이전트] 테스트를 시작합니다: {target_url}")
+    print(f"🚀 [나침반 QA 요원: 나실장] 업무를 시작합니다! (대상: {target_url})")
     
     async with async_playwright() as p:
         # 브라우저 실행 (눈으로 확인하고 싶으시면 headless=False)
@@ -13,22 +13,22 @@ async def run_qa_test(target_url):
 
         try:
             # 1. 페이지 접속
-            print("1. 페이지 접속 중...")
+            print("1. [나실장] 현장 잠입 중... (페이지 접속)")
             await page.goto(target_url)
             await page.wait_for_timeout(2000)
 
             # 2. 프로필 자동 설정 (안되어 있을 경우)
             if await page.is_visible("#profileModal"):
-                print("2. 프로필 자동 설정 중...")
-                await page.fill("#inName", "테스트봇")
-                await page.fill("#inRegion", "가상세계")
+                print("2. [나실장] 신분 위장 중... (프로필 설정)")
+                await page.fill("#inName", "나실장_QA")
+                await page.fill("#inRegion", "가상세계 본부")
                 await page.click("#saveProfile")
                 await page.wait_for_timeout(1000)
 
             # 3. 각 모드별 테스트 루프
             modes = ["scripture", "prayer", "meditation", "chat"]
             for mode in modes:
-                print(f"3. [{mode}] 모드 테스트 시작...")
+                print(f"3. [나실장] {mode} 구역 보안 점검 개시...")
                 
                 # 홈으로 이동 (필요시)
                 await page.click("#goHome")
@@ -50,23 +50,22 @@ async def run_qa_test(target_url):
                 # 답변 내용 확인
                 content = await page.inner_text(".general-content")
                 if content:
-                    print(f"   ✅ [{mode}] 답변 수신 성공 (내용 요약: {content[:30]}...)")
+                    print(f"   ✅ [나실장] {mode} 응답 통과! (은혜가 넘치는군요.)")
                 
                 # 4. 공유 버튼 테스트
-                print(f"   - 공유 버튼 클릭 테스트...")
+                print(f"   - [나실장] 공유 루트 확인 중...")
                 await page.click("#shareBtn")
                 await page.wait_for_timeout(1000)
-                # 모바일이 아닌 경우 alert이 뜰 수 있음 (핸들링 필요시 추가)
                 
                 # 심층 분석 버튼 테스트 (존재할 경우)
                 if await page.is_visible(".deep-btn"):
-                    print(f"   - 심층 분석 토글 테스트...")
+                    print(f"   - [나실장] 심층 분석 기밀 문서 열람 테스트...")
                     await page.click(".deep-btn")
                     await page.wait_for_timeout(500)
                     if await page.is_visible(".deep-content"):
-                        print("   ✅ 심층 분석 내용 노출 확인")
+                        print("   ✅ [나실장] 심층 분석 확인 완료 (아주 깊습니다.)")
 
-            print("\n🎊 모든 기능 테스트가 성공적으로 완료되었습니다!")
+            print("\n🎊 [보고] 대표님, 나실장이 모든 점검을 끝냈습니다. 이상 무!")
 
         except Exception as e:
             print(f"\n❌ 테스트 중 오류 발생: {e}")
