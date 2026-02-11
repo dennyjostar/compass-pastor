@@ -437,3 +437,66 @@ main::-webkit-scrollbar {
         border-top-color: #fff;
     }
 }
+
+/* 심층 분석 토글 스타일 */
+.deep-container {
+    margin-top: 25px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    text-align: center;
+}
+
+.deep-btn {
+    background: rgba(255, 234, 0, 0.05);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-bright);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Nanum Myeongjo', serif;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.deep-btn:active {
+    transform: scale(0.95);
+}
+
+.deep-btn i {
+    transition: transform 0.3s;
+}
+
+.deep-btn.open i {
+    transform: rotate(180deg);
+}
+
+.deep-content {
+    display: none;
+    text-align: left;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    line-height: 1.9;
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
