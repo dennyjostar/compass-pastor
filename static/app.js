@@ -216,28 +216,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
-            const rawText = el.chatText.innerText;
-            if (!rawText || rawText.includes("묵상 중이십니다")) return;
+            const chatBody = document.getElementById('chatText');
+            if (!chatBody || chatBody.innerText.includes("묵상 중이십니다")) return;
 
-            // 공유 텍스트 포맷팅
-            const shareTitle = "🧭 서머나 영적 나침반 상담 결과";
-            const shareText = `[${shareTitle}]\n\n${rawText.trim()}\n\n📖 영혼의 길잡이, Compass`;
+            // [수정] HTML 태그를 제외하고 실제 텍스트 내용만 정밀하게 추출
+            // 심층 분석 섹션이 있으면 버튼 텍스트 등은 제외하고 내용만 가져오기
+            let contentText = "";
+            const general = chatBody.querySelector('.general-content');
+            const deep = chatBody.querySelector('.deep-content');
+
+            if (general) {
+                contentText += `[일반 답변]\n${general.innerText.trim()}\n\n`;
+            }
+            if (deep) {
+                contentText += `[김성수 목사의 심층 분석]\n${deep.innerText.trim()}\n\n`;
+            }
+
+            // 만약 위 구조가 없으면 전체 innerText 사용 (방어적 코드)
+            if (!contentText) {
+                contentText = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
+            }
+
+            const shareTitle = "🧭 서머나 영혼의 길잡이";
+            const shareText = `[${shareTitle} 상담 결과]\n\n${contentText}\n📖 영혼의 길잡이, Compass`;
 
             try {
                 if (navigator.share) {
-                    // 모바일 등 Web Share API 지원 브라우저
                     await navigator.share({
                         title: shareTitle,
-                        text: shareText,
-                        url: window.location.href
+                        text: shareText
+                        // url: window.location.href // [제거] 링크보다 내용 위주로 공유되도록 URL 제외
                     });
                 } else {
-                    // PC 등 미지원 브라우저 (클립보드 복사)
                     await navigator.clipboard.writeText(shareText);
                     alert("✅ 답변 내용이 복사되었습니다!\n카카오톡 대화창에 '붙여넣기'하여 공유해 주세요. 😇");
                 }
             } catch (e) {
-                console.log("공유 API 오류 (취소 등):", e);
+                console.log("공유 오류:", e);
             }
         });
     }
