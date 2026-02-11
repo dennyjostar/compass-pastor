@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let userProfile = { name: '', age: '', gender: '', region: '', job: '' };
     let currentTask = 'chat';
+    let lastUserQuestion = ""; // [추가] 마지막 질문을 기억하기 위한 변수
 
     const showView = (viewName) => {
         el.home.style.display = 'none';
@@ -95,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const msg = el.input.value.trim();
         if (!msg) return;
 
+        lastUserQuestion = msg; // [추가] 마지막 질문 저장
         showView('chat');
         el.chatText.innerHTML = `<div style="text-align:center; color:#FFEA00; padding:40px 0;"><div class="divine-spinner"></div>목사님께서 묵상 중이십니다...</div>`;
 
