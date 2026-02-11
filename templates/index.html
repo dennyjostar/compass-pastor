@@ -76,7 +76,12 @@
             <!-- 3. 상담 결과 출력 화면 -->
             <div class="chat-view" id="viewChat">
                 <div class="chat-bubble">
-                    <span class="chat-label" id="currentChatLabel">🔔 상담 결과</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <span class="chat-label" id="currentChatLabel" style="margin-bottom:0;">🔔 상담 결과</span>
+                        <button id="shareBtn"
+                            style="background:none; border:none; color:var(--gold-dim); cursor:pointer; font-size:1.1rem; padding:5px;"><i
+                                class="fas fa-share-nodes"></i></button>
+                    </div>
                     <div class="chat-body" id="chatText"></div>
                 </div>
                 <div style="text-align:center; margin-top:20px; opacity:0.5; font-size:0.7rem; color:var(--text-dim);">
