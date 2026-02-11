@@ -212,66 +212,61 @@ document.addEventListener('DOMContentLoaded', () => {
     el.send.addEventListener('click', sendMessage);
     el.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // --- 카톡 공유 기능 구현 (완결판) ---
+    // --- 카톡 공유 기능 구현 (완결판 V2 - 텍스트 전용) ---
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const chatBody = document.getElementById('chatText');
             if (!chatBody) return;
 
-            // 묵상 중이거나 메시지가 없는 경우 차단
-            const currentText = chatBody.innerText;
-            if (!currentText || currentText.includes("묵상 중이십니다")) {
+            if (chatBody.innerText.includes("묵상 중이십니다")) {
                 alert("상담 결과가 나온 후에 공유하실 수 있습니다. 😇");
                 return;
             }
 
-            // 텍스트 정밀 추출 (숨겨진 '심층 분석' 내용까지 포함)
-            const elGeneral = chatBody.querySelector('.general-content');
-            const elDeep = chatBody.querySelector('.deep-content');
+            // [정밀 추출] 클래스 기반으로 내용을 분리하여 가져옴 (가시성 상관없음)
+            const genEl = chatBody.querySelector('.general-content');
+            const deepEl = chatBody.querySelector('.deep-content');
 
-            let finalContent = "";
-            if (elGeneral) {
-                finalContent += `[일반 답변]\n${elGeneral.innerText.trim()}\n\n`;
-            } else if (!elDeep) {
-                // 일반 텍스트 모드
-                finalContent += currentText.trim() + "\n\n";
+            let messageBody = "";
+
+            if (genEl) {
+                messageBody += `[일반 답변]\n${genEl.innerText.trim()}\n\n`;
             }
 
-            if (elDeep) {
-                // .deep-content가 숨겨져 있어도 textContent로 내용을 가져옴
-                // 단, 내부의 <b> 제목은 텍스트에 포함되므로 중복 체크
-                let deepText = elDeep.textContent.replace("[ 김성수 목사의 심층 분석 ]", "").trim();
-                finalContent += `[심층 분석]\n${deepText}\n\n`;
+            if (deepEl) {
+                // 심층 분석 버튼 문구 등 제거하고 순수 텍스트만
+                let deepPureText = deepEl.textContent.replace("[ 김성수 목사의 심층 분석 ]", "").trim();
+                messageBody += `[심층 분석]\n${deepPureText}\n\n`;
             }
 
-            const shareTitle = "🧭 서머나 영혼의 길잡이";
-            const shareText = `[${shareTitle} 상담 결과]\n\n${finalContent.trim()}\n📖 영혼의 길잡이, Compass`;
+            // 구조가 없을 경우 전체 텍스트에서 불필요한 문구만 제거
+            if (!messageBody) {
+                messageBody = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
+            }
+
+            const finalShareText = `[🧭 서머나 영혼의 길잡이 상담 결과]\n\n${messageBody.trim()}\n\n📖 영혼의 길잡이, Compass`;
 
             try {
-                // 1. 모바일 브라우저 공유 (navigator.share)
-                if (navigator.share) {
+                // 1. 모바일 앱 공유 (텍스트 필드만 사용)
+                if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
                     await navigator.share({
-                        title: shareTitle,
-                        text: shareText
+                        text: finalShareText
+                        // title과 url을 아예 제거하여 텍스트가 바로 카톡창에 입력되도록 함
                     });
                 }
-                // 2. PC 혹은 미지원 브라우저 (클립보드 복사)
+                // 2. PC 혹은 미지원 환경 (클립보드 복사 유도)
                 else {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = shareText;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        alert("✅ 상담 내용이 복사되었습니다!\n카톡 창에 '붙여넣기'하여 공유해 주세요. 😇");
-                    } catch (err) {
-                        console.error('클립보드 복사 실패:', err);
-                    }
-                    document.body.removeChild(textArea);
+                    const t = document.createElement("textarea");
+                    t.value = finalShareText;
+                    document.body.appendChild(t);
+                    t.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(t);
+                    alert("✅ 말씀 내용이 복사되었습니다!\n카카오톡 대화방에 '붙여넣기'해 주세요. 😇");
                 }
             } catch (e) {
-                console.log("공유 시스템 종료 또는 오류:", e);
+                console.log("공유 시스템 중단:", e);
             }
         });
     }
