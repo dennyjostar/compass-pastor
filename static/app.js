@@ -242,15 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 deepText = deepEl.innerHTML.replace(/<br\s*\/?>/gi, "\n").replace(/<\/?[^>]+(>|$)/g, "").replace("[ 김성수 목사의 심층 분석 ]", "").trim();
             }
 
-            let resultText = "";
-            if (genText) resultText += `[일반 답변]\n${genText}\n\n`;
-            if (deepText) resultText += `[심층 분석]\n${deepText}\n\n`;
-
-            if (!resultText) {
-                resultText = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
-            }
-
-            const finalMsg = `[🧭 나침반 상담 결과]\n\n${resultText.trim()}\n\n📖 서머나 영혼의 길잡이, Compass`;
+            // [커스텀] 질문 제목 + 본문 + 앱 링크 푸터
+            const shareTitle = lastUserQuestion ? `❓ 질문: ${lastUserQuestion}` : "🧭 서머나 영혼의 길잡이";
+            const appLink = "https://web-production-3164c.up.railway.app";
+            const finalMsg = `[${shareTitle}]\n\n${resultText.trim()}\n\n🔗 나침반 바로가기: ${appLink}\n📖 서머나 영혼의 길잡이, Compass`;
 
             // [핵심] 클립보드 복사를 무조건 먼저 수행 (보험)
             try {
