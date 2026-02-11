@@ -250,8 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultText = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
             }
 
-            // [커스텀] 질문 제목 + 본문 + 앱 링크 푸터
-            const shareTitle = lastUserQuestion ? `❓ 질문: ${lastUserQuestion}` : "🧭 서머나 영혼의 길잡이";
+            // [커스텀] 태스크별 모드 이름 포함 + 질문 제목 + 본문 + 앱 링크 푸터
+            const modeNames = { scripture: "말씀 찾기", prayer: "기도문", meditation: "오늘의 묵상", chat: "목사님 대화" };
+            const currentModeName = modeNames[currentTask] || "상담";
+            const shareTitle = lastUserQuestion ? `[${currentModeName}] ❓ 질문: ${lastUserQuestion}` : `🧭 서머나 영혼의 길잡이 (${currentModeName})`;
             const appLink = "https://web-production-3164c.up.railway.app";
             const finalMsg = `[${shareTitle}]\n\n${resultText.trim()}\n\n🔗 나침반 바로가기: ${appLink}\n📖 서머나 영혼의 길잡이, Compass`;
 
