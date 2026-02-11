@@ -212,47 +212,66 @@ document.addEventListener('DOMContentLoaded', () => {
     el.send.addEventListener('click', sendMessage);
     el.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // --- 카톡 공유 기능 구현 ---
+    // --- 카톡 공유 기능 구현 (완결판) ---
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const chatBody = document.getElementById('chatText');
-            if (!chatBody || chatBody.innerText.includes("묵상 중이십니다")) return;
+            if (!chatBody) return;
 
-            // [수정] HTML 태그를 제외하고 실제 텍스트 내용만 정밀하게 추출
-            // 심층 분석 섹션이 있으면 버튼 텍스트 등은 제외하고 내용만 가져오기
-            let contentText = "";
-            const general = chatBody.querySelector('.general-content');
-            const deep = chatBody.querySelector('.deep-content');
-
-            if (general) {
-                contentText += `[일반 답변]\n${general.innerText.trim()}\n\n`;
-            }
-            if (deep) {
-                contentText += `[김성수 목사의 심층 분석]\n${deep.innerText.trim()}\n\n`;
+            // 묵상 중이거나 메시지가 없는 경우 차단
+            const currentText = chatBody.innerText;
+            if (!currentText || currentText.includes("묵상 중이십니다")) {
+                alert("상담 결과가 나온 후에 공유하실 수 있습니다. 😇");
+                return;
             }
 
-            // 만약 위 구조가 없으면 전체 innerText 사용 (방어적 코드)
-            if (!contentText) {
-                contentText = chatBody.innerText.replace(/목사님의 심층 분석 보기/g, "").trim();
+            // 텍스트 정밀 추출 (숨겨진 '심층 분석' 내용까지 포함)
+            const elGeneral = chatBody.querySelector('.general-content');
+            const elDeep = chatBody.querySelector('.deep-content');
+
+            let finalContent = "";
+            if (elGeneral) {
+                finalContent += `[일반 답변]\n${elGeneral.innerText.trim()}\n\n`;
+            } else if (!elDeep) {
+                // 일반 텍스트 모드
+                finalContent += currentText.trim() + "\n\n";
+            }
+
+            if (elDeep) {
+                // .deep-content가 숨겨져 있어도 textContent로 내용을 가져옴
+                // 단, 내부의 <b> 제목은 텍스트에 포함되므로 중복 체크
+                let deepText = elDeep.textContent.replace("[ 김성수 목사의 심층 분석 ]", "").trim();
+                finalContent += `[심층 분석]\n${deepText}\n\n`;
             }
 
             const shareTitle = "🧭 서머나 영혼의 길잡이";
-            const shareText = `[${shareTitle} 상담 결과]\n\n${contentText}\n📖 영혼의 길잡이, Compass`;
+            const shareText = `[${shareTitle} 상담 결과]\n\n${finalContent.trim()}\n📖 영혼의 길잡이, Compass`;
 
             try {
+                // 1. 모바일 브라우저 공유 (navigator.share)
                 if (navigator.share) {
                     await navigator.share({
                         title: shareTitle,
                         text: shareText
-                        // url: window.location.href // [제거] 링크보다 내용 위주로 공유되도록 URL 제외
                     });
-                } else {
-                    await navigator.clipboard.writeText(shareText);
-                    alert("✅ 답변 내용이 복사되었습니다!\n카카오톡 대화창에 '붙여넣기'하여 공유해 주세요. 😇");
+                }
+                // 2. PC 혹은 미지원 브라우저 (클립보드 복사)
+                else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = shareText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert("✅ 상담 내용이 복사되었습니다!\n카톡 창에 '붙여넣기'하여 공유해 주세요. 😇");
+                    } catch (err) {
+                        console.error('클립보드 복사 실패:', err);
+                    }
+                    document.body.removeChild(textArea);
                 }
             } catch (e) {
-                console.log("공유 오류:", e);
+                console.log("공유 시스템 종료 또는 오류:", e);
             }
         });
     }
