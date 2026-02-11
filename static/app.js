@@ -111,29 +111,34 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json();
 
-            // [2단계 응답 처리] 일반 답변과 심층 분석 분리
+            // [2단계 응답 처리] 일반 답변과 심층 분석 분리 (정규식 강화)
             let fullText = data.response;
-            let formatted = fullText.replace(/\n/g, '<br>');
+            const deepMatch = fullText.match(/\[?\s*심층\s*분석\s*\]?/);
+            const generalMatch = fullText.match(/\[?\s*일반\s*답변\s*\]?/);
 
-            if (formatted.includes('[심층 분석]')) {
-                const parts = formatted.split('[심층 분석]');
-                const generalPart = parts[0].replace(/\[일반 답변\]/g, '').trim();
-                const deepPart = parts[1].trim();
+            if (deepMatch) {
+                const parts = fullText.split(deepMatch[0]);
+                let generalContent = parts[0];
+                if (generalMatch) generalContent = generalContent.replace(generalMatch[0], "");
+
+                let deepContent = parts[1].trim();
 
                 el.chatText.innerHTML = `
-                    <div class="general-content">${generalPart}</div>
+                    <div class="general-content">${generalContent.trim().replace(/\n/g, '<br>')}</div>
                     <div class="deep-container">
                         <button class="deep-btn" onclick="toggleDeepAnalysis(this)">
                             <i class="fas fa-chevron-down"></i> 목사님의 심층 분석 보기
                         </button>
                         <div class="deep-content">
                             <b style="color:var(--gold-bright); display:block; margin-bottom:10px;">[ 김성수 목사의 심층 분석 ]</b>
-                            ${deepPart}
+                            ${deepContent.replace(/\n/g, '<br>')}
                         </div>
                     </div>
                 `;
             } else {
-                el.chatText.innerHTML = formatted.replace(/\[일반 답변\]/g, '');
+                let cleanText = fullText;
+                if (generalMatch) cleanText = cleanText.replace(generalMatch[0], "");
+                el.chatText.innerHTML = cleanText.trim().replace(/\n/g, '<br>');
             }
 
             el.input.value = '';
