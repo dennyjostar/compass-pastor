@@ -222,9 +222,9 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V6.6 불멸의 경청 엔진: 무한 재시작 및 8초 최적화)
+// 5. 음성 인식 (V6.7 정밀 필터링 엔진: 중복 증폭 방지)
 let activeRecognition = null;
-let masterTranscript = ""; // 확정된 누적 텍스트
+let masterTranscript = ""; // 세션이 바뀌어도 유지되는 '확정' 텍스트
 let isSessionEnding = false;
 
 function startVoice(el, source) {
@@ -240,9 +240,8 @@ function startVoice(el, source) {
         return;
     }
 
-    // [V6.6] 토글 기능: 작동 중인 경우 수동 종료 및 전송
     if (activeRecognition) {
-        console.log("부장님 수동 종료 요청: 전송 개시");
+        console.log("부장님 완료 요청: 전송 개시");
         stopAndFinalize(true);
         return;
     }
@@ -259,19 +258,21 @@ function startVoice(el, source) {
     if (micBtn) micBtn.classList.add('active-mic');
 
     let silenceTimer = null;
+    let lastSessionFinal = ""; // 현재 세션에서만 확정된 텍스트
+
     const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
         silenceTimer = setTimeout(() => {
-            console.log("8초 침묵 감지: 자동 전송");
+            console.log("침묵 감지: 자동 완료");
             stopAndFinalize(true);
-        }, 8000); // 8초로 상향 조정
+        }, 8000);
     };
 
     function stopAndFinalize(shouldSend) {
         isSessionEnding = true;
         if (silenceTimer) clearTimeout(silenceTimer);
         if (activeRecognition) {
-            activeRecognition.onend = null; // 재시작 방지
+            activeRecognition.onend = null;
             activeRecognition.stop();
             activeRecognition = null;
         }
@@ -285,7 +286,6 @@ function startVoice(el, source) {
         }
     }
 
-    // 새로운 인식 인스턴스를 생성하고 시작하는 핵심 함수
     function runNewRecognition() {
         if (isSessionEnding) return;
 
@@ -302,22 +302,24 @@ function startVoice(el, source) {
                 if (e.results[i].isFinal) sessionFinal += e.results[i][0].transcript;
                 else sessionInterim += e.results[i][0].transcript;
             }
+            lastSessionFinal = sessionFinal; // 세션 확정분 업데이트
             if (targetInput) {
+                // 부장님, 여기가 핵심입니다: [마스터(이전확정)] + [현재세션확정] + [지금들리는말]
                 targetInput.value = (masterTranscript + sessionFinal + sessionInterim).trim();
             }
         };
 
         recognition.onend = () => {
             if (!isSessionEnding) {
-                console.log("브라우저 강제 종료 감지: 엔진 무한 재가동 중...");
-                // 현재까지의 입력값을 마스터로 저장하고 새 엔진 가동
-                masterTranscript = (targetInput ? targetInput.value : "") + " ";
+                console.log("연결 전환 중: 중복 없이 이어갑니다...");
+                // 중요: 현재 세션의 '확정된' 것만 마스터에 더하고 재시작
+                masterTranscript += lastSessionFinal + " ";
+                lastSessionFinal = ""; // 세션 초기화
                 runNewRecognition();
             }
         };
 
         recognition.onerror = (e) => {
-            console.error("Speech Error:", e.error);
             if (e.error === 'not-allowed' || e.error === 'network') {
                 stopAndFinalize(false);
             }
