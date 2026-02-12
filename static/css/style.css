@@ -685,6 +685,129 @@ a {
     line-height: 1.5;
 }
 
+/* ===== 스피너 (묵상중 애니메이션) ===== */
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(201, 168, 76, 0.1);
+    border-top: 2px solid #c9a84c;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== 심층 분석 버튼 및 섹션 ===== */
+.deep-btn {
+    margin-top: 15px;
+    padding: 10px 16px;
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 12px;
+    color: #c9a84c;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.deep-btn:active {
+    background: rgba(201, 168, 76, 0.2);
+    transform: translateY(1px);
+}
+
+.deep-content {
+    margin-top: 15px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid #c9a84c;
+    border-radius: 4px 12px 12px 4px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #cbd5e1;
+    display: none;
+    /* JS에서 토글 */
+}
+
+.deep-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 메시지 스타일 보정 ===== */
+.message {
+    max-width: 90%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #c9a84c, #b09140);
+    color: #0a0e1a;
+    font-weight: 500;
+    border-bottom-right-radius: 4px;
+}
+
+.message.ai {
+    align-self: flex-start;
+    background: #1e263d;
+    color: #e2e8f0;
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    border-bottom-left-radius: 4px;
+}
+
+.section-title {
+    color: #c9a84c;
+    font-weight: 700;
+    font-size: 15px;
+    margin-top: 15px;
+    display: block;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+    padding-bottom: 4px;
+}
+
+/* ===== 모달 내부 닫기 버튼 보정 ===== */
+.chat-close:hover {
+    color: #ffffff !important;
+    transform: rotate(90deg);
+    transition: all 0.3s;
+}
+
+/* 터치 영역 최적화 */
+.feature-card:hover {
+    border-color: rgba(201, 168, 76, 0.3);
+    background: rgba(201, 168, 76, 0.06);
+}
+
 /* ===== 모달 (약관 등) ===== */
 .modal-overlay {
     display: none;
