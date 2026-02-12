@@ -258,15 +258,3 @@ handleClick = function (targetPage) {
     }
     originalHandleClick(targetPage);
 };
-
-// 초기화 호출
-document.addEventListener('DOMContentLoaded', initCompass);
-
-// 기존 handleClick과 통합
-const originalHandleClick = handleClick;
-handleClick = function (targetPage) {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        window.requestPermission();
-    }
-    originalHandleClick(targetPage);
-};

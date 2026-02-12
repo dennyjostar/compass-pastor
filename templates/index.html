@@ -24,72 +24,85 @@
 
         <!-- 메인 콘텐츠 -->
         <div class="main-content" style="padding-bottom: 120px;">
-            <!-- 나침반 섹션 (사용자 제공) -->
+            <!-- 나침반 섹션 (사용자 제공 V4.0) -->
             <div class="compass-section">
                 <div class="compass-wrapper">
+                    <div class="compass-ring"></div>
                     <div class="compass-body" id="compassBody">
-                        <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="compass-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
                             <defs>
-                                <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#e8d48b" />
-                                    <stop offset="50%" stop-color="#c9a84c" />
-                                    <stop offset="100%" stop-color="#a8893a" />
+                                <linearGradient id="gd1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f0e6b0" />
+                                    <stop offset="30%" stop-color="#c9a84c" />
+                                    <stop offset="70%" stop-color="#b8943f" />
+                                    <stop offset="100%" stop-color="#8a7030" />
                                 </linearGradient>
-                                <linearGradient id="goldN" x1="0.5" y1="1" x2="0.5" y2="0">
+                                <linearGradient id="ringG" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#d4b85c" stop-opacity="0.6" />
+                                    <stop offset="50%" stop-color="#a8893a" stop-opacity="0.3" />
+                                    <stop offset="100%" stop-color="#d4b85c" stop-opacity="0.6" />
+                                </linearGradient>
+                                <linearGradient id="nN" x1="0.5" y1="1" x2="0.5" y2="0">
                                     <stop offset="0%" stop-color="#c9a84c" />
-                                    <stop offset="100%" stop-color="#e85050" />
+                                    <stop offset="40%" stop-color="#d45040" />
+                                    <stop offset="100%" stop-color="#e86050" />
                                 </linearGradient>
-                                <linearGradient id="goldS" x1="0.5" y1="0" x2="0.5" y2="1">
-                                    <stop offset="0%" stop-color="#c9a84c" />
-                                    <stop offset="100%" stop-color="#6b5d3a" />
+                                <linearGradient id="nS" x1="0.5" y1="0" x2="0.5" y2="1">
+                                    <stop offset="0%" stop-color="#a89060" />
+                                    <stop offset="100%" stop-color="#504530" />
                                 </linearGradient>
-                                <linearGradient id="goldE" x1="0" y1="0.5" x2="1" y2="0.5">
-                                    <stop offset="0%" stop-color="#c9a84c" />
-                                    <stop offset="100%" stop-color="#8a7a5a" />
+                                <linearGradient id="nE" x1="0" y1="0.5" x2="1" y2="0.5">
+                                    <stop offset="0%" stop-color="#a89060" />
+                                    <stop offset="100%" stop-color="#706040" />
                                 </linearGradient>
-                                <linearGradient id="goldW" x1="1" y1="0.5" x2="0" y2="0.5">
-                                    <stop offset="0%" stop-color="#c9a84c" />
-                                    <stop offset="100%" stop-color="#8a7a5a" />
+                                <linearGradient id="nW" x1="1" y1="0.5" x2="0" y2="0.5">
+                                    <stop offset="0%" stop-color="#a89060" />
+                                    <stop offset="100%" stop-color="#706040" />
                                 </linearGradient>
-                                <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(201,168,76,0.12)" />
+                                <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="rgba(201,168,76,0.08)" />
+                                    <stop offset="100%" stop-color="rgba(201,168,76,0)" />
+                                </radialGradient>
+                                <radialGradient id="centerG" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="rgba(201,168,76,0.25)" />
+                                    <stop offset="60%" stop-color="rgba(201,168,76,0.05)" />
                                     <stop offset="100%" stop-color="rgba(201,168,76,0)" />
                                 </radialGradient>
                             </defs>
 
-                            <circle cx="150" cy="150" r="145" fill="url(#glow)" />
-                            <circle cx="150" cy="150" r="142" fill="none" stroke="url(#gold)" stroke-width="1.5"
-                                opacity="0.4" />
-                            <circle cx="150" cy="150" r="138" fill="none" stroke="url(#gold)" stroke-width="0.5"
-                                opacity="0.2" />
+                            <circle cx="200" cy="200" r="195" fill="url(#bgGlow)" />
+                            <circle cx="200" cy="200" r="190" fill="none" stroke="url(#ringG)" stroke-width="2" />
+                            <circle cx="200" cy="200" r="185" fill="none" stroke="url(#gd1)" stroke-width="0.8"
+                                opacity="0.25" />
+                            <circle cx="200" cy="200" r="180" fill="none" stroke="url(#gd1)" stroke-width="0.4"
+                                opacity="0.15" />
 
                             <g id="ticks"></g>
+                            <g id="degreeLabels"></g>
 
-                            <!-- 북쪽 십자가 -->
-                            <g style="animation: crossGlow 3s ease-in-out infinite;">
-                                <line x1="150" y1="18" x2="150" y2="38" stroke="#e85050" stroke-width="2.5"
+                            <g style="animation: crossPulse 3s ease-in-out infinite;">
+                                <line x1="200" y1="18" x2="200" y2="45" stroke="#e86050" stroke-width="3"
                                     stroke-linecap="round" />
-                                <line x1="143" y1="26" x2="157" y2="26" stroke="#e85050" stroke-width="2"
+                                <line x1="190" y1="28" x2="210" y2="28" stroke="#e86050" stroke-width="2.5"
                                     stroke-linecap="round" />
                             </g>
 
-                            <text x="270" y="155" text-anchor="middle" fill="url(#gold)" font-size="14"
-                                font-weight="600" opacity="0.7">E</text>
-                            <text x="150" y="272" text-anchor="middle" fill="url(#gold)" font-size="14"
-                                font-weight="600" opacity="0.7">S</text>
-                            <text x="30" y="155" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
-                                opacity="0.7">W</text>
+                            <text x="360" y="206" text-anchor="middle" fill="url(#gd1)" font-size="16" font-weight="600"
+                                letter-spacing="1" opacity="0.7">E</text>
+                            <text x="200" y="372" text-anchor="middle" fill="url(#gd1)" font-size="16" font-weight="600"
+                                letter-spacing="1" opacity="0.7">S</text>
+                            <text x="40" y="206" text-anchor="middle" fill="url(#gd1)" font-size="16" font-weight="600"
+                                letter-spacing="1" opacity="0.7">W</text>
 
-                            <!-- 4방향 다이아몬드 바늘 -->
-                            <polygon points="150,40 143,150 150,138 157,150" fill="url(#goldN)" opacity="0.9" />
-                            <polygon points="150,260 157,150 150,162 143,150" fill="url(#goldS)" opacity="0.6" />
-                            <polygon points="260,150 150,143 162,150 150,157" fill="url(#goldE)" opacity="0.5" />
-                            <polygon points="40,150 150,157 138,150 150,143" fill="url(#goldW)" opacity="0.5" />
+                            <polygon points="200,50 192,200 200,185 208,200" fill="url(#nN)" opacity="0.92" />
+                            <polygon points="200,350 208,200 200,215 192,200" fill="url(#nS)" opacity="0.55" />
+                            <polygon points="350,200 200,192 215,200 200,208" fill="url(#nE)" opacity="0.45" />
+                            <polygon points="50,200 200,208 185,200 200,192" fill="url(#nW)" opacity="0.45" />
 
-                            <!-- 중앙 장식 -->
-                            <circle cx="150" cy="150" r="14" fill="#0a0e1a" stroke="url(#gold)" stroke-width="2"
-                                opacity="0.9" />
-                            <circle cx="150" cy="150" r="4" fill="url(#gold)" opacity="0.7" />
+                            <circle cx="200" cy="200" r="25" fill="url(#centerG)"
+                                style="animation: centerGlow 4s ease-in-out infinite;" />
+                            <circle cx="200" cy="200" r="16" fill="#0a0e1a" stroke="url(#gd1)" stroke-width="2.5" />
+                            <circle cx="200" cy="200" r="6" fill="url(#gd1)" opacity="0.8" />
                         </svg>
                     </div>
                 </div>
@@ -137,7 +150,7 @@
                 </div>
             </div>
 
-            <!-- 하단 입력바 (사용자 제공 디자인) -->
+            <!-- 하단 입력바 (사용자 제공 V4.0) -->
             <div class="bottom-bar">
                 <div class="input-wrap" onclick="handleClick('/chat')">
                     <button class="mic-btn">🎤</button>
