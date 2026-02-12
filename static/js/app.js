@@ -356,5 +356,13 @@ function closeModal(id) {
     if (modal) modal.classList.remove('active');
 }
 
-// 8. 최종 실행
+// 9. 시스템 초기화 (로그아웃 및 테스트 리셋)
+window.resetSystem = function () {
+    if (confirm("시스템을 초기화하고 다시 등록하시겠습니까?\n(모든 대화 기록과 사용자 정보가 삭제됩니다)")) {
+        localStorage.clear();
+        location.reload();
+    }
+};
+
+// 10. 최종 실행
 document.addEventListener('DOMContentLoaded', initApp);
