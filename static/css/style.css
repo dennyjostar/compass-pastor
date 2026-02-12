@@ -30,16 +30,26 @@ a {
     flex-direction: column;
 }
 
-/* ===== 헤더 ===== */
+/* ── 헤더 (사용자 제공) ── */
 .header {
+    width: 100%;
+    max-width: 420px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px 8px;
+    padding: 12px 20px;
 }
 
-.header-left {
-    font-size: 20px;
+.header-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(201, 168, 76, 0.1);
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
     cursor: pointer;
 }
 
@@ -47,308 +57,222 @@ a {
     text-align: center;
 }
 
-.header-subtitle {
+.header-center .sub {
     font-size: 11px;
-    color: #8890a8;
+    color: #c9a84c;
     letter-spacing: 2px;
-    margin-bottom: 2px;
 }
 
-.header-title {
+.header-center .title {
     font-size: 20px;
     font-weight: 700;
-    color: #e0e0e0;
-    letter-spacing: 3px;
+    color: #c9a84c;
+    letter-spacing: 4px;
 }
 
-.header-right {
-    font-size: 20px;
-    cursor: pointer;
-}
-
-/* ===== 메인 콘텐츠 ===== */
-.main-content {
-    flex: 1;
-    padding: 10px 20px 100px;
+/* ── 나침반 (사용자 제공) ── */
+.compass-section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 10px;
 }
 
-/* ── 나침반 컨테이너 (사용자 제공) ── */
 .compass-wrapper {
     position: relative;
-    width: 280px;
-    height: 280px;
-    margin: 20px auto;
-    cursor: pointer;
+    width: 180px;
+    height: 180px;
 }
 
-/* 외부 링 (고정) */
-.compass-outer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 3px solid rgba(201, 168, 76, 0.4);
-    box-shadow:
-        0 0 30px rgba(201, 168, 76, 0.15),
-        inset 0 0 30px rgba(201, 168, 76, 0.05);
-}
-
-/* 회전하는 나침반 본체 */
 .compass-body {
     position: absolute;
     width: 100%;
     height: 100%;
-    transition: transform 0.3s ease-out;
     will-change: transform;
 }
 
-/* SVG 나침반 */
 .compass-svg {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 0 15px rgba(201, 168, 76, 0.2));
+    filter: drop-shadow(0 0 12px rgba(201, 168, 76, 0.15));
 }
 
-/* ── 방위 정보 표시 ── */
 .compass-info {
     margin-top: 10px;
     text-align: center;
 }
 
 .degree-display {
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 300;
     color: #c9a84c;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
 }
 
 .degree-display span {
-    font-size: 18px;
+    font-size: 16px;
     vertical-align: super;
     color: rgba(201, 168, 76, 0.7);
 }
 
 .direction-text {
-    font-size: 14px;
-    color: rgba(232, 224, 208, 0.7);
+    font-size: 12px;
+    color: rgba(232, 224, 208, 0.6);
     margin-top: 2px;
     letter-spacing: 1px;
 }
 
-/* ── 상태 메시지 ── */
 .status-msg {
-    margin-top: 15px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    text-align: center;
-    color: rgba(232, 224, 208, 0.6);
-    background: rgba(201, 168, 76, 0.08);
-    border: 1px solid rgba(201, 168, 76, 0.15);
-    max-width: 300px;
-    width: 100%;
-}
-
-.status-msg.error {
-    color: #e8a87c;
-    background: rgba(232, 168, 124, 0.08);
-    border-color: rgba(232, 168, 124, 0.2);
+    margin-top: 8px;
+    padding: 6px 14px;
+    border-radius: 15px;
+    font-size: 11px;
+    color: rgba(232, 224, 208, 0.5);
+    background: rgba(201, 168, 76, 0.06);
+    border: 1px solid rgba(201, 168, 76, 0.1);
 }
 
 .status-msg.active {
-    color: rgba(201, 168, 76, 0.8);
+    color: rgba(201, 168, 76, 0.7);
 }
 
-/* ── iOS 권한 요청 버튼 ── */
 .permission-btn {
-    margin-top: 15px;
-    padding: 12px 24px;
+    margin-top: 10px;
+    padding: 10px 24px;
     background: linear-gradient(135deg, #c9a84c, #a8893a);
     color: #0a0e1a;
     border: none;
-    border-radius: 25px;
-    font-size: 14px;
+    border-radius: 20px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     display: none;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .permission-btn:active {
     transform: scale(0.97);
 }
 
-/* ── 십자가 빛남 애니메이션 ── */
-@keyframes crossGlow {
-
-    0%,
-    100% {
-        opacity: 0.6;
-    }
-
-    50% {
-        opacity: 1;
-    }
-}
-
-/* ===== 인사말 ===== */
-.greeting-area {
+/* ── AI 배지 ── */
+.ai-badge-text {
+    margin-top: 14px;
+    font-size: 11px;
+    color: rgba(232, 224, 208, 0.5);
     text-align: center;
-    margin: 16px 0;
+    padding: 0 20px;
+    line-height: 1.6;
 }
 
-.greeting-text {
+/* ── 인사말 ── */
+.greeting-area {
+    margin-top: 14px;
+    text-align: center;
+}
+
+.greeting-area .hello {
     font-size: 16px;
-    color: #b0b8d0;
-    margin-bottom: 4px;
+    color: #e8e0d0;
 }
 
-.greeting-name {
-    font-weight: 700;
+.greeting-area .hello strong {
     color: #c9a84c;
 }
 
-.greeting-sub {
-    font-size: 13px;
-    color: #6b7280;
+.greeting-area .sub-msg {
+    font-size: 12px;
+    color: rgba(232, 224, 208, 0.5);
     margin-top: 4px;
 }
 
-/* ===== 안내 배지 ===== */
-.info-badges {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    margin: 12px 0 20px;
-}
-
-.info-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 11.5px;
-    color: #8890a8;
-}
-
-.info-badge.ai-badge {
-    border-color: rgba(201, 168, 76, 0.25);
-    color: #c9a84c;
-}
-
-.usage-badge {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    background: rgba(76, 175, 80, 0.1);
-    border: 1px solid rgba(76, 175, 80, 0.25);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 11.5px;
-    color: #66bb6a;
-}
-
-.usage-badge.show {
-    display: inline-flex;
-}
-
-/* ===== 기능 버튼 그리드 ===== */
+/* ── 기능 카드 ── */
 .feature-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+    padding: 0 20px;
+    margin-top: 18px;
     width: 100%;
-    margin-top: 8px;
+    max-width: 420px;
 }
 
 .feature-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(201, 168, 76, 0.05);
+    border: 1px solid rgba(201, 168, 76, 0.12);
     border-radius: 14px;
-    padding: 20px 14px 16px;
+    padding: 16px 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.feature-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(201, 168, 76, 0.3);
-    transform: translateY(-2px);
-}
-
 .feature-card:active {
-    transform: translateY(0);
+    transform: scale(0.97);
+    background: rgba(201, 168, 76, 0.1);
 }
 
-.feature-icon {
-    font-size: 28px;
-    margin-bottom: 8px;
+.feature-card .icon {
+    font-size: 26px;
+    margin-bottom: 6px;
 }
 
-.feature-title {
-    font-size: 14px;
+.feature-card .label {
+    font-size: 13px;
     font-weight: 600;
-    color: #e0e0e0;
-    margin-bottom: 4px;
+    color: #c9a84c;
 }
 
-.feature-desc {
-    font-size: 11px;
-    color: #6b7280;
+.feature-card .desc {
+    font-size: 10px;
+    color: rgba(232, 224, 208, 0.45);
+    margin-top: 4px;
     line-height: 1.4;
 }
 
-/* ===== 하단 입력창 ===== */
+/* ── 하단 입력바 (사용자 제공) ── */
 .bottom-bar {
     position: fixed;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    max-width: 420px;
     width: 100%;
-    padding: 12px 16px 20px;
-    background: linear-gradient(0deg, #0a0e1a 60%, transparent);
+    max-width: 420px;
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, #0a0e1a 30%);
+    z-index: 500;
 }
 
 .input-wrap {
     display: flex;
     align-items: center;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.15);
     border-radius: 25px;
-    padding: 4px 6px 4px 16px;
+    padding: 10px 16px;
+    gap: 10px;
     cursor: pointer;
+}
+
+.input-wrap .input-placeholder {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: rgba(232, 224, 208, 0.35);
+    font-size: 14px;
 }
 
 .mic-btn,
 .send-btn {
-    width: 36px;
-    height: 36px;
+    background: none;
     border: none;
-    background: transparent;
     color: #c9a84c;
     font-size: 18px;
     cursor: pointer;
+    padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-}
-
-.input-placeholder {
-    flex: 1;
-    padding: 10px 8px;
-    font-size: 14px;
-    color: #5a6178;
 }
 
 /* ===== 오버레이 공통 ===== */
