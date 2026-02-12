@@ -112,71 +112,83 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
 }
-// ===== 실제 나침반 기능 (지자기 센서 연동) =====
+// ===== 실제 나침반 기능 (시각적 피드백 강화) =====
 let compassActive = false;
 
 function initCompass() {
     if (compassActive) return;
 
-    // iOS 13+ 기기 대응
+    // iOS 13+ 권한 요청
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // 사용자 경험을 위해 선택창 유도 (iOS 필수)
-        if (confirm("실제 북쪽을 가리키는 나침반 기능을 활성화하시겠습니까? (방향 센서 권한이 필요합니다)")) {
-            DeviceOrientationEvent.requestPermission()
-                .then(response => {
-                    if (response === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation, true);
-                        compassActive = true;
-                        console.log("[Compass] iOS Sensor Active");
-                    }
-                })
-                .catch(err => {
-                    console.error("[Compass] Permission error:", err);
-                });
-        }
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    activateCompass();
+                } else {
+                    alert("나침반 기능을 위해 센서 권한이 필요합니다.");
+                }
+            })
+            .catch(err => console.error("Permission Error:", err));
     } else {
-        // 안드로이드 및 일반 기기 (권한 요청 없이 바로 시작 가능)
-        if ('ondeviceorientationabsolute' in window) {
-            window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-        } else {
-            window.addEventListener('deviceorientation', handleOrientation, true);
+        // 안드로이드 및 기타
+        activateCompass();
+    }
+}
+
+function activateCompass() {
+    window.addEventListener('deviceorientation', handleOrientation, true);
+    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+    compassActive = true;
+
+    // 디버그 레이블 생성 (나침반 아래에 각도 표시)
+    if (!document.getElementById('compassDegree')) {
+        const greetingArea = document.querySelector('.greeting-area');
+        if (greetingArea) {
+            const degText = document.createElement('div');
+            degText.id = 'compassDegree';
+            degText.style.cssText = "font-size: 11px; color: #c9a84c; margin-top: 8px; opacity: 0.8; font-weight: 500;";
+            degText.textContent = "나침반 동기화 중...";
+            greetingArea.appendChild(degText);
         }
-        compassActive = true;
-        console.log("[Compass] Android/Standard Sensor Active");
     }
 }
 
 function handleOrientation(event) {
     let heading = null;
 
-    // iOS 전용
+    // 1. iOS 전용 (가장 정확함)
     if (event.webkitCompassHeading) {
         heading = event.webkitCompassHeading;
     }
-    // 안드로이드 Absolute
+    // 2. 안드로이드 절대값
     else if (event.absolute && event.alpha !== null) {
         heading = 360 - event.alpha;
     }
-    // 일반 Alpha (정확도는 떨어지지만 작동함)
+    // 3. 일반 alpha
     else if (event.alpha !== null) {
         heading = 360 - event.alpha;
     }
 
     if (heading !== null) {
         const needles = document.querySelectorAll('.compass-needle');
+        const degLabel = document.getElementById('compassDegree');
+
+        // 각도 업데이트
+        const roundedHeading = Math.round(heading);
+        if (degLabel) degLabel.textContent = `현재 방향: ${roundedHeading}° (북쪽 추적 중)`;
+
         needles.forEach(needle => {
-            // 바늘 회전 적용
+            // 인라인 스타일로 회전 적용 (CSS 애니메이션 무시)
             needle.style.transform = `rotate(${-heading}deg)`;
-            // 주석: 실제 작동 시 CSS 애니메이션을 JS에서 강제로 끕니다.
             needle.style.animation = 'none';
             needle.style.setProperty('animation', 'none', 'important');
         });
     }
 }
 
-// 기존 handleClick 함수를 실제 나침반 활성화와 연결
+// 클릭 이벤트에 나침반 초기화 연결
 const originalHandleClick = handleClick;
 handleClick = function (targetPage) {
-    initCompass(); // 사용자가 어디든 클릭하면 센서 활성화 시도
-    originalHandleClick(targetPage);
+    initCompass();
+    if (originalHandleClick) originalHandleClick(targetPage);
 };
