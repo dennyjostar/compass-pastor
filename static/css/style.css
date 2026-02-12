@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    background: linear-gradient(180deg, #0a0e1a 0%, #121832 50%, #0a0e1a 100%);
+    background: linear-gradient(160deg, #060a14 0%, #0f1526 40%, #111a30 70%, #060a14 100%);
     color: #e0e0e0;
     min-height: 100vh;
     display: flex;
@@ -30,7 +30,7 @@ a {
     flex-direction: column;
 }
 
-/* ── 헤더 (사용자 제공) ── */
+/* ── 헤더 (사용자 제공 V4.0) ── */
 .header {
     width: 100%;
     max-width: 420px;
@@ -43,8 +43,8 @@ a {
 .header-icon {
     width: 36px;
     height: 36px;
-    background: rgba(201, 168, 76, 0.1);
-    border: 1px solid rgba(201, 168, 76, 0.25);
+    background: rgba(201, 168, 76, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.2);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -70,18 +70,31 @@ a {
     letter-spacing: 4px;
 }
 
-/* ── 나침반 (사용자 제공) ── */
+/* ── 나침반 (사용자 제공 V4.0) ── */
 .compass-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .compass-wrapper {
     position: relative;
-    width: 180px;
-    height: 180px;
+    width: 200px;
+    height: 200px;
+}
+
+/* 외부 장식 링 (고정) */
+.compass-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(201, 168, 76, 0.25);
+    box-shadow:
+        0 0 40px rgba(201, 168, 76, 0.08),
+        0 0 80px rgba(201, 168, 76, 0.04),
+        inset 0 0 20px rgba(201, 168, 76, 0.03);
 }
 
 .compass-body {
@@ -94,7 +107,7 @@ a {
 .compass-svg {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 0 12px rgba(201, 168, 76, 0.15));
+    filter: drop-shadow(0 0 8px rgba(201, 168, 76, 0.12));
 }
 
 .compass-info {
@@ -103,33 +116,34 @@ a {
 }
 
 .degree-display {
-    font-size: 28px;
-    font-weight: 300;
+    font-size: 30px;
+    font-weight: 200;
     color: #c9a84c;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
 }
 
 .degree-display span {
     font-size: 16px;
     vertical-align: super;
-    color: rgba(201, 168, 76, 0.7);
+    color: rgba(201, 168, 76, 0.6);
 }
 
 .direction-text {
     font-size: 12px;
-    color: rgba(232, 224, 208, 0.6);
+    color: rgba(232, 224, 208, 0.55);
     margin-top: 2px;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
 .status-msg {
-    margin-top: 8px;
-    padding: 6px 14px;
-    border-radius: 15px;
-    font-size: 11px;
-    color: rgba(232, 224, 208, 0.5);
-    background: rgba(201, 168, 76, 0.06);
-    border: 1px solid rgba(201, 168, 76, 0.1);
+    margin-top: 6px;
+    padding: 5px 14px;
+    border-radius: 12px;
+    font-size: 10px;
+    color: rgba(201, 168, 76, 0.5);
+    background: rgba(201, 168, 76, 0.04);
+    border: 1px solid rgba(201, 168, 76, 0.08);
 }
 
 .status-msg.active {
@@ -149,15 +163,11 @@ a {
     display: none;
 }
 
-.permission-btn:active {
-    transform: scale(0.97);
-}
-
 /* ── AI 배지 ── */
 .ai-badge-text {
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: 11px;
-    color: rgba(232, 224, 208, 0.5);
+    color: rgba(232, 224, 208, 0.45);
     text-align: center;
     padding: 0 20px;
     line-height: 1.6;
@@ -165,7 +175,7 @@ a {
 
 /* ── 인사말 ── */
 .greeting-area {
-    margin-top: 14px;
+    margin-top: 12px;
     text-align: center;
 }
 
@@ -180,7 +190,7 @@ a {
 
 .greeting-area .sub-msg {
     font-size: 12px;
-    color: rgba(232, 224, 208, 0.5);
+    color: rgba(232, 224, 208, 0.45);
     margin-top: 4px;
 }
 
@@ -190,14 +200,14 @@ a {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     padding: 0 20px;
-    margin-top: 18px;
+    margin-top: 16px;
     width: 100%;
     max-width: 420px;
 }
 
 .feature-card {
-    background: rgba(201, 168, 76, 0.05);
-    border: 1px solid rgba(201, 168, 76, 0.12);
+    background: rgba(201, 168, 76, 0.04);
+    border: 1px solid rgba(201, 168, 76, 0.1);
     border-radius: 14px;
     padding: 16px 12px;
     text-align: center;
@@ -207,7 +217,7 @@ a {
 
 .feature-card:active {
     transform: scale(0.97);
-    background: rgba(201, 168, 76, 0.1);
+    background: rgba(201, 168, 76, 0.08);
 }
 
 .feature-card .icon {
@@ -223,12 +233,39 @@ a {
 
 .feature-card .desc {
     font-size: 10px;
-    color: rgba(232, 224, 208, 0.45);
+    color: rgba(232, 224, 208, 0.4);
     margin-top: 4px;
     line-height: 1.4;
 }
 
-/* ── 하단 입력바 (사용자 제공) ── */
+/* 애니메이션 */
+@keyframes crossPulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 2px rgba(232, 80, 80, 0.4));
+        opacity: 0.85;
+    }
+
+    50% {
+        filter: drop-shadow(0 0 6px rgba(232, 80, 80, 0.8));
+        opacity: 1;
+    }
+}
+
+@keyframes centerGlow {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* ── 하단 입력바 (사용자 제공 V4.0) ── */
 .bottom-bar {
     position: fixed;
     bottom: 0;
@@ -238,15 +275,15 @@ a {
     max-width: 420px;
     padding: 12px 16px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    background: linear-gradient(transparent, #0a0e1a 30%);
+    background: linear-gradient(transparent, #060a14 30%);
     z-index: 500;
 }
 
 .input-wrap {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(201, 168, 76, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(201, 168, 76, 0.12);
     border-radius: 25px;
     padding: 10px 16px;
     gap: 10px;
