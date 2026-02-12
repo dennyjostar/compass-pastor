@@ -178,17 +178,21 @@
 
             <!-- 하단 입력바 (사용자 제공 V4.0 정식 기능화) -->
             <div class="bottom-bar">
-                <div class="input-wrap">
-                    <button class="mic-btn" onclick="startVoice(this)">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                            <path
-                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                        </svg>
-                    </button>
-                    <input type="text" id="chatInput" placeholder="고민이나 상황을 말씀해주세요..."
-                        onkeypress="if(event.keyCode==13) sendMessage()">
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+                <div class="input-wrap" style="flex-direction: column; align-items: center; padding: 12px 15px;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <button class="mic-btn" onclick="startVoice(this)">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path
+                                    d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                                <path
+                                    d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                            </svg>
+                        </button>
+                        <input type="text" id="chatInput" placeholder="고민이나 상황을 말씀해주세요..."
+                            onkeypress="if(event.keyCode==13) sendMessage()">
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+                    </div>
+                    <div class="mic-guide">마이크 터치 후 말씀하시고, 다시 한번 터치하세요</div>
                 </div>
             </div>
         </div>
@@ -221,18 +225,23 @@
             </div>
 
             <div style="padding: 12px 20px; border-top: 1px solid rgba(201,168,76,0.1); background: #0a0e1a;">
-                <div class="input-wrap" style="background: rgba(255,255,255,0.04); border-radius: 20px;">
-                    <button class="mic-btn modal-mic" onclick="startVoice(this, 'modal')">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                            <path
-                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                        </svg>
-                    </button>
-                    <input type="text" id="modalChatInput" placeholder="목사님께 궁금한 점을 입력하세요..."
-                        onkeypress="if(event.keyCode==13) sendMessage('modal')" style="height: 34px;">
-                    <button class="send-btn" onclick="sendMessage('modal')"
-                        style="background: #c9a84c; color: #0a0e1a; width: 30px; height: 30px; border-radius: 50%; padding: 0;">➤</button>
+                <div class="input-wrap"
+                    style="background: rgba(255,255,255,0.04); border-radius: 20px; flex-direction: column; align-items: center; padding: 12px 15px;">
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <button class="mic-btn modal-mic" onclick="startVoice(this, 'modal')">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path
+                                    d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                                <path
+                                    d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                            </svg>
+                        </button>
+                        <input type="text" id="modalChatInput" placeholder="목사님께 궁금한 점을 입력하세요..."
+                            onkeypress="if(event.keyCode==13) sendMessage('modal')" style="height: 34px;">
+                        <button class="send-btn" onclick="sendMessage('modal')"
+                            style="background: #c9a84c; color: #0a0e1a; width: 30px; height: 30px; border-radius: 50%; padding: 0;">➤</button>
+                    </div>
+                    <div class="mic-guide">마이크 터치 후 말씀하시고, 다시 한번 터치하세요</div>
                 </div>
             </div>
         </div>

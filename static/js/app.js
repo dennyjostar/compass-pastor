@@ -222,7 +222,9 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V6.1 하이엔드 연속 모드: 강제 종료 방지)
+// 5. 음성 인식 (V6.2 하이브리드 모드: 토글 전송 및 5초 최적화)
+let activeRecognition = null; // 현재 작동 중인 인식 객체
+
 function startVoice(el, source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -232,6 +234,14 @@ function startVoice(el, source) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         alert("🎤 현재 브라우저는 음성 인식을 지원하지 않습니다.");
+        return;
+    }
+
+    // [V6.2] 이미 실행 중이라면 즉시 중단하고 전송 (토글 기능)
+    if (activeRecognition) {
+        console.log("사용자 수동 종료: 즉시 전송");
+        activeRecognition.isFinished = true; // 수동 종료 플래그
+        activeRecognition.stop();
         return;
     }
 
@@ -248,22 +258,22 @@ function startVoice(el, source) {
 
     let recognition = new SpeechRecognition();
     let silenceTimer = null;
-    let isFinished = false;
-    let accumulatedText = ""; // 재시작 시 이전 텍스트 보관
+    let accumulatedText = "";
 
     const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
         silenceTimer = setTimeout(() => {
-            console.log("8초 침묵 감지: 자동 전송 프로세스");
-            isFinished = true;
+            console.log("5초 침묵 감지: 자동 전송");
+            recognition.isFinished = true;
             recognition.stop();
-        }, 8000); // 8초로 넉넉하게 대폭 상향
+        }, 5000); // 5초로 최적화
     };
 
     const initRecognition = () => {
         recognition.lang = 'ko-KR';
         recognition.interimResults = true;
         recognition.continuous = true;
+        recognition.isFinished = false; // 종료 대기 상태
 
         recognition.onresult = (e) => {
             resetSilenceTimer();
@@ -274,15 +284,10 @@ function startVoice(el, source) {
             if (targetInput) targetInput.value = accumulatedText + currentSessionText;
         };
 
-        recognition.onerror = (e) => {
-            console.error("Speech Recognition Error:", e.error);
-            if (e.error !== 'no-speech') {
-                isFinished = true;
-            }
-        };
-
         recognition.onend = () => {
-            if (isFinished) {
+            if (recognition.isFinished) {
+                // 부장님이 다시 누르거나 5초가 지났을 때
+                activeRecognition = null;
                 if (silenceTimer) clearTimeout(silenceTimer);
                 if (micBtn) {
                     micBtn.style.color = '';
@@ -296,21 +301,32 @@ function startVoice(el, source) {
                     sendMessage(source);
                 }
             } else {
-                console.log("브라우저 강제 종료 감지: 상담 유지 중...");
-                accumulatedText = targetInput.value + " ";
+                // 브라우저가 멋대로 끊었을 때 (자동 재시작)
+                console.log("상담 유지 중...");
+                accumulatedText = (targetInput ? targetInput.value : "") + " ";
+                const oldIsFinished = recognition.isFinished;
                 recognition = new SpeechRecognition();
                 initRecognition();
+                recognition.isFinished = oldIsFinished;
+                activeRecognition = recognition;
                 recognition.start();
+            }
+        };
+
+        recognition.onerror = (e) => {
+            if (e.error !== 'no-speech') {
+                recognition.isFinished = true;
             }
         };
     };
 
     if (statusDisplay) {
-        statusDisplay.textContent = "🎙️ 부장님 말씀을 경청 중입니다... (8초 이상 침묵 시 전송)";
+        statusDisplay.textContent = "🎙️ 듣고 있습니다... (다 누르면 즉시 전송)";
         statusDisplay.style.color = "#f0d078";
     }
 
     initRecognition();
+    activeRecognition = recognition;
     recognition.start();
     resetSilenceTimer();
 }
