@@ -246,15 +246,128 @@ function initCompass() {
         window.addEventListener('deviceorientation', onOrientationGeneric, true);
     }
 }
+// ===== 채팅 및 부가 기능 (V4.0) =====
+
+function sendMessage(source) {
+    if (!isRegistered) {
+        document.getElementById('registerOverlay').classList.add('active');
+        return;
+    }
+
+    const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+    const inputEl = document.getElementById(inputId);
+    const text = inputEl.value.trim();
+
+    if (!text) return;
+
+    // 모달이 닫혀있으면 열기
+    const chatOverlay = document.getElementById('chatOverlay');
+    if (!chatOverlay.classList.contains('active')) {
+        chatOverlay.classList.add('active');
+    }
+
+    addMessage('user', text);
+    inputEl.value = '';
+
+    const profile = {
+        name: userName,
+        age: localStorage.getItem('compass_userAge'),
+        gender: localStorage.getItem('compass_userGender'),
+        job: localStorage.getItem('compass_userJob')
+    };
+
+    fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, profile: profile })
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.response) {
+                addMessage('ai', data.response);
+            } else if (data.error) {
+                addMessage('ai', "죄송합니다. 오류가 발생했습니다: " + data.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            addMessage('ai', "서버와 연결할 수 없습니다.");
+        });
+}
+
+function addMessage(type, content) {
+    const list = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = `message ${type}`;
+
+    // 마크다운 형식의 [제목] 처리 (목사님 답변 구조)
+    let formatted = content.replace(/\[(.*?)\]/g, '<span class="section-title">[$1]</span>');
+    formatted = formatted.replace(/\n/g, '<br>');
+
+    msg.innerHTML = formatted;
+    list.appendChild(msg);
+    list.scrollTop = list.scrollHeight;
+}
+
+function startVoice() {
+    if (!isRegistered) {
+        document.getElementById('registerOverlay').classList.add('active');
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("이 브라우저는 음성 인식을 지원하지 않습니다.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ko-KR';
+    recognition.start();
+
+    const statusMsg = document.getElementById('statusMsg');
+    const oldText = statusMsg.textContent;
+    statusMsg.textContent = "듣고 있습니다...";
+
+    recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        document.getElementById('chatInput').value = text;
+        statusMsg.textContent = "인식됨: " + text;
+        setTimeout(() => { sendMessage(); }, 500);
+    };
+
+    recognition.onerror = () => {
+        statusMsg.textContent = "음성 인식 실패";
+        setTimeout(() => { statusMsg.textContent = oldText; }, 2000);
+    };
+
+    recognition.onend = () => {
+        if (statusMsg.textContent === "듣고 있습니다...") {
+            statusMsg.textContent = oldText;
+        }
+    };
+}
 
 // 초기화 호출
-document.addEventListener('DOMContentLoaded', initCompass);
+document.addEventListener('DOMContentLoaded', function () {
+    initCompass();
+});
 
-// 기존 handleClick과 통합
-const originalHandleClick = handleClick;
-handleClick = function (targetPage) {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        window.requestPermission();
+// 기존 handleClick과 통합 (Redefinition fix)
+function handleFeatureClick(target) {
+    if (!isRegistered) {
+        document.getElementById('registerOverlay').classList.add('active');
+        return;
     }
-    originalHandleClick(targetPage);
+
+    if (target === '/chat') {
+        document.getElementById('chatOverlay').classList.add('active');
+    } else {
+        alert("이 기능은 준비 중입니다: " + target);
+    }
+}
+
+// 전역 handleClick 덮어쓰기
+window.handleClick = function (target) {
+    handleFeatureClick(target);
 };
