@@ -222,8 +222,8 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V5.5 중복 방지 및 클래스 기반 피드백)
-function startVoice(source) {
+// 5. 음성 인식 (V5.6 중복 방지 및 요소 직접 제어)
+function startVoice(el, source) {
     if (!isRegistered) {
         handleFeatureClick();
         return;
@@ -235,8 +235,11 @@ function startVoice(source) {
         return;
     }
 
-    const micBtn = source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
-    if (micBtn) micBtn.classList.add('active-mic');
+    // 클릭된 요소(el)가 있으면 바로 사용, 없으면 source로 찾기
+    const micBtn = el || (source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)'));
+    if (micBtn) {
+        micBtn.classList.add('active-mic');
+    }
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'ko-KR';
@@ -250,15 +253,16 @@ function startVoice(source) {
     const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
         silenceTimer = setTimeout(() => {
+            console.log("침묵 감지: 전송 시공");
             recognition.stop();
-        }, 2500); // 2.5초 침묵 시 전송
+        }, 2200); // 2.2초로 더욱 민첩하게 조정
     };
 
     const statusDisplay = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldText = statusDisplay ? statusDisplay.textContent : "나침반 활성";
 
     if (statusDisplay) {
-        statusDisplay.textContent = "🎙️ 듣고 있습니다...";
+        statusDisplay.textContent = "🎙️ 말씀해 주세요...";
         statusDisplay.style.color = "#f0d078";
     }
 
@@ -267,19 +271,28 @@ function startVoice(source) {
 
     recognition.onresult = (e) => {
         resetSilenceTimer();
-        let currentText = "";
-        // 중복 방지를 위해 전체 결과를 매번 새로 조합
+        let final_transcript = '';
+        let interim_transcript = '';
+
+        // Android/모바일 브라우저의 중복 결과 방지 로직
         for (let i = 0; i < e.results.length; ++i) {
-            currentText += e.results[i][0].transcript;
+            if (e.results[i].isFinal) {
+                final_transcript += e.results[i][0].transcript;
+            } else {
+                interim_transcript += e.results[i][0].transcript;
+            }
         }
-        if (targetInput) targetInput.value = currentText;
+
+        if (targetInput) {
+            targetInput.value = final_transcript + interim_transcript;
+        }
     };
 
     recognition.onerror = (e) => {
         console.error("Speech Error:", e.error);
         if (micBtn) micBtn.classList.remove('active-mic');
         if (statusDisplay) {
-            statusDisplay.textContent = "다시 시도해 주세요.";
+            statusDisplay.textContent = "다시 말씀해 주세요.";
             statusDisplay.style.color = "";
         }
         if (silenceTimer) clearTimeout(silenceTimer);
@@ -294,6 +307,7 @@ function startVoice(source) {
             statusDisplay.style.color = "";
         }
 
+        // 입력값이 있을 때만 전송
         if (targetInput && targetInput.value.trim().length > 0) {
             sendMessage(source);
         }
