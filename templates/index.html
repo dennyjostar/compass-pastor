@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>나침반(Compass)</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}">
 </head>
 
 <body>
@@ -24,7 +25,7 @@
 
         <!-- 메인 콘텐츠 -->
         <div class="main-content" style="padding-bottom: 120px;">
-            <!-- 나침반 섹션 (사용자 제공 V4.0) -->
+            <!-- ══ 나침반 섹션 (V4.5 모듈화) ══ -->
             <div class="compass-section">
                 <div class="compass-wrapper">
                     <div class="compass-ring"></div>
@@ -38,9 +39,9 @@
                                     <stop offset="100%" stop-color="#8a7030" />
                                 </linearGradient>
                                 <linearGradient id="ringG" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#d4b85c" stop-opacity="0.6" />
-                                    <stop offset="50%" stop-color="#a8893a" stop-opacity="0.3" />
-                                    <stop offset="100%" stop-color="#d4b85c" stop-opacity="0.6" />
+                                    <stop offset="0%" stop-color="#d4b85c" stop-opacity="0.5" />
+                                    <stop offset="50%" stop-color="#a8893a" stop-opacity="0.25" />
+                                    <stop offset="100%" stop-color="#d4b85c" stop-opacity="0.5" />
                                 </linearGradient>
                                 <linearGradient id="nN" x1="0.5" y1="1" x2="0.5" y2="0">
                                     <stop offset="0%" stop-color="#c9a84c" />
@@ -60,59 +61,84 @@
                                     <stop offset="100%" stop-color="#706040" />
                                 </linearGradient>
                                 <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(201,168,76,0.08)" />
+                                    <stop offset="0%" stop-color="rgba(201,168,76,0.07)" />
                                     <stop offset="100%" stop-color="rgba(201,168,76,0)" />
                                 </radialGradient>
                                 <radialGradient id="centerG" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(201,168,76,0.25)" />
-                                    <stop offset="60%" stop-color="rgba(201,168,76,0.05)" />
+                                    <stop offset="0%" stop-color="rgba(201,168,76,0.2)" />
+                                    <stop offset="60%" stop-color="rgba(201,168,76,0.04)" />
                                     <stop offset="100%" stop-color="rgba(201,168,76,0)" />
                                 </radialGradient>
                             </defs>
 
                             <circle cx="200" cy="200" r="195" fill="url(#bgGlow)" />
-                            <circle cx="200" cy="200" r="190" fill="none" stroke="url(#ringG)" stroke-width="2" />
-                            <circle cx="200" cy="200" r="185" fill="none" stroke="url(#gd1)" stroke-width="0.8"
-                                opacity="0.25" />
-                            <circle cx="200" cy="200" r="180" fill="none" stroke="url(#gd1)" stroke-width="0.4"
+                            <circle cx="200" cy="200" r="185" fill="none" stroke="url(#ringG)" stroke-width="1.5" />
+                            <circle cx="200" cy="200" r="180" fill="none" stroke="url(#gd1)" stroke-width="0.6"
+                                opacity="0.2" />
+                            <circle cx="200" cy="200" r="170" fill="none" stroke="url(#gd1)" stroke-width="0.3"
+                                opacity="0.1" />
+
+                            <g id="compassTicks"></g>
+                            <g id="compassDegLabels"></g>
+
+                            <circle cx="200" cy="200" r="130" fill="none" stroke="url(#gd1)" stroke-width="0.4"
+                                opacity="0.08" stroke-dasharray="2,5" />
+                            <circle cx="200" cy="200" r="95" fill="none" stroke="url(#gd1)" stroke-width="0.2"
+                                opacity="0.06" />
+
+                            <line x1="200" y1="28" x2="200" y2="58" stroke="url(#gd1)" stroke-width="0.4"
+                                opacity="0.15" />
+                            <line x1="200" y1="342" x2="200" y2="372" stroke="url(#gd1)" stroke-width="0.4"
+                                opacity="0.15" />
+                            <line x1="28" y1="200" x2="58" y2="200" stroke="url(#gd1)" stroke-width="0.4"
+                                opacity="0.15" />
+                            <line x1="342" y1="200" x2="372" y2="200" stroke="url(#gd1)" stroke-width="0.4"
                                 opacity="0.15" />
 
-                            <g id="ticks"></g>
-                            <g id="degreeLabels"></g>
-
                             <g style="animation: crossPulse 3s ease-in-out infinite;">
-                                <line x1="200" y1="18" x2="200" y2="45" stroke="#e86050" stroke-width="3"
+                                <line x1="200" y1="20" x2="200" y2="44" stroke="#e86050" stroke-width="2.5"
                                     stroke-linecap="round" />
-                                <line x1="190" y1="28" x2="210" y2="28" stroke="#e86050" stroke-width="2.5"
+                                <line x1="191" y1="30" x2="209" y2="30" stroke="#e86050" stroke-width="2"
                                     stroke-linecap="round" />
                             </g>
 
-                            <text x="360" y="206" text-anchor="middle" fill="url(#gd1)" font-size="16" font-weight="600"
-                                letter-spacing="1" opacity="0.7">E</text>
-                            <text x="200" y="372" text-anchor="middle" fill="url(#gd1)" font-size="16" font-weight="600"
-                                letter-spacing="1" opacity="0.7">S</text>
-                            <text x="40" y="206" text-anchor="middle" fill="url(#gd1)" font-size="16" font-weight="600"
-                                letter-spacing="1" opacity="0.7">W</text>
+                            <text x="355" y="205" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
+                                opacity="0.65">E</text>
+                            <text x="200" y="370" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
+                                opacity="0.65">S</text>
+                            <text x="45" y="205" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
+                                opacity="0.65">W</text>
 
-                            <polygon points="200,50 192,200 200,185 208,200" fill="url(#nN)" opacity="0.92" />
-                            <polygon points="200,350 208,200 200,215 192,200" fill="url(#nS)" opacity="0.55" />
-                            <polygon points="350,200 200,192 215,200 200,208" fill="url(#nE)" opacity="0.45" />
-                            <polygon points="50,200 200,208 185,200 200,192" fill="url(#nW)" opacity="0.45" />
+                            <text x="305" y="95" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                                opacity="0.22">NE</text>
+                            <text x="305" y="315" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                                opacity="0.22">SE</text>
+                            <text x="95" y="315" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                                opacity="0.22">SW</text>
+                            <text x="95" y="95" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                                opacity="0.22">NW</text>
 
-                            <circle cx="200" cy="200" r="25" fill="url(#centerG)"
+                            <polygon points="200,52 193,200 200,187 207,200" fill="url(#nN)" opacity="0.9" />
+                            <polygon points="200,348 207,200 200,213 193,200" fill="url(#nS)" opacity="0.5" />
+                            <polygon points="348,200 200,193 213,200 200,207" fill="url(#nE)" opacity="0.4" />
+                            <polygon points="52,200 200,207 187,200 200,193" fill="url(#nW)" opacity="0.4" />
+
+                            <circle cx="200" cy="200" r="22" fill="url(#centerG)"
                                 style="animation: centerGlow 4s ease-in-out infinite;" />
-                            <circle cx="200" cy="200" r="16" fill="#0a0e1a" stroke="url(#gd1)" stroke-width="2.5" />
-                            <circle cx="200" cy="200" r="6" fill="url(#gd1)" opacity="0.8" />
+                            <circle cx="200" cy="200" r="14" fill="#0a0e1a" stroke="url(#gd1)" stroke-width="2" />
+                            <circle cx="200" cy="200" r="5" fill="url(#gd1)" opacity="0.75" />
                         </svg>
                     </div>
                 </div>
 
+                <!-- 방위 정보 -->
                 <div class="compass-info">
                     <div class="degree-display" id="degreeDisplay">0<span>°</span></div>
                     <div class="direction-text" id="directionText">북쪽을 향하고 있습니다</div>
-                    <div class="status-msg active" id="statusMsg">나침반 활성</div>
-                    <button class="permission-btn" id="permissionBtn" onclick="requestPermission()">나침반 권한 허용</button>
                 </div>
+                <div class="compass-status active" id="compassStatus">나침반 활성</div>
+                <button class="compass-permission-btn" id="compassPermBtn" onclick="requestCompassPermission()">나침반 권한
+                    허용</button>
             </div>
 
             <!-- AI 배지 및 인사말 -->
@@ -344,6 +370,7 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/compass.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}?v=4.0"></script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)

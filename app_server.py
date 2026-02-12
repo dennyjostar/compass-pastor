@@ -81,6 +81,10 @@ def privacy():
 def ai_notice():
     return render_template('ai-notice.html')
 
+@app.route('/compass-test')
+def compass_test():
+    return render_template('compass-test.html')
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:
