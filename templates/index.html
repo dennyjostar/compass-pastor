@@ -25,66 +25,73 @@
         <!-- 메인 -->
         <div class="main-content">
 
-            <!-- 새로운 고품격 SVG 나침반 (십자가 포함) -->
-            <div class="compass-container" onclick="handleClick()">
-                <svg width="140" height="140" viewBox="0 0 140 140" class="compass-svg">
-                    <!-- 외곽 원 -->
-                    <circle cx="70" cy="70" r="66" fill="none" stroke="url(#goldGrad)" stroke-width="2" />
-                    <circle cx="70" cy="70" r="60" fill="none" stroke="url(#goldGrad)" stroke-width="0.5"
-                        opacity="0.4" />
+            <!-- 나침반 (사용자 제공) -->
+            <div class="compass-wrapper" onclick="handleClick()">
+                <!-- 고정 외부 링 -->
+                <div class="compass-outer"></div>
 
-                    <!-- 방위 눈금 (12개) -->
-                    <g stroke="#c9a84c" stroke-width="1" opacity="0.3">
-                        <line x1="70" y1="10" x2="70" y2="18" />
-                        <line x1="70" y1="122" x2="70" y2="130" />
-                        <line x1="10" y1="70" x2="18" y2="70" />
-                        <line x1="122" y1="70" x2="130" y2="70" />
-                        <line x1="28" y1="28" x2="33" y2="33" />
-                        <line x1="107" y1="28" x2="112" y2="33" />
-                        <line x1="28" y1="112" x2="33" y2="107" />
-                        <line x1="107" y1="112" x2="112" y2="107" />
-                    </g>
+                <!-- 회전하는 본체 -->
+                <div class="compass-body" id="compassBody">
+                    <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#e8d48b" />
+                                <stop offset="50%" stop-color="#c9a84c" />
+                                <stop offset="100%" stop-color="#a8893a" />
+                            </linearGradient>
+                            <linearGradient id="needleN" x1="0.5" y1="1" x2="0.5" y2="0">
+                                <stop offset="0%" stop-color="#c9a84c" />
+                                <stop offset="100%" stop-color="#e85050" />
+                            </linearGradient>
+                            <linearGradient id="needleS" x1="0.5" y1="0" x2="0.5" y2="1">
+                                <stop offset="0%" stop-color="#c9a84c" />
+                                <stop offset="100%" stop-color="#8a7a5a" />
+                            </linearGradient>
+                            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="rgba(201,168,76,0.15)" />
+                                <stop offset="100%" stop-color="rgba(201,168,76,0)" />
+                            </radialGradient>
+                        </defs>
 
-                    <!-- 방위 문자 -->
-                    <text x="70" y="30" text-anchor="middle" fill="#c9a84c" font-size="11" font-weight="700">N</text>
-                    <text x="70" y="118" text-anchor="middle" fill="#6b7280" font-size="9" font-weight="500">S</text>
-                    <text x="115" y="74" text-anchor="middle" fill="#6b7280" font-size="9" font-weight="500">E</text>
-                    <text x="25" y="74" text-anchor="middle" fill="#6b7280" font-size="9" font-weight="500">W</text>
+                        <!-- 배경 빛 -->
+                        <circle cx="150" cy="150" r="145" fill="url(#glow)" />
 
-                    <!-- 나침반 바늘 (회전 애니메이션) -->
-                    <g class="compass-needle">
-                        <!-- 북쪽 바늘 (금색) -->
-                        <polygon points="70,25 64,70 76,70" fill="url(#goldGrad)" />
-                        <!-- 남쪽 바늘 (어두운색) -->
-                        <polygon points="70,115 64,70 76,70" fill="#2a3050" />
-                        <!-- 중앙 원 -->
-                        <circle cx="70" cy="70" r="5" fill="#c9a84c" />
-                        <circle cx="70" cy="70" r="2.5" fill="#0a0e1a" />
-                    </g>
+                        <!-- 외곽 원 -->
+                        <circle cx="150" cy="150" r="140" fill="none" stroke="url(#gold)" stroke-width="2"
+                            opacity="0.5" />
+                        <circle cx="150" cy="150" r="130" fill="none" stroke="url(#gold)" stroke-width="0.5"
+                            opacity="0.3" />
 
-                    <!-- 십자가 (북쪽 끝) -->
-                    <g class="compass-needle" fill="#c9a84c">
-                        <rect x="68.5" y="15" width="3" height="10" rx="1" />
-                        <rect x="66" y="18.5" width="8" height="3" rx="1" />
-                    </g>
+                        <!-- 눈금 그룹 -->
+                        <g id="ticks" opacity="0.4"></g>
 
-                    <!-- 그라디언트 정의 -->
-                    <defs>
-                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#c9a84c" />
-                            <stop offset="50%" style="stop-color:#f0d078" />
-                            <stop offset="100%" style="stop-color:#c9a84c" />
-                        </linearGradient>
-                        <!-- 발광 효과 -->
-                        <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" style="stop-color:rgba(201,168,76,0.15)" />
-                            <stop offset="100%" style="stop-color:rgba(201,168,76,0)" />
-                        </radialGradient>
-                    </defs>
+                        <!-- 방위 문자 (북쪽 십자가 포함) -->
+                        <text x="150" y="38" text-anchor="middle" fill="#e85050" font-size="18" font-weight="700"
+                            style="animation: crossGlow 3s ease-in-out infinite;">✝</text>
+                        <text x="272" y="155" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
+                            opacity="0.8">E</text>
+                        <text x="150" y="275" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
+                            opacity="0.8">S</text>
+                        <text x="28" y="155" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
+                            opacity="0.8">W</text>
 
-                    <!-- 배경 발광 -->
-                    <circle cx="70" cy="70" r="55" fill="url(#glowGrad)" />
-                </svg>
+                        <!-- 바늘 (북/남) -->
+                        <polygon points="150,30 142,150 150,140 158,150" fill="url(#needleN)" opacity="0.9" />
+                        <polygon points="150,270 158,150 150,160 142,150" fill="url(#needleS)" opacity="0.7" />
+
+                        <!-- 중앙 장식 -->
+                        <circle cx="150" cy="150" r="12" fill="#0a0e1a" stroke="url(#gold)" stroke-width="2" />
+                        <circle cx="150" cy="150" r="5" fill="url(#gold)" opacity="0.8" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 방위 정보 (사용자 제공) -->
+            <div class="compass-info">
+                <div class="degree-display" id="degreeDisplay">---<span>°</span></div>
+                <div class="direction-text" id="directionText">방향 감지 중...</div>
+                <div class="status-msg" id="statusMsg">나침반을 초기화하는 중입니다...</div>
+                <button class="permission-btn" id="permissionBtn" onclick="requestPermission()">나침반 권한 허용하기</button>
             </div>
 
             <div class="greeting-area">
