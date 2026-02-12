@@ -3,6 +3,15 @@
 // 1. 상태 및 권한 관리
 let isRegistered = localStorage.getItem('compass_registered') === 'true';
 let userName = localStorage.getItem('compass_userName') || '';
+let currentFeature = '/chat';
+
+// 기능별 대화 기록 (localStorage에서 로드)
+let chatHistories = JSON.parse(localStorage.getItem('compass_histories')) || {
+    '/search': [],
+    '/prayer': [],
+    '/devotion': [],
+    '/chat': []
+};
 
 // 2. 초기화 로직
 function initApp() {
@@ -28,13 +37,16 @@ function updateUIForRegisteredUser(name) {
     if (greetingName) greetingName.textContent = name + ' 님';
 }
 
-// 3. 기능 라우터 (말씀, 기도, 묵상, 상담 통합)
+// 3. 기능 라우터 (대화 기록 분리 V5.1)
 function handleFeatureClick(target) {
     if (!isRegistered) {
         const overlay = document.getElementById('registerOverlay');
         if (overlay) overlay.classList.add('active');
         return;
     }
+
+    const featureTarget = target || '/chat';
+    currentFeature = featureTarget;
 
     // 채팅 모달 열기
     const chatOverlay = document.getElementById('chatOverlay');
@@ -45,42 +57,57 @@ function handleFeatureClick(target) {
     let featureIcon = "💬";
 
     // 기능별 자동 프롬프트 설정 (V5.0 상세화)
-    if (target === '/search') {
+    if (featureTarget === '/search') {
         featureTitle = "말씀 찾기";
         featureIcon = "📖";
         initialMsg = "목사님, 오늘 제게 힘이 되는 성경 구절이나 설교 말씀을 찾아주세요.";
-    } else if (target === '/prayer') {
+    } else if (featureTarget === '/prayer') {
         featureTitle = "기도문 작성";
         featureIcon = "🙏";
         initialMsg = "목사님, 지금 제 상황에 맞는 간절한 기도문을 작성해주실 수 있을까요?";
-    } else if (target === '/devotion') {
+    } else if (featureTarget === '/devotion') {
         featureTitle = "오늘의 묵상";
         featureIcon = "✨";
         initialMsg = "목사님, 오늘 하루 제가 깊이 묵상하며 붙들 수 있는 메시지를 들려주세요.";
     }
 
-    // 모달 제목 및 아이콘 업데이트
+    // UI 업데이트 (제목/아이콘) 및 기록 렌더링
     const chatTitleEl = document.getElementById('chatTitle');
     const chatIconEl = document.getElementById('chatIcon');
     if (chatTitleEl) chatTitleEl.textContent = featureTitle;
     if (chatIconEl) chatIconEl.textContent = featureIcon;
 
-    // 자동 메시지 전송 (약간의 지연으로 자연스럽게)
-    if (initialMsg) {
+    renderHistory();
+
+    // ★ 대화 기록이 전혀 없을 때만 자동 인사말 전송 ★
+    if (initialMsg && chatHistories[featureTarget].length === 0) {
         setTimeout(() => {
-            const input = document.getElementById('chatInput');
-            if (input) {
-                input.value = initialMsg;
-                sendMessage();
+            const modalInput = document.getElementById('modalChatInput');
+            if (modalInput) {
+                modalInput.value = initialMsg;
+                sendMessage('modal');
             }
-        }, 300);
+        }, 500);
     }
+}
+
+function renderHistory() {
+    const list = document.getElementById('chatMessages');
+    if (!list) return;
+    list.innerHTML = ''; // 기존 화면 초기화
+
+    const history = chatHistories[currentFeature] || [];
+    history.forEach(item => {
+        appendMessageToUI(item.type, item.content, false); // 저장 없이 화면에만 표시
+    });
+
+    setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
 }
 
 // 전역 핸들러 등록
 window.handleClick = handleFeatureClick;
 
-// 4. 채팅 시스템 (V5.0 심층 분석 대응)
+// 4. 채팅 시스템 (기능별 저장 대응 V5.1)
 function sendMessage(source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -94,10 +121,10 @@ function sendMessage(source) {
 
     if (!text) return;
 
-    // 모달이 닫혀있으면 열기
-    const chatOverlay = document.getElementById('chatOverlay');
-    if (chatOverlay && !chatOverlay.classList.contains('active')) {
-        chatOverlay.classList.add('active');
+    // 메인 홈 화면 입력창 사용 시 상담 모드로 전환
+    if (source !== 'modal') {
+        currentFeature = '/chat';
+        handleFeatureClick('/chat');
     }
 
     addMessage('user', text);
@@ -131,6 +158,16 @@ function sendMessage(source) {
 }
 
 function addMessage(type, content) {
+    // 1. 메모리 및 로컬 스토리지에 저장
+    if (!chatHistories[currentFeature]) chatHistories[currentFeature] = [];
+    chatHistories[currentFeature].push({ type, content });
+    localStorage.setItem('compass_histories', JSON.stringify(chatHistories));
+
+    // 2. 화면에 표시
+    appendMessageToUI(type, content, true);
+}
+
+function appendMessageToUI(type, content, isNew) {
     const list = document.getElementById('chatMessages');
     if (!list) return;
 
@@ -146,7 +183,7 @@ function addMessage(type, content) {
         let html = generalPart.replace(/\n/g, '<br>');
 
         if (deepPart) {
-            const deepId = 'deep_' + Date.now();
+            const deepId = 'deep_' + Math.random().toString(36).substr(2, 9);
             html += `
                 <button class="deep-btn" onclick="toggleDeep('${deepId}')">
                     🔍 김성수 목사님의 심층 신학 분석 보기
@@ -162,9 +199,11 @@ function addMessage(type, content) {
     }
 
     list.appendChild(msg);
-    setTimeout(() => {
-        list.scrollTop = list.scrollHeight;
-    }, 50);
+    if (isNew) {
+        setTimeout(() => {
+            list.scrollTop = list.scrollHeight;
+        }, 50);
+    }
 }
 
 // 심층 분석 토글 함수
