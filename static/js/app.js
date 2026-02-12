@@ -117,64 +117,66 @@ let compassActive = false;
 
 function initCompass() {
     if (compassActive) return;
-    console.log("[Compass] Initializing sensor...");
 
-    // iOS 13+ 대응
+    // iOS 13+ 기기 대응
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-            .then(response => {
-                console.log("[Compass] iOS Permission response:", response);
-                if (response === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation, true);
-                    compassActive = true;
-                } else {
-                    alert("나침반 기능을 사용하려면 방향 센서 권한이 필요합니다.");
-                }
-            })
-            .catch(err => {
-                console.error("[Compass] Permission error:", err);
-            });
+        // 사용자 경험을 위해 선택창 유도 (iOS 필수)
+        if (confirm("실제 북쪽을 가리키는 나침반 기능을 활성화하시겠습니까? (방향 센서 권한이 필요합니다)")) {
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation, true);
+                        compassActive = true;
+                        console.log("[Compass] iOS Sensor Active");
+                    }
+                })
+                .catch(err => {
+                    console.error("[Compass] Permission error:", err);
+                });
+        }
     } else {
-        // 안드로이드 및 기타 기기
-        console.log("[Compass] Using standard orientation events");
+        // 안드로이드 및 일반 기기 (권한 요청 없이 바로 시작 가능)
         if ('ondeviceorientationabsolute' in window) {
             window.addEventListener('deviceorientationabsolute', handleOrientation, true);
         } else {
             window.addEventListener('deviceorientation', handleOrientation, true);
         }
         compassActive = true;
+        console.log("[Compass] Android/Standard Sensor Active");
     }
 }
 
 function handleOrientation(event) {
-    let heading = 0;
+    let heading = null;
 
-    // iOS
+    // iOS 전용
     if (event.webkitCompassHeading) {
         heading = event.webkitCompassHeading;
     }
-    // Android Absolute
+    // 안드로이드 Absolute
     else if (event.absolute && event.alpha !== null) {
         heading = 360 - event.alpha;
     }
-    // Android Standard (정확도 낮음)
+    // 일반 Alpha (정확도는 떨어지지만 작동함)
     else if (event.alpha !== null) {
         heading = 360 - event.alpha;
     }
 
-    if (heading !== 0) {
+    if (heading !== null) {
         const needles = document.querySelectorAll('.compass-needle');
         needles.forEach(needle => {
-            // 부드러운 회전을 위해 transform 적용
+            // 바늘 회전 적용
             needle.style.transform = `rotate(${-heading}deg)`;
-            needle.style.animation = 'none'; // 센서 작동 시 흔들림 애니메이션 중지
+            // 주석: 실제 작동 시 CSS 애니메이션을 JS에서 강제로 끕니다.
+            needle.style.animation = 'none';
+            needle.style.setProperty('animation', 'none', 'important');
         });
     }
 }
 
-// 클릭 핸들러 확장
+// 기존 handleClick 함수를 실제 나침반 활성화와 연결
 const originalHandleClick = handleClick;
 handleClick = function (targetPage) {
-    initCompass();
+    initCompass(); // 사용자가 어디든 클릭하면 센서 활성화 시도
     originalHandleClick(targetPage);
 };
