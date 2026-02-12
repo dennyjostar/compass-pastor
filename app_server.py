@@ -69,6 +69,18 @@ def find_best_sermon(query):
 def home():
     return render_template('index.html')
 
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/ai-notice')
+def ai_notice():
+    return render_template('ai-notice.html')
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:

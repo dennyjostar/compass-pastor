@@ -1,0 +1,664 @@
+/* ===== 리셋 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: linear-gradient(180deg, #0a0e1a 0%, #121832 50%, #0a0e1a 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+a {
+    color: #c9a84c;
+    text-decoration: underline;
+}
+
+/* ===== 앱 래퍼 ===== */
+.app-wrap {
+    max-width: 420px;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== 헤더 ===== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px 8px;
+}
+
+.header-left {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.header-center {
+    text-align: center;
+}
+
+.header-subtitle {
+    font-size: 11px;
+    color: #8890a8;
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #e0e0e0;
+    letter-spacing: 3px;
+}
+
+.header-right {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* ===== 메인 콘텐츠 ===== */
+.main-content {
+    flex: 1;
+    padding: 10px 20px 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ===== 나침반 이미지 (SVG) ===== */
+.compass-container {
+    margin: 20px auto;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.compass-svg {
+    filter: drop-shadow(0 0 15px rgba(201, 168, 76, 0.2));
+    transition: filter 0.3s;
+}
+
+/* 바늘 미세 흔들림 애니메이션 및 JS 회전 대응 */
+.compass-needle {
+    transform-origin: 70px 70px;
+    animation: needleSway 4s ease-in-out infinite;
+    transition: transform 0.1s ease-out;
+    /* JS 회전 시 부드럽게 움직이도록 추가 */
+}
+
+@keyframes needleSway {
+    0% {
+        transform: rotate(-2deg);
+    }
+
+    25% {
+        transform: rotate(3deg);
+    }
+
+    50% {
+        transform: rotate(-1deg);
+    }
+
+    75% {
+        transform: rotate(2deg);
+    }
+
+    100% {
+        transform: rotate(-2deg);
+    }
+}
+
+/* 호버 시 빛나는 효과 */
+.compass-container:hover .compass-svg {
+    filter: drop-shadow(0 0 25px rgba(201, 168, 76, 0.4));
+}
+
+/* ===== 인사말 ===== */
+.greeting-area {
+    text-align: center;
+    margin: 16px 0;
+}
+
+.greeting-text {
+    font-size: 16px;
+    color: #b0b8d0;
+    margin-bottom: 4px;
+}
+
+.greeting-name {
+    font-weight: 700;
+    color: #c9a84c;
+}
+
+.greeting-sub {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* ===== 안내 배지 ===== */
+.info-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 20px;
+}
+
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11.5px;
+    color: #8890a8;
+}
+
+.info-badge.ai-badge {
+    border-color: rgba(201, 168, 76, 0.25);
+    color: #c9a84c;
+}
+
+.usage-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.25);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11.5px;
+    color: #66bb6a;
+}
+
+.usage-badge.show {
+    display: inline-flex;
+}
+
+/* ===== 기능 버튼 그리드 ===== */
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 20px 14px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feature-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(201, 168, 76, 0.3);
+    transform: translateY(-2px);
+}
+
+.feature-card:active {
+    transform: translateY(0);
+}
+
+.feature-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.feature-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 4px;
+}
+
+.feature-desc {
+    font-size: 11px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+/* ===== 하단 입력창 ===== */
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 420px;
+    width: 100%;
+    padding: 12px 16px 20px;
+    background: linear-gradient(0deg, #0a0e1a 60%, transparent);
+}
+
+.input-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 25px;
+    padding: 4px 6px 4px 16px;
+    cursor: pointer;
+}
+
+.mic-btn,
+.send-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #c9a84c;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.input-placeholder {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 14px;
+    color: #5a6178;
+}
+
+/* ===== 오버레이 공통 ===== */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.overlay.active {
+    display: flex;
+}
+
+/* ===== 등록 안내 팝업 ===== */
+.register-popup {
+    background: #1a1f36;
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    border: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+.register-popup .popup-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.register-popup h3 {
+    color: #c9a84c;
+    font-size: 17px;
+    margin-bottom: 10px;
+}
+
+.register-popup p {
+    color: #8890a8;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.btn-register {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #c9a84c, #d4b85c);
+    border: none;
+    border-radius: 12px;
+    color: #0a0e1a;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.btn-register:hover {
+    opacity: 0.9;
+}
+
+.btn-cancel {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* ===== 등록 화면 ===== */
+.register-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #0a0e1a 0%, #121832 50%, #0a0e1a 100%);
+    z-index: 2000;
+    overflow-y: auto;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.register-screen.active {
+    display: flex;
+}
+
+.register-container {
+    max-width: 420px;
+    width: 100%;
+    padding: 30px 24px;
+}
+
+.reg-logo-area {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.reg-logo-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 12px;
+    background: linear-gradient(135deg, #c9a84c, #f0d078);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.reg-greeting {
+    color: #c9a84c;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.reg-service-name {
+    font-size: 15px;
+    color: #b0b8d0;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.reg-ai-notice {
+    background: rgba(201, 168, 76, 0.1);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.reg-ai-notice p {
+    font-size: 12.5px;
+    color: #c9a84c;
+    line-height: 1.5;
+}
+
+.reg-service-features {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 12.5px;
+    color: #8890a8;
+    line-height: 1.5;
+}
+
+.reg-section-title {
+    text-align: center;
+    color: #c9a84c;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.reg-section-desc {
+    text-align: center;
+    font-size: 13px;
+    color: #8890a8;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* ===== 폼 요소 ===== */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    color: #b0b8d0;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.form-label .optional {
+    color: #6b7280;
+    font-weight: 400;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    border-color: #c9a84c;
+}
+
+.form-input::placeholder {
+    color: #5a6178;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.form-row .form-select-wrap {
+    flex: 1;
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-size: 14px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.form-select:focus {
+    border-color: #c9a84c;
+}
+
+.form-select option {
+    background: #1a1f36;
+    color: #e0e0e0;
+}
+
+/* ===== 약관 동의 ===== */
+.terms-area {
+    margin: 20px 0;
+}
+
+.terms-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.terms-check input[type="checkbox"] {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    accent-color: #c9a84c;
+    flex-shrink: 0;
+}
+
+.terms-check label {
+    font-size: 13px;
+    color: #b0b8d0;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+/* ===== 버튼 ===== */
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #c9a84c, #d4b85c);
+    border: none;
+    border-radius: 12px;
+    color: #0a0e1a;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ===== 프라이버시 안내 ===== */
+.privacy-notice {
+    text-align: center;
+    margin-top: 20px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+}
+
+.privacy-notice .privacy-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.privacy-notice p {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* ===== 모달 (약관 등) ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #1a1f36;
+    border-radius: 16px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 28px 24px;
+}
+
+.modal-content h2 {
+    color: #c9a84c;
+    font-size: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    color: #d4b85c;
+    font-size: 14px;
+    margin: 16px 0 8px;
+    font-weight: 600;
+}
+
+.modal-content p,
+.modal-content li {
+    font-size: 13px;
+    color: #b0b8d0;
+    line-height: 1.7;
+    margin-bottom: 8px;
+}
+
+.modal-content ul {
+    padding-left: 18px;
+    margin-bottom: 12px;
+}
+
+.modal-close {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #c9a84c, #d4b85c);
+    border: none;
+    border-radius: 10px;
+    color: #0a0e1a;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+}
