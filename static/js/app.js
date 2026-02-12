@@ -222,7 +222,7 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V5.7 중복 해결 및 색상 강제 적용)
+// 5. 음성 인식 (V6.0 무제한 연속 대화 및 4초 침묵 감지)
 function startVoice(el, source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -235,7 +235,6 @@ function startVoice(el, source) {
         return;
     }
 
-    // 마이크 버튼 색상 강제 변경 (노란색)
     const micBtn = el || (source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)'));
     if (micBtn) {
         micBtn.style.color = '#f0d078';
@@ -244,26 +243,54 @@ function startVoice(el, source) {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'ko-KR';
-    recognition.interimResults = false; // 중복 방지를 위해 실시간 표시 끔
-    recognition.continuous = false;    // 한 문장 단위로 인식 (가장 안정적)
+    recognition.interimResults = true; // 실시간 확인
+    recognition.continuous = true;    // 연속 대화 모드 활성화
 
+    let silenceTimer = null;
     const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
     const targetInput = document.getElementById(inputId);
+
+    const resetSilenceTimer = () => {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+            console.log("4초 침묵 감지: 전송 시공");
+            recognition.stop();
+        }, 4000); // 4초로 넉넉하게 조정
+    };
 
     const statusDisplay = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldText = statusDisplay ? statusDisplay.textContent : "나침반 활성";
 
     if (statusDisplay) {
-        statusDisplay.textContent = "🎙️ 말씀해 주세요...";
+        statusDisplay.textContent = "🎙️ 부장님, 말씀하십시오...";
         statusDisplay.style.color = "#f0d078";
     }
 
     recognition.start();
+    resetSilenceTimer();
 
     recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        if (targetInput) targetInput.value = text;
-        if (statusDisplay) statusDisplay.textContent = "인식됨: " + text;
+        resetSilenceTimer();
+        let final_transcript = '';
+        let interim_transcript = '';
+
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+            if (e.results[i].isFinal) {
+                final_transcript += e.results[i][0].transcript;
+            } else {
+                interim_transcript += e.results[i][0].transcript;
+            }
+        }
+
+        // 기존 텍스트에 누적하는 것이 아니라, 현재 세션의 전체 결과를 반영 (중복 방지)
+        if (targetInput) {
+            // interimResults 사용 시 중복을 피하기 위해 현재까지의 result를 조합
+            let currentText = "";
+            for (let i = 0; i < e.results.length; i++) {
+                currentText += e.results[i][0].transcript;
+            }
+            targetInput.value = currentText;
+        }
     };
 
     recognition.onerror = (e) => {
@@ -272,26 +299,20 @@ function startVoice(el, source) {
             micBtn.style.color = '';
             micBtn.classList.remove('active-mic');
         }
-        if (statusDisplay) {
-            statusDisplay.textContent = "다시 말씀해 주세요.";
-            statusDisplay.style.color = "";
-        }
+        if (silenceTimer) clearTimeout(silenceTimer);
     };
 
     recognition.onend = () => {
-        // 원래 상태로 복구
+        if (silenceTimer) clearTimeout(silenceTimer);
         if (micBtn) {
             micBtn.style.color = '';
             micBtn.classList.remove('active-mic');
         }
         if (statusDisplay) {
-            setTimeout(() => {
-                statusDisplay.textContent = oldText;
-                statusDisplay.style.color = "";
-            }, 1000);
+            statusDisplay.textContent = oldText;
+            statusDisplay.style.color = "";
         }
 
-        // 인식된 텍스트가 있으면 즉시 전송
         if (targetInput && targetInput.value.trim().length > 0) {
             sendMessage(source);
         }
