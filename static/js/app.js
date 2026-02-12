@@ -112,7 +112,7 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
 }
-// ===== 나침반 제어 (V3.5 정밀 로직) =====
+// ===== 나침반 제어 (V4.0 - 안드로이드 절대 방위 지원) =====
 let currentRotation = 0;
 let targetRotation = 0;
 let sensorActive = false;
@@ -122,15 +122,36 @@ function createTicks() {
     const g = document.getElementById('ticks');
     if (!g) return;
     let h = '';
-    for (let i = 0; i < 360; i += 5) {
+    for (let i = 0; i < 360; i += 2) {
         const rad = (i * Math.PI) / 180;
-        const major = i % 30 === 0;
-        const r1 = major ? 125 : 129, r2 = 134;
-        h += `<line x1="${150 + r1 * Math.sin(rad)}" y1="${150 - r1 * Math.cos(rad)}" 
-            x2="${150 + r2 * Math.sin(rad)}" y2="${150 - r2 * Math.cos(rad)}" 
-            stroke="#c9a84c" stroke-width="${major ? 1.2 : 0.4}" opacity="0.35"/>`;
+        const isMajor = i % 30 === 0;
+        const isMid = i % 10 === 0;
+        const r1 = isMajor ? 164 : (isMid ? 168 : 172);
+        const r2 = 178;
+        const w = isMajor ? 1.8 : (isMid ? 0.8 : 0.3);
+        const o = isMajor ? 0.5 : (isMid ? 0.3 : 0.15);
+        const x1 = 200 + r1 * Math.sin(rad);
+        const y1 = 200 - r1 * Math.cos(rad);
+        const x2 = 200 + r2 * Math.sin(rad);
+        const y2 = 200 - r2 * Math.cos(rad);
+        h += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#c9a84c" stroke-width="${w}" opacity="${o}"/>`;
     }
     g.innerHTML = h;
+
+    // 도수 라벨 (30도 간격)
+    const dg = document.getElementById('degreeLabels');
+    if (dg) {
+        let dl = '';
+        for (let i = 0; i < 360; i += 30) {
+            if (i === 0 || i === 90 || i === 180 || i === 270) continue;
+            const rad = (i * Math.PI) / 180;
+            const r = 155;
+            const x = 200 + r * Math.sin(rad);
+            const y = 200 - r * Math.cos(rad);
+            dl += `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" fill="#c9a84c" font-size="8" font-weight="300" opacity="0.3">${i}</text>`;
+        }
+        dg.innerHTML = dl;
+    }
 }
 
 function getDirName(deg) {
@@ -143,7 +164,7 @@ function animateCompass() {
     let d = targetRotation - currentRotation;
     while (d > 180) d -= 360;
     while (d < -180) d += 360;
-    currentRotation += d * 0.12; // Easing 상수
+    currentRotation += d * 0.1; // Smoothness factor
     const compassBody = document.getElementById('compassBody');
     if (compassBody) compassBody.style.transform = `rotate(${currentRotation}deg)`;
     requestAnimationFrame(animateCompass);
@@ -170,22 +191,36 @@ function updateCompassData(heading) {
     if (directionText) directionText.textContent = getDirName(heading);
 }
 
-function onOrientation(e) {
-    let h = null;
-    if (e.webkitCompassHeading !== undefined) h = e.webkitCompassHeading;
-    else if (e.alpha !== null) h = 360 - e.alpha;
-    if (h !== null) updateCompassData(h);
+// Android용 절대 방위 처리
+function onOrientationAbsolute(e) {
+    if (e.absolute && e.alpha !== null) {
+        updateCompassData(360 - e.alpha);
+    }
+}
+
+// iOS용 처리
+function onOrientationIOS(e) {
+    if (e.webkitCompassHeading !== undefined) {
+        updateCompassData(e.webkitCompassHeading);
+    }
+}
+
+// 일반 폴백
+function onOrientationGeneric(e) {
+    if (e.alpha !== null && e.absolute) {
+        updateCompassData(360 - e.alpha);
+    }
 }
 
 window.requestPermission = function () {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission().then(r => {
             if (r === 'granted') {
-                window.addEventListener('deviceorientation', onOrientation, true);
+                window.addEventListener('deviceorientation', onOrientationIOS, true);
                 const permissionBtn = document.getElementById('permissionBtn');
                 if (permissionBtn) permissionBtn.style.display = 'none';
                 const statusMsg = document.getElementById('statusMsg');
-                if (statusMsg) statusMsg.textContent = '센서 연결 중...';
+                if (statusMsg) statusMsg.textContent = '센서 연결됨';
             }
         }).catch(console.error);
     }
@@ -193,43 +228,36 @@ window.requestPermission = function () {
 
 function initCompass() {
     createTicks();
-    // 기본값 설정
-    const degreeDisplay = document.getElementById('degreeDisplay');
-    const directionText = document.getElementById('directionText');
-    if (degreeDisplay) degreeDisplay.innerHTML = '0<span>°</span>';
-    if (directionText) directionText.textContent = '북쪽을 향하고 있습니다';
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    // AbsoluteOrientationSensor 시도
-    if ('AbsoluteOrientationSensor' in window) {
-        try {
-            const s = new AbsoluteOrientationSensor({ frequency: 30 });
-            s.addEventListener('reading', () => {
-                const q = s.quaternion;
-                const t3 = 2 * (q[0] * q[2] + q[3] * q[1]);
-                const t4 = 1 - 2 * (q[1] * q[1] + q[2] * q[2]);
-                let h = Math.atan2(t3, t4) * (180 / Math.PI);
-                if (h < 0) h += 360;
-                updateCompassData(h);
-            });
-            s.addEventListener('error', () => tryFallbackOrientation());
-            s.start();
-            setTimeout(() => { if (!sensorActive) tryFallbackOrientation(); }, 1500);
-            return;
-        } catch (e) { }
-    }
-    tryFallbackOrientation();
-}
-
-function tryFallbackOrientation() {
-    if ('DeviceOrientationEvent' in window) {
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (isIOS) {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             const permissionBtn = document.getElementById('permissionBtn');
             if (permissionBtn) permissionBtn.style.display = 'inline-block';
+            const statusMsg = document.getElementById('statusMsg');
+            if (statusMsg) statusMsg.textContent = '버튼을 눌러 권한을 허용해 주세요';
         } else {
-            window.addEventListener('deviceorientation', onOrientation, true);
+            window.addEventListener('deviceorientation', onOrientationIOS, true);
         }
+    } else {
+        if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', onOrientationAbsolute, true);
+        }
+        window.addEventListener('deviceorientation', onOrientationGeneric, true);
     }
 }
+
+// 초기화 호출
+document.addEventListener('DOMContentLoaded', initCompass);
+
+// 기존 handleClick과 통합
+const originalHandleClick = handleClick;
+handleClick = function (targetPage) {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        window.requestPermission();
+    }
+    originalHandleClick(targetPage);
+};
 
 // 초기화 호출
 document.addEventListener('DOMContentLoaded', initCompass);
