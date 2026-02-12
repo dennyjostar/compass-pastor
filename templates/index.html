@@ -12,138 +12,138 @@
 
     <div class="app-wrap" id="homeScreen">
 
-        <!-- 헤더 -->
+        <!-- 헤더 (사용자 제공) -->
         <div class="header">
-            <div class="header-left" onclick="handleClick()">🏠</div>
+            <div class="header-icon" onclick="handleClick()">🏠</div>
             <div class="header-center">
-                <div class="header-subtitle">당신의 영혼을 위한 나침반</div>
-                <div class="header-title">COMPASS</div>
+                <div class="sub">당신의 영혼을 위한 나침반</div>
+                <div class="title">COMPASS</div>
             </div>
-            <div class="header-right" onclick="handleClick()">👤</div>
+            <div class="header-icon" onclick="handleClick()">👤</div>
         </div>
 
-        <!-- 메인 -->
-        <div class="main-content">
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content" style="padding-bottom: 120px;">
+            <!-- 나침반 섹션 (사용자 제공) -->
+            <div class="compass-section">
+                <div class="compass-wrapper">
+                    <div class="compass-body" id="compassBody">
+                        <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#e8d48b" />
+                                    <stop offset="50%" stop-color="#c9a84c" />
+                                    <stop offset="100%" stop-color="#a8893a" />
+                                </linearGradient>
+                                <linearGradient id="goldN" x1="0.5" y1="1" x2="0.5" y2="0">
+                                    <stop offset="0%" stop-color="#c9a84c" />
+                                    <stop offset="100%" stop-color="#e85050" />
+                                </linearGradient>
+                                <linearGradient id="goldS" x1="0.5" y1="0" x2="0.5" y2="1">
+                                    <stop offset="0%" stop-color="#c9a84c" />
+                                    <stop offset="100%" stop-color="#6b5d3a" />
+                                </linearGradient>
+                                <linearGradient id="goldE" x1="0" y1="0.5" x2="1" y2="0.5">
+                                    <stop offset="0%" stop-color="#c9a84c" />
+                                    <stop offset="100%" stop-color="#8a7a5a" />
+                                </linearGradient>
+                                <linearGradient id="goldW" x1="1" y1="0.5" x2="0" y2="0.5">
+                                    <stop offset="0%" stop-color="#c9a84c" />
+                                    <stop offset="100%" stop-color="#8a7a5a" />
+                                </linearGradient>
+                                <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="rgba(201,168,76,0.12)" />
+                                    <stop offset="100%" stop-color="rgba(201,168,76,0)" />
+                                </radialGradient>
+                            </defs>
 
-            <!-- 나침반 (사용자 제공) -->
-            <div class="compass-wrapper" onclick="handleClick()">
-                <!-- 고정 외부 링 -->
-                <div class="compass-outer"></div>
+                            <circle cx="150" cy="150" r="145" fill="url(#glow)" />
+                            <circle cx="150" cy="150" r="142" fill="none" stroke="url(#gold)" stroke-width="1.5"
+                                opacity="0.4" />
+                            <circle cx="150" cy="150" r="138" fill="none" stroke="url(#gold)" stroke-width="0.5"
+                                opacity="0.2" />
 
-                <!-- 회전하는 본체 -->
-                <div class="compass-body" id="compassBody">
-                    <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#e8d48b" />
-                                <stop offset="50%" stop-color="#c9a84c" />
-                                <stop offset="100%" stop-color="#a8893a" />
-                            </linearGradient>
-                            <linearGradient id="needleN" x1="0.5" y1="1" x2="0.5" y2="0">
-                                <stop offset="0%" stop-color="#c9a84c" />
-                                <stop offset="100%" stop-color="#e85050" />
-                            </linearGradient>
-                            <linearGradient id="needleS" x1="0.5" y1="0" x2="0.5" y2="1">
-                                <stop offset="0%" stop-color="#c9a84c" />
-                                <stop offset="100%" stop-color="#8a7a5a" />
-                            </linearGradient>
-                            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="rgba(201,168,76,0.15)" />
-                                <stop offset="100%" stop-color="rgba(201,168,76,0)" />
-                            </radialGradient>
-                        </defs>
+                            <g id="ticks"></g>
 
-                        <!-- 배경 빛 -->
-                        <circle cx="150" cy="150" r="145" fill="url(#glow)" />
+                            <!-- 북쪽 십자가 -->
+                            <g style="animation: crossGlow 3s ease-in-out infinite;">
+                                <line x1="150" y1="18" x2="150" y2="38" stroke="#e85050" stroke-width="2.5"
+                                    stroke-linecap="round" />
+                                <line x1="143" y1="26" x2="157" y2="26" stroke="#e85050" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </g>
 
-                        <!-- 외곽 원 -->
-                        <circle cx="150" cy="150" r="140" fill="none" stroke="url(#gold)" stroke-width="2"
-                            opacity="0.5" />
-                        <circle cx="150" cy="150" r="130" fill="none" stroke="url(#gold)" stroke-width="0.5"
-                            opacity="0.3" />
+                            <text x="270" y="155" text-anchor="middle" fill="url(#gold)" font-size="14"
+                                font-weight="600" opacity="0.7">E</text>
+                            <text x="150" y="272" text-anchor="middle" fill="url(#gold)" font-size="14"
+                                font-weight="600" opacity="0.7">S</text>
+                            <text x="30" y="155" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
+                                opacity="0.7">W</text>
 
-                        <!-- 눈금 그룹 -->
-                        <g id="ticks" opacity="0.4"></g>
+                            <!-- 4방향 다이아몬드 바늘 -->
+                            <polygon points="150,40 143,150 150,138 157,150" fill="url(#goldN)" opacity="0.9" />
+                            <polygon points="150,260 157,150 150,162 143,150" fill="url(#goldS)" opacity="0.6" />
+                            <polygon points="260,150 150,143 162,150 150,157" fill="url(#goldE)" opacity="0.5" />
+                            <polygon points="40,150 150,157 138,150 150,143" fill="url(#goldW)" opacity="0.5" />
 
-                        <!-- 방위 문자 (북쪽 십자가 포함) -->
-                        <text x="150" y="38" text-anchor="middle" fill="#e85050" font-size="18" font-weight="700"
-                            style="animation: crossGlow 3s ease-in-out infinite;">✝</text>
-                        <text x="272" y="155" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
-                            opacity="0.8">E</text>
-                        <text x="150" y="275" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
-                            opacity="0.8">S</text>
-                        <text x="28" y="155" text-anchor="middle" fill="url(#gold)" font-size="14" font-weight="600"
-                            opacity="0.8">W</text>
+                            <!-- 중앙 장식 -->
+                            <circle cx="150" cy="150" r="14" fill="#0a0e1a" stroke="url(#gold)" stroke-width="2"
+                                opacity="0.9" />
+                            <circle cx="150" cy="150" r="4" fill="url(#gold)" opacity="0.7" />
+                        </svg>
+                    </div>
+                </div>
 
-                        <!-- 바늘 (북/남) -->
-                        <polygon points="150,30 142,150 150,140 158,150" fill="url(#needleN)" opacity="0.9" />
-                        <polygon points="150,270 158,150 150,160 142,150" fill="url(#needleS)" opacity="0.7" />
-
-                        <!-- 중앙 장식 -->
-                        <circle cx="150" cy="150" r="12" fill="#0a0e1a" stroke="url(#gold)" stroke-width="2" />
-                        <circle cx="150" cy="150" r="5" fill="url(#gold)" opacity="0.8" />
-                    </svg>
+                <div class="compass-info">
+                    <div class="degree-display" id="degreeDisplay">0<span>°</span></div>
+                    <div class="direction-text" id="directionText">북쪽을 향하고 있습니다</div>
+                    <div class="status-msg active" id="statusMsg">나침반 활성</div>
+                    <button class="permission-btn" id="permissionBtn" onclick="requestPermission()">나침반 권한 허용</button>
                 </div>
             </div>
 
-            <!-- 방위 정보 (사용자 제공) -->
-            <div class="compass-info">
-                <div class="degree-display" id="degreeDisplay">---<span>°</span></div>
-                <div class="direction-text" id="directionText">방향 감지 중...</div>
-                <div class="status-msg" id="statusMsg">나침반을 초기화하는 중입니다...</div>
-                <button class="permission-btn" id="permissionBtn" onclick="requestPermission()">나침반 권한 허용하기</button>
+            <!-- AI 배지 및 인사말 -->
+            <div class="ai-badge-text">
+                🤖 김성수 목사님의 설교를 학습한 AI가 함께합니다<br>
+                🔒 모든 대화는 기기 내 암호화 저장
             </div>
 
             <div class="greeting-area">
-                <div class="greeting-text">
-                    평안하십니까, <span class="greeting-name" id="greetingName">반갑습니다</span>
-                </div>
-                <div class="greeting-sub">나침반이 당신의 영적 여정을 기억합니다</div>
+                <div class="hello">평안하십니까, <strong id="greetingName">반갑습니다</strong></div>
+                <div class="sub-msg">나침반이 당신의 영적 여정을 기억합니다</div>
             </div>
 
-            <div class="info-badges">
-                <div class="info-badge ai-badge">
-                    🤖 김성수 목사님의 설교를 학습한 AI가 함께합니다
-                </div>
-                <div class="info-badge">
-                    🔒 모든 상담 내용은 본인 기기에만 암호화되어 보관됩니다
-                </div>
-                <div class="usage-badge" id="usageBadge">
-                    💬 오늘 남은 무료 상담: <strong>3/3회</strong>
-                </div>
-            </div>
-
+            <!-- 기능 그리드 -->
             <div class="feature-grid">
                 <div class="feature-card" onclick="handleClick('/search')">
-                    <div class="feature-icon">📖</div>
-                    <div class="feature-title">말씀 찾기</div>
-                    <div class="feature-desc">설교·성경 구절 검색</div>
+                    <div class="icon">📖</div>
+                    <div class="label">말씀 찾기</div>
+                    <div class="desc">설교·성경 구절 검색</div>
                 </div>
                 <div class="feature-card" onclick="handleClick('/prayer')">
-                    <div class="feature-icon">🙏</div>
-                    <div class="feature-title">기도문</div>
-                    <div class="feature-desc">상황에 맞는 기도문 생성</div>
+                    <div class="icon">🙏</div>
+                    <div class="label">기도문</div>
+                    <div class="desc">상황에 맞는 기도문 생성</div>
                 </div>
                 <div class="feature-card" onclick="handleClick('/devotion')">
-                    <div class="feature-icon">📕</div>
-                    <div class="feature-title">오늘의 묵상</div>
-                    <div class="feature-desc">오늘의 말씀과 묵상 가이드</div>
+                    <div class="icon">✨</div>
+                    <div class="label">오늘의 묵상</div>
+                    <div class="desc">오늘의 말씀과 묵상 가이드</div>
                 </div>
                 <div class="feature-card" onclick="handleClick('/chat')">
-                    <div class="feature-icon">💬</div>
-                    <div class="feature-title">목사님 말씀 상담</div>
-                    <div class="feature-desc">AI 영적 상담 대화</div>
+                    <div class="icon">💬</div>
+                    <div class="label">목사님 말씀 상담</div>
+                    <div class="desc">AI 영적 상담 대화</div>
                 </div>
             </div>
 
-        </div>
-
-        <!-- 하단 입력창 -->
-        <div class="bottom-bar">
-            <div class="input-wrap" onclick="handleClick('/chat')">
-                <button class="mic-btn">🎤</button>
-                <div class="input-placeholder">고민이나 상황을 말씀해주세요...</div>
-                <button class="send-btn">✈️</button>
+            <!-- 하단 입력바 (사용자 제공 디자인) -->
+            <div class="bottom-bar">
+                <div class="input-wrap" onclick="handleClick('/chat')">
+                    <button class="mic-btn">🎤</button>
+                    <div class="input-placeholder">고민이나 상황을 말씀해주세요...</div>
+                    <button class="send-btn">➤</button>
+                </div>
             </div>
         </div>
 
@@ -309,7 +309,7 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=2.5"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=3.5"></script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)
         fetch('/terms').then(r => r.text()).then(html => {

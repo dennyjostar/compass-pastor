@@ -112,83 +112,133 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
 }
-// ===== 실제 나침반 기능 (시각적 피드백 강화) =====
-let compassActive = false;
+// ===== 나침반 제어 (V3.5 정밀 로직) =====
+let currentRotation = 0;
+let targetRotation = 0;
+let sensorActive = false;
+let animRunning = false;
 
-function initCompass() {
-    if (compassActive) return;
-
-    // iOS 13+ 권한 요청
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-            .then(response => {
-                if (response === 'granted') {
-                    activateCompass();
-                } else {
-                    alert("나침반 기능을 위해 센서 권한이 필요합니다.");
-                }
-            })
-            .catch(err => console.error("Permission Error:", err));
-    } else {
-        // 안드로이드 및 기타
-        activateCompass();
+function createTicks() {
+    const g = document.getElementById('ticks');
+    if (!g) return;
+    let h = '';
+    for (let i = 0; i < 360; i += 5) {
+        const rad = (i * Math.PI) / 180;
+        const major = i % 30 === 0;
+        const r1 = major ? 125 : 129, r2 = 134;
+        h += `<line x1="${150 + r1 * Math.sin(rad)}" y1="${150 - r1 * Math.cos(rad)}" 
+            x2="${150 + r2 * Math.sin(rad)}" y2="${150 - r2 * Math.cos(rad)}" 
+            stroke="#c9a84c" stroke-width="${major ? 1.2 : 0.4}" opacity="0.35"/>`;
     }
+    g.innerHTML = h;
 }
 
-function activateCompass() {
-    window.addEventListener('deviceorientation', handleOrientation, true);
-    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-    compassActive = true;
+function getDirName(deg) {
+    const n = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동',
+        '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
+    return n[Math.round(deg / 22.5) % 16] + '쪽을 향하고 있습니다';
+}
 
-    // 디버그 레이블 생성 (나침반 아래에 각도 표시)
-    if (!document.getElementById('compassDegree')) {
-        const greetingArea = document.querySelector('.greeting-area');
-        if (greetingArea) {
-            const degText = document.createElement('div');
-            degText.id = 'compassDegree';
-            degText.style.cssText = "font-size: 11px; color: #c9a84c; margin-top: 8px; opacity: 0.8; font-weight: 500;";
-            degText.textContent = "나침반 동기화 중...";
-            greetingArea.appendChild(degText);
+function animateCompass() {
+    let d = targetRotation - currentRotation;
+    while (d > 180) d -= 360;
+    while (d < -180) d += 360;
+    currentRotation += d * 0.12; // Easing 상수
+    const compassBody = document.getElementById('compassBody');
+    if (compassBody) compassBody.style.transform = `rotate(${currentRotation}deg)`;
+    requestAnimationFrame(animateCompass);
+}
+
+function updateCompassData(heading) {
+    if (!sensorActive) {
+        sensorActive = true;
+        const statusMsg = document.getElementById('statusMsg');
+        if (statusMsg) {
+            statusMsg.className = 'status-msg active';
+            statusMsg.textContent = '나침반 활성';
+        }
+    }
+    if (!animRunning) {
+        animRunning = true;
+        animateCompass();
+    }
+    const deg = Math.round(heading);
+    targetRotation = -heading;
+    const degreeDisplay = document.getElementById('degreeDisplay');
+    const directionText = document.getElementById('directionText');
+    if (degreeDisplay) degreeDisplay.innerHTML = `${deg}<span>°</span>`;
+    if (directionText) directionText.textContent = getDirName(heading);
+}
+
+function onOrientation(e) {
+    let h = null;
+    if (e.webkitCompassHeading !== undefined) h = e.webkitCompassHeading;
+    else if (e.alpha !== null) h = 360 - e.alpha;
+    if (h !== null) updateCompassData(h);
+}
+
+window.requestPermission = function () {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(r => {
+            if (r === 'granted') {
+                window.addEventListener('deviceorientation', onOrientation, true);
+                const permissionBtn = document.getElementById('permissionBtn');
+                if (permissionBtn) permissionBtn.style.display = 'none';
+                const statusMsg = document.getElementById('statusMsg');
+                if (statusMsg) statusMsg.textContent = '센서 연결 중...';
+            }
+        }).catch(console.error);
+    }
+};
+
+function initCompass() {
+    createTicks();
+    // 기본값 설정
+    const degreeDisplay = document.getElementById('degreeDisplay');
+    const directionText = document.getElementById('directionText');
+    if (degreeDisplay) degreeDisplay.innerHTML = '0<span>°</span>';
+    if (directionText) directionText.textContent = '북쪽을 향하고 있습니다';
+
+    // AbsoluteOrientationSensor 시도
+    if ('AbsoluteOrientationSensor' in window) {
+        try {
+            const s = new AbsoluteOrientationSensor({ frequency: 30 });
+            s.addEventListener('reading', () => {
+                const q = s.quaternion;
+                const t3 = 2 * (q[0] * q[2] + q[3] * q[1]);
+                const t4 = 1 - 2 * (q[1] * q[1] + q[2] * q[2]);
+                let h = Math.atan2(t3, t4) * (180 / Math.PI);
+                if (h < 0) h += 360;
+                updateCompassData(h);
+            });
+            s.addEventListener('error', () => tryFallbackOrientation());
+            s.start();
+            setTimeout(() => { if (!sensorActive) tryFallbackOrientation(); }, 1500);
+            return;
+        } catch (e) { }
+    }
+    tryFallbackOrientation();
+}
+
+function tryFallbackOrientation() {
+    if ('DeviceOrientationEvent' in window) {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            const permissionBtn = document.getElementById('permissionBtn');
+            if (permissionBtn) permissionBtn.style.display = 'inline-block';
+        } else {
+            window.addEventListener('deviceorientation', onOrientation, true);
         }
     }
 }
 
-function handleOrientation(event) {
-    let heading = null;
+// 초기화 호출
+document.addEventListener('DOMContentLoaded', initCompass);
 
-    // 1. iOS 전용 (가장 정확함)
-    if (event.webkitCompassHeading) {
-        heading = event.webkitCompassHeading;
-    }
-    // 2. 안드로이드 절대값
-    else if (event.absolute && event.alpha !== null) {
-        heading = 360 - event.alpha;
-    }
-    // 3. 일반 alpha
-    else if (event.alpha !== null) {
-        heading = 360 - event.alpha;
-    }
-
-    if (heading !== null) {
-        const needles = document.querySelectorAll('.compass-needle');
-        const degLabel = document.getElementById('compassDegree');
-
-        // 각도 업데이트
-        const roundedHeading = Math.round(heading);
-        if (degLabel) degLabel.textContent = `현재 방향: ${roundedHeading}° (북쪽 추적 중)`;
-
-        needles.forEach(needle => {
-            // 인라인 스타일로 회전 적용 (CSS 애니메이션 무시)
-            needle.style.transform = `rotate(${-heading}deg)`;
-            needle.style.animation = 'none';
-            needle.style.setProperty('animation', 'none', 'important');
-        });
-    }
-}
-
-// 클릭 이벤트에 나침반 초기화 연결
+// 기존 handleClick과 통합
 const originalHandleClick = handleClick;
 handleClick = function (targetPage) {
-    initCompass();
-    if (originalHandleClick) originalHandleClick(targetPage);
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        window.requestPermission();
+    }
+    originalHandleClick(targetPage);
 };
