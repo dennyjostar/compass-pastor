@@ -1,90 +1,47 @@
-// ===== 상태 관리 =====
+// ===== 상태 관리 (V4.1 통합) =====
 let isRegistered = localStorage.getItem('compass_registered') === 'true';
 let userName = localStorage.getItem('compass_userName') || '';
 
-// ===== 페이지 로드 =====
-window.onload = function () {
+// ===== 초기화 =====
+function initApp() {
+    initCompass();
     if (isRegistered && userName) {
-        const greetingName = document.getElementById('greetingName');
-        const usageBadge = document.getElementById('usageBadge');
-        if (greetingName) greetingName.textContent = userName + ' 님';
-        if (usageBadge) usageBadge.classList.add('show');
+        updateUIForRegisteredUser(userName);
     }
-};
+}
 
-// ===== 미등록 시 클릭 핸들러 =====
-function handleClick(targetPage) {
+function updateUIForRegisteredUser(name) {
+    const greetingName = document.getElementById('greetingName');
+    if (greetingName) greetingName.textContent = name + ' 님';
+}
+
+// ===== 통합 클릭 핸들러 (빈 화면 방지) =====
+function handleClick(target) {
     if (!isRegistered) {
         document.getElementById('registerOverlay').classList.add('active');
-    } else {
-        // 등록된 사용자 → 해당 기능 페이지로 이동
-        if (targetPage) {
-            window.location.href = targetPage;
-        }
+        return;
     }
-}
 
-// ===== 등록 팝업 → 등록 화면 =====
-function showRegisterScreen() {
-    document.getElementById('registerOverlay').classList.remove('active');
-    document.getElementById('registerScreen').classList.add('active');
-}
-
-// ===== 등록 팝업 닫기 =====
-function closeRegisterOverlay() {
-    document.getElementById('registerOverlay').classList.remove('active');
-}
-
-// ===== 약관 전체 동의 =====
-function toggleAll(el) {
-    const items = document.querySelectorAll('.agree-item');
-    items.forEach(function (item) {
-        item.checked = el.checked;
-    });
-    updateButton();
-}
-
-// ===== 개별 체크 → 전체 동의 확인 =====
-function checkAll() {
-    const items = document.querySelectorAll('.agree-item');
-    const allChecked = Array.from(items).every(function (item) {
-        return item.checked;
-    });
-    const agreeAll = document.getElementById('agreeAll');
-    if (agreeAll) agreeAll.checked = allChecked;
-    updateButton();
-}
-
-// ===== 시작 버튼 활성화 =====
-function updateButton() {
-    const items = document.querySelectorAll('.agree-item');
-    const allChecked = Array.from(items).every(function (item) {
-        return item.checked;
-    });
-    const startBtn = document.getElementById('startBtn');
-    if (startBtn) startBtn.disabled = !allChecked;
+    // 페이지 이동 대신 모달 열기
+    if (target === '/chat' || !target) {
+        openModal('chatOverlay');
+    } else {
+        alert("이 기능은 곧 업데이트될 예정입니다: " + target);
+    }
 }
 
 // ===== 등록 완료 =====
 function completeRegistration() {
-    var name = document.getElementById('userName').value.trim();
-    var age = document.getElementById('userAge').value;
-    var gender = document.getElementById('userGender').value;
+    const name = document.getElementById('userName').value.trim();
+    const age = document.getElementById('userAge').value;
+    const gender = document.getElementById('userGender').value;
 
-    if (!name) {
-        alert('성함(닉네임)을 입력해 주세요.');
-        return;
-    }
-    if (!age) {
-        alert('연령대를 선택해 주세요.');
-        return;
-    }
-    if (!gender) {
-        alert('성별을 선택해 주세요.');
+    if (!name || !age || !gender) {
+        alert('필수 정보를 모두 입력해 주세요.');
         return;
     }
 
-    // localStorage 저장
+    // 상태 업데이트 및 저장
     isRegistered = true;
     userName = name;
     localStorage.setItem('compass_registered', 'true');
@@ -94,25 +51,105 @@ function completeRegistration() {
     localStorage.setItem('compass_userRegion', document.getElementById('userRegion').value);
     localStorage.setItem('compass_userJob', document.getElementById('userJob').value);
 
-    // 홈 화면 업데이트
-    const greetingName = document.getElementById('greetingName');
-    const usageBadge = document.getElementById('usageBadge');
-    if (greetingName) greetingName.textContent = name + ' 님';
-    if (usageBadge) usageBadge.classList.add('show');
-
-    // 등록 화면 닫기
+    // UI 즉시 반영
+    updateUIForRegisteredUser(name);
     document.getElementById('registerScreen').classList.remove('active');
+
+    // 센서 권한 요청 (선택 사항)
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        window.requestPermission();
+    }
 }
 
-// ===== 모달 열기/닫기 =====
+// ===== 채팅 기능 =====
+function sendMessage(source) {
+    const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+    const inputEl = document.getElementById(inputId);
+    const text = inputEl.value.trim();
+
+    if (!text) return;
+
+    // 대화창 열기
+    openModal('chatOverlay');
+
+    addMessage('user', text);
+    inputEl.value = '';
+
+    const profile = {
+        name: userName,
+        age: localStorage.getItem('compass_userAge'),
+        gender: localStorage.getItem('compass_userGender'),
+        job: localStorage.getItem('compass_userJob')
+    };
+
+    fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, profile: profile })
+    })
+        .then(r => r.json())
+        .then(data => {
+            addMessage('ai', data.response || "죄송합니다. 오류가 발생했습니다.");
+        })
+        .catch(() => addMessage('ai', "서버와 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."));
+}
+
+function addMessage(type, content) {
+    const list = document.getElementById('chatMessages');
+    if (!list) return;
+    const msg = document.createElement('div');
+    msg.className = `message ${type}`;
+    msg.innerHTML = content.replace(/\[(.*?)\]/g, '<span class="section-title">[$1]</span>').replace(/\n/g, '<br>');
+    list.appendChild(msg);
+    list.scrollTop = list.scrollHeight;
+}
+
+// ===== 마이크 기능 (보안 엔진 강화) =====
+function startVoice() {
+    if (!isRegistered) {
+        handleClick();
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("현재 브라우저는 음성 인식을 지원하지 않습니다. 크롬(Chrome) 또는 삼성 인터넷을 사용해 주세요.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ko-KR';
+    recognition.start();
+
+    const statusMsg = document.getElementById('statusMsg');
+    const oldText = statusMsg.textContent;
+    statusMsg.textContent = "🎙️ 말씀을 듣고 있습니다...";
+
+    recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        statusMsg.textContent = "인식됨: " + text;
+        const mainInput = document.getElementById('chatInput');
+        if (mainInput) mainInput.value = text;
+        setTimeout(() => { sendMessage(); }, 800);
+    };
+
+    recognition.onerror = () => { statusMsg.textContent = "음성 인식을 다시 시도해 주세요."; };
+    recognition.onend = () => { setTimeout(() => { statusMsg.textContent = oldText; }, 2000); };
+}
+
+// ===== 모달 제어 =====
 function openModal(id) {
-    document.getElementById(id).classList.add('active');
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('active');
 }
 
 function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('active');
 }
-// ===== 나침반 제어 (V4.0 - 안드로이드 절대 방위 지원) =====
+
+// 초기화 호출
+document.addEventListener('DOMContentLoaded', initApp);
 let currentRotation = 0;
 let targetRotation = 0;
 let sensorActive = false;
