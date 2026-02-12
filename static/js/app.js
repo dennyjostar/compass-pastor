@@ -222,7 +222,7 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V5.2 모달 마이크 대응)
+// 5. 음성 인식 (V5.4 마이크 피드백 및 3초 침묵 감지)
 function startVoice(source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -237,12 +237,24 @@ function startVoice(source) {
 
     // 클릭된 마이크 버튼 찾기
     const micBtn = source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
-    if (micBtn) micBtn.style.color = '#e86050'; // 활성화 시 붉은색 강조
+    if (micBtn) micBtn.style.color = '#f0d078'; // 활성화 시 노란색(골드) 강조
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'ko-KR';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    recognition.interimResults = true; // 실시간 인식 결과 확인
+    recognition.continuous = true;   // 연속 인식 허용
+
+    // 침묵 감지용 타이머
+    let silenceTimer = null;
+    let finalTranscript = "";
+
+    const resetSilenceTimer = () => {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+            console.log("3초 침묵 감지: 자동 전송");
+            recognition.stop();
+        }, 3000); // 3초 침묵 시 종료
+    };
 
     // UI 피드백
     const statusDisplay = document.getElementById('compassStatus') || document.getElementById('statusMsg');
@@ -250,24 +262,27 @@ function startVoice(source) {
 
     if (statusDisplay) {
         statusDisplay.textContent = "🎙️ 말씀을 듣고 있습니다...";
-        statusDisplay.style.color = "#c9a84c";
+        statusDisplay.style.color = "#f0d078";
     }
 
     recognition.start();
+    resetSilenceTimer();
 
     recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        if (statusDisplay) statusDisplay.textContent = "인식됨: " + text;
+        resetSilenceTimer(); // 결과가 올 때마다 타이머 리셋
+        let interimTranscript = "";
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+            if (e.results[i].isFinal) {
+                finalTranscript += e.results[i][0].transcript;
+            } else {
+                interimTranscript += e.results[i][0].transcript;
+            }
+        }
 
         const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
         const targetInput = document.getElementById(inputId);
-
         if (targetInput) {
-            targetInput.value = text;
-            setTimeout(() => {
-                sendMessage(source);
-                if (micBtn) micBtn.style.color = '';
-            }, 600);
+            targetInput.value = finalTranscript + interimTranscript;
         }
     };
 
@@ -275,15 +290,26 @@ function startVoice(source) {
         console.error("Speech Recognition Error:", e.error);
         if (statusDisplay) statusDisplay.textContent = "다시 말씀해 주세요.";
         if (micBtn) micBtn.style.color = '';
+        if (silenceTimer) clearTimeout(silenceTimer);
     };
 
     recognition.onend = () => {
-        setTimeout(() => {
-            if (statusDisplay && statusDisplay.textContent.includes("듣고 있습니다")) {
-                statusDisplay.textContent = oldText;
-            }
+        if (silenceTimer) clearTimeout(silenceTimer);
+
+        // 최종 전송 처리
+        const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+        const targetInput = document.getElementById(inputId);
+
+        if (targetInput && targetInput.value.trim().length > 0) {
+            setTimeout(() => {
+                sendMessage(source);
+                if (micBtn) micBtn.style.color = '';
+                if (statusDisplay) statusDisplay.textContent = oldText;
+            }, 500);
+        } else {
             if (micBtn) micBtn.style.color = '';
-        }, 2000);
+            if (statusDisplay) statusDisplay.textContent = oldText;
+        }
     };
 }
 
