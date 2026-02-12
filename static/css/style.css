@@ -903,3 +903,12 @@ a {
     cursor: pointer;
     margin-top: 16px;
 }
+.mic-guide {
+    font-size: 10px;
+    color: #c9a84c;
+    opacity: 0.7;
+    margin-top: 5px;
+    text-align: center;
+    width: 100%;
+    pointer-events: none;
+}
