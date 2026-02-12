@@ -10,6 +10,17 @@ function initApp() {
     if (isRegistered && userName) {
         updateUIForRegisteredUser(userName);
     }
+
+    // 비등록 사용자가 입력창 클릭 시 등록 유도
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+        chatInput.addEventListener('focus', () => {
+            if (!isRegistered) {
+                chatInput.blur(); // 포커스 해제
+                handleFeatureClick();
+            }
+        });
+    }
 }
 
 function updateUIForRegisteredUser(name) {
@@ -20,7 +31,8 @@ function updateUIForRegisteredUser(name) {
 // 3. 기능 라우터 (말씀, 기도, 묵상, 상담 통합)
 function handleFeatureClick(target) {
     if (!isRegistered) {
-        document.getElementById('registerOverlay').classList.add('active');
+        const overlay = document.getElementById('registerOverlay');
+        if (overlay) overlay.classList.add('active');
         return;
     }
 
@@ -64,6 +76,11 @@ window.handleClick = handleFeatureClick;
 
 // 4. 채팅 시스템
 function sendMessage(source) {
+    if (!isRegistered) {
+        handleFeatureClick();
+        return;
+    }
+
     const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
     const inputEl = document.getElementById(inputId);
     if (!inputEl) return;
