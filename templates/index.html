@@ -216,6 +216,7 @@
 
             <div style="padding: 12px 20px; border-top: 1px solid rgba(201,168,76,0.1); background: #0a0e1a;">
                 <div class="input-wrap" style="background: rgba(255,255,255,0.04); border-radius: 20px;">
+                    <button class="mic-btn modal-mic" onclick="startVoice('modal')">🎤</button>
                     <input type="text" id="modalChatInput" placeholder="목사님께 궁금한 점을 입력하세요..."
                         onkeypress="if(event.keyCode==13) sendMessage('modal')" style="height: 34px;">
                     <button class="send-btn" onclick="sendMessage('modal')"

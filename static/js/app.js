@@ -79,15 +79,19 @@ function handleFeatureClick(target) {
 
     renderHistory();
 
-    // ★ 대화 기록이 전혀 없을 때만 자동 인사말 전송 ★
-    if (initialMsg && chatHistories[featureTarget].length === 0) {
-        setTimeout(() => {
-            const modalInput = document.getElementById('modalChatInput');
-            if (modalInput) {
-                modalInput.value = initialMsg;
-                sendMessage('modal');
-            }
-        }, 500);
+    // ★ 대화 기록이 전혀 없을 때만 목사님의 환영 인사 추가 (V5.2 사용자 피드백 반영) ★
+    if (chatHistories[featureTarget].length === 0) {
+        let welcomeMsg = "";
+        if (featureTarget === '/search') welcomeMsg = "반갑습니다, " + userName + " 님. 오늘 궁금하신 말씀이나 성경 구절이 있으신가요? 찾고 싶으신 내용을 말씀해 주시면 제가 도와드리겠습니다.";
+        else if (featureTarget === '/prayer') welcomeMsg = "샬롬, " + userName + " 님. 지금 기도가 필요한 상황이신가요? 어떤 마음으로 기도하고 싶으신지 들려주시면 함께 기도문을 작성해 보겠습니다.";
+        else if (featureTarget === '/devotion') welcomeMsg = userName + " 님, 오늘 하루도 주님의 은혜 안에서 평안하시길 바랍니다. 묵상을 위해 오늘 하루를 어떻게 보내고 싶으신지, 혹은 고민이 있으신지 말씀해 주세요.";
+        else if (featureTarget === '/chat') welcomeMsg = "어서오세요, " + userName + " 님. 목사님 도움이 필요하신가요? 무엇이든 말씀해 주십시오.";
+
+        if (welcomeMsg) {
+            setTimeout(() => {
+                addMessage('ai', welcomeMsg);
+            }, 300);
+        }
     }
 }
 
@@ -218,8 +222,8 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V4.6 마이크 보정)
-function startVoice() {
+// 5. 음성 인식 (V5.2 모달 마이크 대응)
+function startVoice(source) {
     if (!isRegistered) {
         handleFeatureClick();
         return;
@@ -231,7 +235,8 @@ function startVoice() {
         return;
     }
 
-    const micBtn = document.querySelector('.mic-btn');
+    // 클릭된 마이크 버튼 찾기
+    const micBtn = source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
     if (micBtn) micBtn.style.color = '#e86050'; // 활성화 시 붉은색 강조
 
     const recognition = new SpeechRecognition();
@@ -239,7 +244,7 @@ function startVoice() {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    // UI 피드백 (기존 ID와 신규 ID 모두 대응)
+    // UI 피드백
     const statusDisplay = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldText = statusDisplay ? statusDisplay.textContent : "나침반 활성";
 
@@ -254,11 +259,13 @@ function startVoice() {
         const text = e.results[0][0].transcript;
         if (statusDisplay) statusDisplay.textContent = "인식됨: " + text;
 
-        const mainInput = document.getElementById('chatInput');
-        if (mainInput) {
-            mainInput.value = text;
+        const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+        const targetInput = document.getElementById(inputId);
+
+        if (targetInput) {
+            targetInput.value = text;
             setTimeout(() => {
-                sendMessage();
+                sendMessage(source);
                 if (micBtn) micBtn.style.color = '';
             }, 600);
         }
