@@ -222,9 +222,10 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V6.4 무중복 하이엔드 엔진)
+// 5. 음성 인식 (V6.6 불멸의 경청 엔진: 무한 재시작 및 8초 최적화)
 let activeRecognition = null;
-let finalTranscript = ""; // 최종 확정된 텍스트 저장소
+let masterTranscript = ""; // 확정된 누적 텍스트
+let isSessionEnding = false;
 
 function startVoice(el, source) {
     if (!isRegistered) {
@@ -232,107 +233,107 @@ function startVoice(el, source) {
         return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
+    const { SpeechRecognition, webkitSpeechRecognition } = window;
+    const Recognition = SpeechRecognition || webkitSpeechRecognition;
+    if (!Recognition) {
         alert("🎤 현재 브라우저는 음성 인식을 지원하지 않습니다.");
         return;
     }
 
-    // [V6.4] 토글 기능: 이미 실행 중이면 즉시 중단 및 전송
+    // [V6.6] 토글 기능: 작동 중인 경우 수동 종료 및 전송
     if (activeRecognition) {
-        activeRecognition.onend = null; // 자동 재시작 방지
-        activeRecognition.stop();
-        finalizeAndSend(source);
+        console.log("부장님 수동 종료 요청: 전송 개시");
+        stopAndFinalize(true);
         return;
     }
 
     const micBtn = el || (source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)'));
-    if (micBtn) micBtn.classList.add('active-mic');
-
     const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
     const targetInput = document.getElementById(inputId);
-    const statusDisplay = document.getElementById('compassStatus') || document.getElementById('statusMsg');
-    const oldStatus = statusDisplay ? statusDisplay.textContent : "";
+    const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
+    const oldStatus = statusDisp ? statusDisp.textContent : "";
 
-    finalTranscript = ""; // 세션 시작 시 초기화
+    masterTranscript = "";
+    isSessionEnding = false;
     if (targetInput) targetInput.value = "";
-
-    let recognition = new SpeechRecognition();
-    recognition.lang = 'ko-KR';
-    recognition.interimResults = true;
-    recognition.continuous = true;
-    activeRecognition = recognition;
+    if (micBtn) micBtn.classList.add('active-mic');
 
     let silenceTimer = null;
-    const resetTimer = () => {
+    const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
         silenceTimer = setTimeout(() => {
-            console.log("5초 침묵: 자동 완료");
-            if (activeRecognition) {
-                activeRecognition.onend = null;
-                activeRecognition.stop();
-            }
-            finalizeAndSend(source);
-        }, 5000);
+            console.log("8초 침묵 감지: 자동 전송");
+            stopAndFinalize(true);
+        }, 8000); // 8초로 상향 조정
     };
 
-    function finalizeAndSend(src) {
-        activeRecognition = null;
+    function stopAndFinalize(shouldSend) {
+        isSessionEnding = true;
         if (silenceTimer) clearTimeout(silenceTimer);
-        if (micBtn) micBtn.classList.remove('active-mic');
-        if (statusDisplay) {
-            statusDisplay.textContent = oldStatus;
-            statusDisplay.style.color = "";
-        }
-        if (targetInput && targetInput.value.trim().length > 0) {
-            sendMessage(src);
-        }
-    }
-
-    recognition.onresult = (e) => {
-        resetTimer();
-        let interimTranscript = "";
-        let sessionFinal = "";
-
-        for (let i = e.resultIndex; i < e.results.length; ++i) {
-            const transcript = e.results[i][0].transcript;
-            if (e.results[i].isFinal) {
-                sessionFinal += transcript;
-            } else {
-                interimTranscript += transcript;
-            }
-        }
-
-        // 실시간으로 입력창 업데이트 (기존 확정분 + 현재 세션 확정분 + 실시간 인식분)
-        if (targetInput) {
-            targetInput.value = finalTranscript + sessionFinal + interimTranscript;
-        }
-    };
-
-    recognition.onerror = (e) => {
-        console.error("Speech Error:", e.error);
-        if (e.error !== 'no-speech') {
-            activeRecognition = null;
-            if (micBtn) micBtn.classList.remove('active-mic');
-        }
-    };
-
-    recognition.onend = () => {
         if (activeRecognition) {
-            // 예기치 않은 종료 시 현재까지의 텍스트를 저장하고 다시 시작
-            finalTranscript = targetInput.value + " ";
-            recognition.start();
-            console.log("상담 연결 유지 중...");
+            activeRecognition.onend = null; // 재시작 방지
+            activeRecognition.stop();
+            activeRecognition = null;
         }
-    };
-
-    if (statusDisplay) {
-        statusDisplay.textContent = "🎙️ 경청하고 있습니다... (다시 누르면 완료)";
-        statusDisplay.style.color = "#f0d078";
+        if (micBtn) micBtn.classList.remove('active-mic');
+        if (statusDisp) {
+            statusDisp.textContent = oldStatus;
+            statusDisp.style.color = "";
+        }
+        if (shouldSend && targetInput && targetInput.value.trim().length > 0) {
+            sendMessage(source);
+        }
     }
 
-    recognition.start();
-    resetTimer();
+    // 새로운 인식 인스턴스를 생성하고 시작하는 핵심 함수
+    function runNewRecognition() {
+        if (isSessionEnding) return;
+
+        const recognition = new Recognition();
+        recognition.lang = 'ko-KR';
+        recognition.interimResults = true;
+        recognition.continuous = true;
+
+        recognition.onresult = (e) => {
+            resetSilenceTimer();
+            let sessionFinal = "";
+            let sessionInterim = "";
+            for (let i = 0; i < e.results.length; i++) {
+                if (e.results[i].isFinal) sessionFinal += e.results[i][0].transcript;
+                else sessionInterim += e.results[i][0].transcript;
+            }
+            if (targetInput) {
+                targetInput.value = (masterTranscript + sessionFinal + sessionInterim).trim();
+            }
+        };
+
+        recognition.onend = () => {
+            if (!isSessionEnding) {
+                console.log("브라우저 강제 종료 감지: 엔진 무한 재가동 중...");
+                // 현재까지의 입력값을 마스터로 저장하고 새 엔진 가동
+                masterTranscript = (targetInput ? targetInput.value : "") + " ";
+                runNewRecognition();
+            }
+        };
+
+        recognition.onerror = (e) => {
+            console.error("Speech Error:", e.error);
+            if (e.error === 'not-allowed' || e.error === 'network') {
+                stopAndFinalize(false);
+            }
+        };
+
+        activeRecognition = recognition;
+        recognition.start();
+    }
+
+    if (statusDisp) {
+        statusDisp.textContent = "🎙️ 경청하고 있습니다... (다시 누르면 완료)";
+        statusDisp.style.color = "#f0d078";
+    }
+
+    runNewRecognition();
+    resetSilenceTimer();
 }
 
 // 6. 사용자 등록 로직 (V4.8 필수 함수 복원)
