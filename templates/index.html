@@ -150,16 +150,38 @@
                 </div>
             </div>
 
-            <!-- 하단 입력바 (사용자 제공 V4.0) -->
+            <!-- 하단 입력바 (사용자 제공 V4.0 정식 기능화) -->
             <div class="bottom-bar">
-                <div class="input-wrap" onclick="handleClick('/chat')">
-                    <button class="mic-btn">🎤</button>
-                    <div class="input-placeholder">고민이나 상황을 말씀해주세요...</div>
-                    <button class="send-btn">➤</button>
+                <div class="input-wrap">
+                    <button class="mic-btn" onclick="startVoice()">🎤</button>
+                    <input type="text" id="chatInput" placeholder="고민이나 상황을 말씀해주세요..."
+                        onkeypress="if(event.keyCode==13) sendMessage()">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <!-- 채팅 오버레이 (대화 내용 표시용) -->
+    <div class="modal-overlay" id="chatOverlay" style="z-index: 1000;">
+        <div class="modal-content" style="max-width: 420px; height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="justify-content: space-between;">
+                <h3 style="color: #c9a84c;">AI 목사님 상담</h3>
+                <button class="modal-close" onclick="closeModal('chatOverlay')">✕</button>
+            </div>
+            <div id="chatMessages"
+                style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;">
+                <!-- 메시지가 여기에 추가됨 -->
+            </div>
+            <div style="padding: 10px; border-top: 1px solid rgba(201,168,76,0.12);">
+                <div class="input-wrap">
+                    <input type="text" id="modalChatInput" placeholder="답변을 입력하세요..."
+                        onkeypress="if(event.keyCode==13) sendMessage('modal')">
+                    <button class="send-btn" onclick="sendMessage('modal')">➤</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 등록 안내 팝업 -->
