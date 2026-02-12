@@ -117,22 +117,31 @@ let compassActive = false;
 
 function initCompass() {
     if (compassActive) return;
+    console.log("[Compass] Initializing sensor...");
 
-    // iOS 13+ 기기 대응 (권한 요청 필요)
+    // iOS 13+ 대응
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission()
             .then(response => {
+                console.log("[Compass] iOS Permission response:", response);
                 if (response === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
+                    window.addEventListener('deviceorientation', handleOrientation, true);
                     compassActive = true;
+                } else {
+                    alert("나침반 기능을 사용하려면 방향 센서 권한이 필요합니다.");
                 }
             })
-            .catch(console.error);
+            .catch(err => {
+                console.error("[Compass] Permission error:", err);
+            });
     } else {
-        // 일반 안드로이드 및 기타 기기
-        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-        // absolute 지원 안 할 경우 대비
-        window.addEventListener('deviceorientation', handleOrientation, true);
+        // 안드로이드 및 기타 기기
+        console.log("[Compass] Using standard orientation events");
+        if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        } else {
+            window.addEventListener('deviceorientation', handleOrientation, true);
+        }
         compassActive = true;
     }
 }
@@ -140,29 +149,32 @@ function initCompass() {
 function handleOrientation(event) {
     let heading = 0;
 
-    // iOS 전용 헤딩 값
+    // iOS
     if (event.webkitCompassHeading) {
         heading = event.webkitCompassHeading;
     }
-    // 표준 헤딩 값 (안드로이드 등)
-    else if (event.alpha) {
+    // Android Absolute
+    else if (event.absolute && event.alpha !== null) {
+        heading = 360 - event.alpha;
+    }
+    // Android Standard (정확도 낮음)
+    else if (event.alpha !== null) {
         heading = 360 - event.alpha;
     }
 
-    // 나침반 바늘 요소들 회전 적용
-    const needles = document.querySelectorAll('.compass-needle');
-    needles.forEach(needle => {
-        // 기존 CSS 애니메이션과 겹치지 않도록 transform 직접 제어
-        // -heading은 북쪽을 고정하기 위함
-        needle.style.transform = `rotate(${-heading}deg)`;
-        // 실제 작동 시에는 미세 흔들림 애니메이션 중단 (선택 사항)
-        needle.style.animation = 'none';
-    });
+    if (heading !== 0) {
+        const needles = document.querySelectorAll('.compass-needle');
+        needles.forEach(needle => {
+            // 부드러운 회전을 위해 transform 적용
+            needle.style.transform = `rotate(${-heading}deg)`;
+            needle.style.animation = 'none'; // 센서 작동 시 흔들림 애니메이션 중지
+        });
+    }
 }
 
-// 기존 handleClick 함수 수정 (센서 활성화 트리거 추가)
+// 클릭 핸들러 확장
 const originalHandleClick = handleClick;
 handleClick = function (targetPage) {
-    initCompass(); // 클릭 시 센서 권한 요청 및 활성화
+    initCompass();
     originalHandleClick(targetPage);
 };
