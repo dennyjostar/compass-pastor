@@ -75,54 +75,124 @@ a {
     align-items: center;
 }
 
-/* ===== 나침반 이미지 (SVG) ===== */
-.compass-container {
+/* ── 나침반 컨테이너 (사용자 제공) ── */
+.compass-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
     margin: 20px auto;
     cursor: pointer;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
+/* 외부 링 (고정) */
+.compass-outer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid rgba(201, 168, 76, 0.4);
+    box-shadow:
+        0 0 30px rgba(201, 168, 76, 0.15),
+        inset 0 0 30px rgba(201, 168, 76, 0.05);
+}
+
+/* 회전하는 나침반 본체 */
+.compass-body {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease-out;
+    will-change: transform;
+}
+
+/* SVG 나침반 */
 .compass-svg {
+    width: 100%;
+    height: 100%;
     filter: drop-shadow(0 0 15px rgba(201, 168, 76, 0.2));
-    transition: filter 0.3s;
 }
 
-/* 바늘 미세 흔들림 애니메이션 및 JS 회전 대응 */
-.compass-needle {
-    transform-origin: 70px 70px;
-    animation: needleSway 4s ease-in-out infinite;
-    transition: transform 0.1s ease-out;
-    /* JS 회전 시 부드럽게 움직이도록 추가 */
+/* ── 방위 정보 표시 ── */
+.compass-info {
+    margin-top: 10px;
+    text-align: center;
 }
 
-@keyframes needleSway {
-    0% {
-        transform: rotate(-2deg);
-    }
+.degree-display {
+    font-size: 36px;
+    font-weight: 300;
+    color: #c9a84c;
+    letter-spacing: 2px;
+}
 
-    25% {
-        transform: rotate(3deg);
+.degree-display span {
+    font-size: 18px;
+    vertical-align: super;
+    color: rgba(201, 168, 76, 0.7);
+}
+
+.direction-text {
+    font-size: 14px;
+    color: rgba(232, 224, 208, 0.7);
+    margin-top: 2px;
+    letter-spacing: 1px;
+}
+
+/* ── 상태 메시지 ── */
+.status-msg {
+    margin-top: 15px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    text-align: center;
+    color: rgba(232, 224, 208, 0.6);
+    background: rgba(201, 168, 76, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    max-width: 300px;
+    width: 100%;
+}
+
+.status-msg.error {
+    color: #e8a87c;
+    background: rgba(232, 168, 124, 0.08);
+    border-color: rgba(232, 168, 124, 0.2);
+}
+
+.status-msg.active {
+    color: rgba(201, 168, 76, 0.8);
+}
+
+/* ── iOS 권한 요청 버튼 ── */
+.permission-btn {
+    margin-top: 15px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #c9a84c, #a8893a);
+    color: #0a0e1a;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.permission-btn:active {
+    transform: scale(0.97);
+}
+
+/* ── 십자가 빛남 애니메이션 ── */
+@keyframes crossGlow {
+
+    0%,
+    100% {
+        opacity: 0.6;
     }
 
     50% {
-        transform: rotate(-1deg);
+        opacity: 1;
     }
-
-    75% {
-        transform: rotate(2deg);
-    }
-
-    100% {
-        transform: rotate(-2deg);
-    }
-}
-
-/* 호버 시 빛나는 효과 */
-.compass-container:hover .compass-svg {
-    filter: drop-shadow(0 0 25px rgba(201, 168, 76, 0.4));
 }
 
 /* ===== 인사말 ===== */
