@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Compass Test - 센서 테스트</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}">
+    <style>
+        body {
+            background: #060a14;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .test-box {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(201, 168, 76, 0.1);
+        }
+
+        .test-title {
+            color: #c9a84c;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .test-log {
+            font-family: monospace;
+            font-size: 12px;
+            color: #aaa;
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            height: 100px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="test-title" style="margin-bottom: 20px;">Compass Sensor Performance Test</div>
+
+    <!-- 나침반 섹션 (Claude 제공 구조) -->
+    <div class="test-box">
+        <div class="compass-section">
+            <div class="compass-wrapper">
+                <div class="compass-ring"></div>
+                <div class="compass-body" id="compassBody">
+                    <svg class="compass-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="gd1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#f0e6b0" />
+                                <stop offset="30%" stop-color="#c9a84c" />
+                                <stop offset="70%" stop-color="#b8943f" />
+                                <stop offset="100%" stop-color="#8a7030" />
+                            </linearGradient>
+                            <linearGradient id="ringG" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#d4b85c" stop-opacity="0.5" />
+                                <stop offset="50%" stop-color="#a8893a" stop-opacity="0.25" />
+                                <stop offset="100%" stop-color="#d4b85c" stop-opacity="0.5" />
+                            </linearGradient>
+                            <linearGradient id="nN" x1="0.5" y1="1" x2="0.5" y2="0">
+                                <stop offset="0%" stop-color="#c9a84c" />
+                                <stop offset="40%" stop-color="#d45040" />
+                                <stop offset="100%" stop-color="#e86050" />
+                            </linearGradient>
+                            <linearGradient id="nS" x1="0.5" y1="0" x2="0.5" y2="1">
+                                <stop offset="0%" stop-color="#a89060" />
+                                <stop offset="100%" stop-color="#504530" />
+                            </linearGradient>
+                            <linearGradient id="nE" x1="0" y1="0.5" x2="1" y2="0.5">
+                                <stop offset="0%" stop-color="#a89060" />
+                                <stop offset="100%" stop-color="#706040" />
+                            </linearGradient>
+                            <linearGradient id="nW" x1="1" y1="0.5" x2="0" y2="0.5">
+                                <stop offset="0%" stop-color="#a89060" />
+                                <stop offset="100%" stop-color="#706040" />
+                            </linearGradient>
+                            <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="rgba(201,168,76,0.07)" />
+                                <stop offset="100%" stop-color="rgba(201,168,76,0)" />
+                            </radialGradient>
+                            <radialGradient id="centerG" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="rgba(201,168,76,0.2)" />
+                                <stop offset="60%" stop-color="rgba(201,168,76,0.04)" />
+                                <stop offset="100%" stop-color="rgba(201,168,76,0)" />
+                            </radialGradient>
+                        </defs>
+
+                        <circle cx="200" cy="200" r="195" fill="url(#bgGlow)" />
+                        <circle cx="200" cy="200" r="185" fill="none" stroke="url(#ringG)" stroke-width="1.5" />
+                        <circle cx="200" cy="200" r="180" fill="none" stroke="url(#gd1)" stroke-width="0.6"
+                            opacity="0.2" />
+                        <circle cx="200" cy="200" r="170" fill="none" stroke="url(#gd1)" stroke-width="0.3"
+                            opacity="0.1" />
+
+                        <g id="compassTicks"></g>
+                        <g id="compassDegLabels"></g>
+
+                        <circle cx="200" cy="200" r="130" fill="none" stroke="url(#gd1)" stroke-width="0.4"
+                            opacity="0.08" stroke-dasharray="2,5" />
+                        <circle cx="200" cy="200" r="95" fill="none" stroke="url(#gd1)" stroke-width="0.2"
+                            opacity="0.06" />
+
+                        <line x1="200" y1="28" x2="200" y2="58" stroke="url(#gd1)" stroke-width="0.4" opacity="0.15" />
+                        <line x1="200" y1="342" x2="200" y2="372" stroke="url(#gd1)" stroke-width="0.4"
+                            opacity="0.15" />
+                        <line x1="28" y1="200" x2="58" y2="200" stroke="url(#gd1)" stroke-width="0.4" opacity="0.15" />
+                        <line x1="342" y1="200" x2="372" y2="200" stroke="url(#gd1)" stroke-width="0.4"
+                            opacity="0.15" />
+
+                        <g style="animation: crossPulse 3s ease-in-out infinite;">
+                            <line x1="200" y1="20" x2="200" y2="44" stroke="#e86050" stroke-width="2.5"
+                                stroke-linecap="round" />
+                            <line x1="191" y1="30" x2="209" y2="30" stroke="#e86050" stroke-width="2"
+                                stroke-linecap="round" />
+                        </g>
+
+                        <text x="355" y="205" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
+                            opacity="0.65">E</text>
+                        <text x="200" y="370" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
+                            opacity="0.65">S</text>
+                        <text x="45" y="205" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
+                            opacity="0.65">W</text>
+
+                        <text x="305" y="95" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                            opacity="0.22">NE</text>
+                        <text x="305" y="315" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                            opacity="0.22">SE</text>
+                        <text x="95" y="315" text-anchor="middle" fill="url(#gd1)" font-size="8"
+                            opacity="0.22">SW</text>
+                        <text x="95" y="95" text-anchor="middle" fill="url(#gd1)" font-size="8" opacity="0.22">NW</text>
+
+                        <polygon points="200,52 193,200 200,187 207,200" fill="url(#nN)" opacity="0.9" />
+                        <polygon points="200,52 200,187 207,200" fill="rgba(255,255,255,0.07)" />
+                        <polygon points="200,348 207,200 200,213 193,200" fill="url(#nS)" opacity="0.5" />
+                        <polygon points="200,348 200,213 193,200" fill="rgba(0,0,0,0.12)" />
+                        <polygon points="348,200 200,193 213,200 200,207" fill="url(#nE)" opacity="0.4" />
+                        <polygon points="348,200 213,200 200,207" fill="rgba(0,0,0,0.08)" />
+                        <polygon points="52,200 200,207 187,200 200,193" fill="url(#nW)" opacity="0.4" />
+                        <polygon points="52,200 187,200 200,193" fill="rgba(0,0,0,0.08)" />
+
+                        <circle cx="200" cy="200" r="22" fill="url(#centerG)"
+                            style="animation: centerGlow 4s ease-in-out infinite;" />
+                        <circle cx="200" cy="200" r="14" fill="#0a0e1a" stroke="url(#gd1)" stroke-width="2" />
+                        <circle cx="200" cy="200" r="6" fill="url(#gd1)" opacity="0.75" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="compass-info">
+                <div class="degree-display" id="degreeDisplay">0<span>°</span></div>
+                <div class="direction-text" id="directionText">북쪽을 향하고 있습니다</div>
+            </div>
+            <div class="compass-status" id="compassStatus">나침반 대기 중...</div>
+            <button class="compass-permission-btn" id="compassPermBtn" onclick="requestCompassPermission()">나침반 권한
+                허용</button>
+        </div>
+    </div>
+
+    <!-- 로그 섹션 -->
+    <div class="test-box">
+        <div class="test-title">Sensor Debug Logs</div>
+        <div class="test-log" id="testLog">Initializing test...<br></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/compass.js') }}"></script>
+    <script>
+        const logEl = document.getElementById('testLog');
+        function log(msg) {
+            logEl.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        log("Checking sensor compatibility...");
+        if ('ondeviceorientationabsolute' in window) log("✅ deviceorientationabsolute SUPPORTED (Android)");
+        else log("❌ deviceorientationabsolute NOT found");
+
+        if ('DeviceOrientationEvent' in window) {
+            log("✅ DeviceOrientationEvent found");
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') log("ℹ️ iOS 13+ Permission required");
+        }
+
+        window.addEventListener('deviceorientationabsolute', (e) => {
+            if (e.alpha !== null) log(`Absolute alpha: ${e.alpha.toFixed(2)}`);
+        }, true);
+    </script>
+</body>
+
+</html>
