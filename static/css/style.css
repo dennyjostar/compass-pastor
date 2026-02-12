@@ -370,6 +370,13 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s;
+}
+
+.mic-btn.active-mic {
+    color: #f0d078 !important;
+    text-shadow: 0 0 15px rgba(240, 208, 120, 0.6);
+    transform: scale(1.15);
 }
 
 /* ===== 오버레이 공통 ===== */

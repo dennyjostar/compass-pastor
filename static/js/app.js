@@ -222,7 +222,7 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V5.4 마이크 피드백 및 3초 침묵 감지)
+// 5. 음성 인식 (V5.5 중복 방지 및 클래스 기반 피드백)
 function startVoice(source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -231,37 +231,34 @@ function startVoice(source) {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("🎤 현재 브라우저는 음성 인식을 지원하지 않습니다.\n크롬(Chrome)이나 삼성 인터넷 브라우저를 사용해 주세요.");
+        alert("🎤 현재 브라우저는 음성 인식을 지원하지 않습니다.");
         return;
     }
 
-    // 클릭된 마이크 버튼 찾기
     const micBtn = source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
-    if (micBtn) micBtn.style.color = '#f0d078'; // 활성화 시 노란색(골드) 강조
+    if (micBtn) micBtn.classList.add('active-mic');
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'ko-KR';
-    recognition.interimResults = true; // 실시간 인식 결과 확인
-    recognition.continuous = true;   // 연속 인식 허용
+    recognition.interimResults = true;
+    recognition.continuous = true;
 
-    // 침묵 감지용 타이머
     let silenceTimer = null;
-    let finalTranscript = "";
+    const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+    const targetInput = document.getElementById(inputId);
 
     const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
         silenceTimer = setTimeout(() => {
-            console.log("3초 침묵 감지: 자동 전송");
             recognition.stop();
-        }, 3000); // 3초 침묵 시 종료
+        }, 2500); // 2.5초 침묵 시 전송
     };
 
-    // UI 피드백
     const statusDisplay = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldText = statusDisplay ? statusDisplay.textContent : "나침반 활성";
 
     if (statusDisplay) {
-        statusDisplay.textContent = "🎙️ 말씀을 듣고 있습니다...";
+        statusDisplay.textContent = "🎙️ 듣고 있습니다...";
         statusDisplay.style.color = "#f0d078";
     }
 
@@ -269,46 +266,36 @@ function startVoice(source) {
     resetSilenceTimer();
 
     recognition.onresult = (e) => {
-        resetSilenceTimer(); // 결과가 올 때마다 타이머 리셋
-        let interimTranscript = "";
-        for (let i = e.resultIndex; i < e.results.length; ++i) {
-            if (e.results[i].isFinal) {
-                finalTranscript += e.results[i][0].transcript;
-            } else {
-                interimTranscript += e.results[i][0].transcript;
-            }
+        resetSilenceTimer();
+        let currentText = "";
+        // 중복 방지를 위해 전체 결과를 매번 새로 조합
+        for (let i = 0; i < e.results.length; ++i) {
+            currentText += e.results[i][0].transcript;
         }
-
-        const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
-        const targetInput = document.getElementById(inputId);
-        if (targetInput) {
-            targetInput.value = finalTranscript + interimTranscript;
-        }
+        if (targetInput) targetInput.value = currentText;
     };
 
     recognition.onerror = (e) => {
-        console.error("Speech Recognition Error:", e.error);
-        if (statusDisplay) statusDisplay.textContent = "다시 말씀해 주세요.";
-        if (micBtn) micBtn.style.color = '';
+        console.error("Speech Error:", e.error);
+        if (micBtn) micBtn.classList.remove('active-mic');
+        if (statusDisplay) {
+            statusDisplay.textContent = "다시 시도해 주세요.";
+            statusDisplay.style.color = "";
+        }
         if (silenceTimer) clearTimeout(silenceTimer);
     };
 
     recognition.onend = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
+        if (micBtn) micBtn.classList.remove('active-mic');
 
-        // 최종 전송 처리
-        const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
-        const targetInput = document.getElementById(inputId);
+        if (statusDisplay) {
+            statusDisplay.textContent = oldText;
+            statusDisplay.style.color = "";
+        }
 
         if (targetInput && targetInput.value.trim().length > 0) {
-            setTimeout(() => {
-                sendMessage(source);
-                if (micBtn) micBtn.style.color = '';
-                if (statusDisplay) statusDisplay.textContent = oldText;
-            }, 500);
-        } else {
-            if (micBtn) micBtn.style.color = '';
-            if (statusDisplay) statusDisplay.textContent = oldText;
+            sendMessage(source);
         }
     };
 }
