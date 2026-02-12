@@ -42,22 +42,28 @@ function handleFeatureClick(target) {
 
     let initialMsg = "";
     let featureTitle = "AI 목사님 상담";
+    let featureIcon = "💬";
 
-    // 기능별 자동 프롬프트 설정
+    // 기능별 자동 프롬프트 설정 (V5.0 상세화)
     if (target === '/search') {
-        featureTitle = "📖 말씀 찾기";
+        featureTitle = "말씀 찾기";
+        featureIcon = "📖";
         initialMsg = "목사님, 오늘 제게 힘이 되는 성경 구절이나 설교 말씀을 찾아주세요.";
     } else if (target === '/prayer') {
-        featureTitle = "🙏 기도문 작성";
+        featureTitle = "기도문 작성";
+        featureIcon = "🙏";
         initialMsg = "목사님, 지금 제 상황에 맞는 간절한 기도문을 작성해주실 수 있을까요?";
     } else if (target === '/devotion') {
-        featureTitle = "✨ 오늘의 묵상";
+        featureTitle = "오늘의 묵상";
+        featureIcon = "✨";
         initialMsg = "목사님, 오늘 하루 제가 깊이 묵상하며 붙들 수 있는 메시지를 들려주세요.";
     }
 
-    // 모달 제목 업데이트
-    const chatTitle = document.querySelector('#chatOverlay h3');
-    if (chatTitle) chatTitle.textContent = featureTitle;
+    // 모달 제목 및 아이콘 업데이트
+    const chatTitleEl = document.getElementById('chatTitle');
+    const chatIconEl = document.getElementById('chatIcon');
+    if (chatTitleEl) chatTitleEl.textContent = featureTitle;
+    if (chatIconEl) chatIconEl.textContent = featureIcon;
 
     // 자동 메시지 전송 (약간의 지연으로 자연스럽게)
     if (initialMsg) {
@@ -74,7 +80,7 @@ function handleFeatureClick(target) {
 // 전역 핸들러 등록
 window.handleClick = handleFeatureClick;
 
-// 4. 채팅 시스템
+// 4. 채팅 시스템 (V5.0 심층 분석 대응)
 function sendMessage(source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -97,6 +103,10 @@ function sendMessage(source) {
     addMessage('user', text);
     inputEl.value = '';
 
+    // 로딩 표시
+    const loading = document.getElementById('meditating');
+    if (loading) loading.style.display = 'flex';
+
     const profile = {
         name: userName,
         age: localStorage.getItem('compass_userAge'),
@@ -111,25 +121,63 @@ function sendMessage(source) {
     })
         .then(r => r.json())
         .then(data => {
+            if (loading) loading.style.display = 'none';
             addMessage('ai', data.response || "죄송합니다. 오류가 발생했습니다.");
         })
-        .catch(() => addMessage('ai', "서버와 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."));
+        .catch(() => {
+            if (loading) loading.style.display = 'none';
+            addMessage('ai', "서버와 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+        });
 }
 
 function addMessage(type, content) {
     const list = document.getElementById('chatMessages');
     if (!list) return;
+
     const msg = document.createElement('div');
     msg.className = `message ${type}`;
 
-    // 김성수 목사님 특유의 [섹션] 스타일링
-    let formatted = content.replace(/\[(.*?)\]/g, '<span class="section-title">[$1]</span>');
-    formatted = formatted.replace(/\n/g, '<br>');
+    if (type === 'ai') {
+        // [심층 분석] 섹션 분리 로직
+        const parts = content.split(/2\.\s*\[심층 분석\]/i);
+        let generalPart = parts[0].replace(/1\.\s*\[일반 답변\]/i, '').trim();
+        let deepPart = parts.length > 1 ? parts[1].trim() : null;
 
-    msg.innerHTML = formatted;
+        let html = generalPart.replace(/\n/g, '<br>');
+
+        if (deepPart) {
+            const deepId = 'deep_' + Date.now();
+            html += `
+                <button class="deep-btn" onclick="toggleDeep('${deepId}')">
+                    🔍 김성수 목사님의 심층 신학 분석 보기
+                </button>
+                <div id="${deepId}" class="deep-content">
+                    ${deepPart.replace(/\n/g, '<br>')}
+                </div>
+            `;
+        }
+        msg.innerHTML = html;
+    } else {
+        msg.textContent = content;
+    }
+
     list.appendChild(msg);
-    list.scrollTop = list.scrollHeight;
+    setTimeout(() => {
+        list.scrollTop = list.scrollHeight;
+    }, 50);
 }
+
+// 심층 분석 토글 함수
+window.toggleDeep = function (id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.classList.toggle('active');
+        const list = document.getElementById('chatMessages');
+        if (el.classList.contains('active')) {
+            setTimeout(() => { list.scrollTop = list.scrollHeight; }, 300);
+        }
+    }
+};
 
 // 5. 음성 인식 (V4.6 마이크 보정)
 function startVoice() {

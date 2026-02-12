@@ -191,20 +191,35 @@
 
     <!-- 채팅 오버레이 (대화 내용 표시용) -->
     <div class="modal-overlay" id="chatOverlay" style="z-index: 1000;">
-        <div class="modal-content" style="max-width: 420px; height: 80vh; display: flex; flex-direction: column;">
-            <div class="modal-header" style="justify-content: space-between;">
-                <h3 style="color: #c9a84c;">AI 목사님 상담</h3>
-                <button class="modal-close" onclick="closeModal('chatOverlay')">✕</button>
+        <div class="modal-content"
+            style="max-width: 420px; height: 85vh; display: flex; flex-direction: column; padding: 0; background: #0f1526;">
+            <div class="modal-header"
+                style="padding: 18px 20px; border-bottom: 1px solid rgba(201,168,76,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(201,168,76,0.03);">
+                <h3 style="color: #c9a84c; font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <span id="chatIcon">💬</span> <span id="chatTitle">AI 목사님 상담</span>
+                </h3>
+                <button class="chat-close" onclick="closeModal('chatOverlay')"
+                    style="background: none; border: none; color: #c9a84c; font-size: 20px; cursor: pointer; padding: 5px;">✕</button>
             </div>
+
             <div id="chatMessages"
-                style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;">
+                style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth;">
                 <!-- 메시지가 여기에 추가됨 -->
             </div>
-            <div style="padding: 10px; border-top: 1px solid rgba(201,168,76,0.12);">
-                <div class="input-wrap">
-                    <input type="text" id="modalChatInput" placeholder="답변을 입력하세요..."
-                        onkeypress="if(event.keyCode==13) sendMessage('modal')">
-                    <button class="send-btn" onclick="sendMessage('modal')">➤</button>
+
+            <!-- AI 묵상중 표시 (스피너) -->
+            <div id="meditating"
+                style="display: none; padding: 15px 20px; align-items: center; gap: 12px; background: rgba(201,168,76,0.02);">
+                <div class="spinner"></div>
+                <span style="font-size: 13px; color: #c9a84c; opacity: 0.8;">목사님이 묵상 중입니다...</span>
+            </div>
+
+            <div style="padding: 12px 20px; border-top: 1px solid rgba(201,168,76,0.1); background: #0a0e1a;">
+                <div class="input-wrap" style="background: rgba(255,255,255,0.04); border-radius: 20px;">
+                    <input type="text" id="modalChatInput" placeholder="목사님께 궁금한 점을 입력하세요..."
+                        onkeypress="if(event.keyCode==13) sendMessage('modal')" style="height: 34px;">
+                    <button class="send-btn" onclick="sendMessage('modal')"
+                        style="background: #c9a84c; color: #0a0e1a; width: 30px; height: 30px; border-radius: 50%; padding: 0;">➤</button>
                 </div>
             </div>
         </div>
