@@ -6,7 +6,7 @@ let userName = localStorage.getItem('compass_userName') || '';
 
 // 2. 초기화 로직
 function initApp() {
-    initCompass();
+    // initCompass()는 compass.js 내부에서 자체 실행되므로 여기서 명시적으로 부르지 않습니다.
     if (isRegistered && userName) {
         updateUIForRegisteredUser(userName);
     }
@@ -176,7 +176,35 @@ function startVoice() {
     };
 }
 
-// 6. 사용자 등록 로직
+// 6. 사용자 등록 로직 (V4.8 필수 함수 복원)
+function showRegisterScreen() {
+    const overlay = document.getElementById('registerOverlay');
+    const screen = document.getElementById('registerScreen');
+    if (overlay) overlay.classList.remove('active');
+    if (screen) screen.classList.add('active');
+}
+
+function closeRegisterOverlay() {
+    const overlay = document.getElementById('registerOverlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+function toggleAll(el) {
+    const items = document.querySelectorAll('.agree-item');
+    items.forEach(item => { item.checked = el.checked; });
+    checkAll();
+}
+
+function checkAll() {
+    const items = document.querySelectorAll('.agree-item');
+    const startBtn = document.getElementById('startBtn');
+    const allChecked = Array.from(items).every(item => item.checked);
+    if (startBtn) startBtn.disabled = !allChecked;
+
+    const agreeAll = document.getElementById('agreeAll');
+    if (agreeAll) agreeAll.checked = allChecked;
+}
+
 function completeRegistration() {
     const name = document.getElementById('userName').value.trim();
     const age = document.getElementById('userAge').value;
@@ -193,13 +221,14 @@ function completeRegistration() {
     localStorage.setItem('compass_userName', name);
     localStorage.setItem('compass_userAge', age);
     localStorage.setItem('compass_userGender', gender);
-    localStorage.setItem('compass_userRegion', document.getElementById('userRegion').value);
-    localStorage.setItem('compass_userJob', document.getElementById('userJob').value);
+    localStorage.setItem('compass_userRegion', document.getElementById('userRegion').value || '');
+    localStorage.setItem('compass_userJob', document.getElementById('userJob').value || '');
 
     updateUIForRegisteredUser(name);
-    document.getElementById('registerScreen').classList.remove('active');
+    const screen = document.getElementById('registerScreen');
+    if (screen) screen.classList.remove('active');
 
-    // 신규 나침반 권한 요청 (compass.js)
+    // 나침반 및 마이크 권한 유도
     if (typeof window.requestCompassPermission === 'function') {
         window.requestCompassPermission();
     }

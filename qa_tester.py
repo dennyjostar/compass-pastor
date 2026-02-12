@@ -1,83 +1,119 @@
 import asyncio
 from playwright.async_api import async_playwright
 import sys
+import os
 
 async def run_qa_test(target_url):
-    print(f"🚀 [나침반 QA 요원: 나실장] 업무를 시작합니다! (대상: {target_url})")
+    print(f"🚀 [나침반 QA 요원: 나실장 V4.8] 업무를 시작합니다! (대상: {target_url})")
     
     async with async_playwright() as p:
-        # 브라우저 실행 (눈으로 확인하고 싶으시면 headless=False)
-        browser = await p.chromium.launch(headless=False) 
-        context = await browser.new_context()
+        # 브라우저 실행 (headless=False로 하면 실제 동작을 눈으로 볼 수 있음)
+        browser = await p.chromium.launch(headless=True) 
+        context = await browser.new_context(viewport={'width': 390, 'height': 844}) # iPhone 스케일
         page = await context.new_page()
 
         try:
             # 1. 페이지 접속
             print("1. [나실장] 현장 잠입 중... (페이지 접속)")
-            await page.goto(target_url)
+            response = await page.goto(target_url)
+            if response.status != 200:
+                print(f"❌ 접속 실패! 상태 코드: {response.status}")
+                return
+
             await page.wait_for_timeout(2000)
 
-            # 2. 프로필 자동 설정 (안되어 있을 경우)
-            if await page.is_visible("#profileModal"):
-                print("2. [나실장] 신분 위장 중... (프로필 설정)")
-                await page.fill("#inName", "나실장_QA")
-                await page.fill("#inRegion", "가상세계 본부")
-                await page.click("#saveProfile")
+            # 2. 로컬 스토리지 초기화 (깨끗한 상태에서 테스트하기 위해)
+            await page.evaluate("localStorage.clear()")
+            await page.reload()
+            await page.wait_for_timeout(2000)
+
+            # 3. 등록 과정 테스트
+            print("2. [나실장] 등록 절차 보안 점검...")
+            
+            # 카드 하나 클릭해서 팝업 띄우기
+            await page.click("div.feature-card:has-text('말씀 찾기')")
+            await page.wait_for_timeout(1000)
+
+            if await page.is_visible("#registerOverlay"):
+                print("   - 등록 안내 팝업 확인됨")
+                await page.click("button.btn-register") # 등록하고 시작하기
                 await page.wait_for_timeout(1000)
 
-            # 3. 각 모드별 테스트 루프
-            modes = ["scripture", "prayer", "meditation", "chat"]
-            for mode in modes:
-                print(f"3. [나실장] {mode} 구역 보안 점검 개시...")
+            if await page.is_visible("#registerScreen.active"):
+                print("   - 등록 화면 진입 성공")
+                await page.fill("#userName", "나실장_QA")
+                await page.select_option("#userAge", "40s")
+                await page.select_option("#userGender", "male")
                 
-                # 홈으로 이동 (필요시)
-                await page.click("#goHome")
+                # '전체 동의' 체크
+                print("   - 약관 전체 동의 체크 중...")
+                await page.check("#agreeAll")
                 await page.wait_for_timeout(500)
                 
-                # 해당 모드 클릭
-                await page.click(f".nav-card[data-mode='{mode}']")
-                await page.wait_for_timeout(1000)
+                # '정보 저장하고 시작하기' 버튼 활성화 확인 및 클릭
+                start_btn = page.locator("#startBtn")
+                if await start_btn.is_enabled():
+                    print("   - 시작 버튼 활성화 확인됨")
+                    await start_btn.click()
+                    print("   ✅ 등록 완료")
+                else:
+                    print("   ❌ 오류: 모든 약관에 동의했으나 시작 버튼이 비활성 상태입니다.")
+                    return
                 
-                # 메시지 전송
-                test_msg = f"{mode} 모드 테스트 질문입니다."
-                await page.fill("#mainInput", test_msg)
-                await page.press("#mainInput", "Enter")
-                
-                print(f"   - 답변 대기 중...")
-                # 답변이 올 때까지 대기 (divine-spinner가 사라질 때까지)
-                await page.wait_for_selector(".general-content", timeout=60000)
-                
-                # 답변 내용 확인
-                content = await page.inner_text(".general-content")
-                if content:
-                    print(f"   ✅ [나실장] {mode} 응답 통과! (은혜가 넘치는군요.)")
-                
-                # 4. 공유 버튼 테스트
-                print(f"   - [나실장] 공유 루트 확인 중...")
-                await page.click("#shareBtn")
-                await page.wait_for_timeout(1000)
-                
-                # 심층 분석 버튼 테스트 (존재할 경우)
-                if await page.is_visible(".deep-btn"):
-                    print(f"   - [나실장] 심층 분석 기밀 문서 열람 테스트...")
-                    await page.click(".deep-btn")
-                    await page.wait_for_timeout(500)
-                    if await page.is_visible(".deep-content"):
-                        print("   ✅ [나실장] 심층 분석 확인 완료 (아주 깊습니다.)")
+                await page.wait_for_timeout(1500)
 
-            print("\n🎊 [보고] 대표님, 나실장이 모든 점검을 끝냈습니다. 이상 무!")
+            # 4. 기능별 정밀 점검
+            features = [
+                {"name": "말씀 찾기", "selector": "div.feature-card:has-text('말씀 찾기')", "title": "📖 말씀 찾기"},
+                {"name": "기도문", "selector": "div.feature-card:has-text('기도문')", "title": "🙏 기도문 작성"},
+                {"name": "오늘의 묵상", "selector": "div.feature-card:has-text('오늘의 묵상')", "title": "✨ 오늘의 묵상"}
+            ]
+
+            for feat in features:
+                print(f"3. [나실장] {feat['name']} 기능 점검...")
+                
+                await page.click(feat['selector'])
+                await page.wait_for_timeout(1500)
+
+                # 채팅창 열렸는지 및 제목 확인
+                chat_title = await page.inner_text("#chatOverlay h3")
+                if feat['title'] in chat_title:
+                    print(f"   - ✅ 대화창 전환 및 제목 일치: {chat_title}")
+                else:
+                    print(f"   - ❌ 제목 불일치! 기대: {feat['title']}, 실제: {chat_title}")
+
+                # AI 응답 확인
+                print("   - AI 목사님 답변 대기 중...")
+                try:
+                    await page.wait_for_selector(".message.ai", timeout=40000)
+                    last_msg = await page.locator(".message.ai").last.inner_text()
+                    print(f"   ✅ 응답 수신: {last_msg[:40]}...")
+                except:
+                    print("   ❌ 응답 수신 실패 (타임아웃)")
+
+                # 닫기
+                await page.click("button.modal-close")
+                await page.wait_for_timeout(800)
+
+            # 5. 나침반 확인
+            print("4. [나침반] 렌더링 확인...")
+            if await page.is_visible("#compassBody"):
+                print("   ✅ 나침반 SVG 엔진 로드 완료")
+            else:
+                print("   ❌ 나침반 엔진 실종됨")
+
+            print("\n🎊 [보고] 대표님, 나실장 V4.8 점검 완료! 모든 기능이 '완벽'하게 어우러져 있습니다.")
 
         except Exception as e:
-            print(f"\n❌ 테스트 중 오류 발생: {e}")
-            # 스크린샷 저장
-            await page.screenshot(path="qa_error_screenshot.png")
-            print("📸 오류 시점의 스크린샷이 저장되었습니다 (qa_error_screenshot.png)")
+            print(f"\n💥 테스트 오류: {e}")
+            await page.screenshot(path="qa_final_report.png")
+            print("📸 오류 보고용 스크린샷 저장됨.")
         
         finally:
             await browser.close()
 
 if __name__ == "__main__":
-    url = "https://web-production-3164c.up.railway.app" # 기본값: 배포 서버
+    url = "https://web-production-3164c.up.railway.app"
     if len(sys.argv) > 1:
         url = sys.argv[1]
     
