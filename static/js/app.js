@@ -222,9 +222,9 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V8.0 긴 문장 보존 + 앞부분 삭제 방지 엔진)
+// 5. 음성 인식 (V8.2 중복 반복 완전 차단 + 긴 문장 누적 보존 엔진)
 let activeRecognition = null;
-let masterTranscript = ""; // 세션 전체에서 확정된 텍스트 누적 보관함
+let masterTranscript = ""; // 전체 대화 누적 보관함
 
 function startVoice(el, source) {
     if (!isRegistered) {
@@ -250,11 +250,9 @@ function startVoice(el, source) {
     const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldStatus = statusDisp ? statusDisp.textContent : "";
 
-    // 초기화
+    // 세션 초기화
     masterTranscript = "";
-    let lastConfirmedIndex = -1;
     let isEnding = false;
-
     if (targetInput) targetInput.value = "";
     if (micBtn) micBtn.classList.add('active-mic');
 
@@ -279,62 +277,66 @@ function startVoice(el, source) {
         }
     }
 
-    const recognition = new Recognition();
-    recognition.lang = 'ko-KR';
-    recognition.interimResults = true;
-    recognition.continuous = true;
+    function runRecognition() {
+        if (isEnding) return;
 
-    recognition.onresult = (e) => {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        // 긴 문장 말씀하실 때 끊기지 않도록 대기 시간 12초로 연장
-        silenceTimer = setTimeout(() => stopAndFinalize(true), 12000);
+        const recognition = new Recognition();
+        recognition.lang = 'ko-KR';
+        recognition.interimResults = true;
+        recognition.continuous = true;
 
-        let interimPart = "";
+        let sessionLastIndex = -1;
 
-        // ★ V8.0 핵심: 앞부분이 사라지지 않도록 새로운 결과만 masterTranscript에 누적 ★
-        for (let i = 0; i < e.results.length; i++) {
-            const transcript = e.results[i][0].transcript.trim();
+        recognition.onresult = (e) => {
+            if (silenceTimer) clearTimeout(silenceTimer);
+            silenceTimer = setTimeout(() => stopAndFinalize(true), 12000);
 
-            if (e.results[i].isFinal) {
-                // 이 인덱스의 결과가 처음으로 '확정'된 경우에만 누적함
-                if (i > lastConfirmedIndex) {
-                    // 안드로이드 특유의 중복 전송 방어: 이전 확정 문구와 똑같은지 체크
-                    if (!masterTranscript.endsWith(transcript)) {
-                        masterTranscript += (masterTranscript ? " " : "") + transcript;
+            let interimPart = "";
+
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const tr = e.results[i][0].transcript.trim();
+                if (e.results[i].isFinal) {
+                    if (i > sessionLastIndex) {
+                        // 중복 체크: 이미 저장된 문장과 겹치는지 검사
+                        const cleanMaster = masterTranscript.replace(/\s+/g, '');
+                        const cleanTr = tr.replace(/\s+/g, '');
+                        if (!cleanMaster.endsWith(cleanTr)) {
+                            masterTranscript += (masterTranscript ? " " : "") + tr;
+                        }
+                        sessionLastIndex = i;
                     }
-                    lastConfirmedIndex = i;
+                } else {
+                    interimPart = tr;
                 }
-            } else {
-                // 아직 '진행중'인 말은 임시로 보여줌
-                interimPart = transcript;
             }
-        }
 
-        if (targetInput) {
-            // [지금까지 확정된 전체 문장] + [지금 말하고 있는 부분]
-            const finalDisplay = (masterTranscript + " " + interimPart).trim();
-            // 단어 단위 중복 제거 (최종 안전망)
-            targetInput.value = finalDisplay.split(' ').filter((w, i, a) => w !== a[i - 1]).join(' ');
-        }
-    };
+            if (targetInput) {
+                const fullText = (masterTranscript + " " + interimPart).trim();
+                // 단어 단위 중복 제거
+                targetInput.value = fullText.split(/\s+/).filter((w, i, a) => w !== a[i - 1]).join(' ');
+            }
+        };
 
-    recognition.onend = () => {
-        if (!isEnding) {
-            console.log("세션 유지 중...");
-            recognition.start();
-        }
-    };
+        recognition.onend = () => {
+            if (!isEnding) runRecognition();
+        };
 
-    recognition.onerror = () => stopAndFinalize(false);
+        recognition.onerror = () => {
+            if (!isEnding) stopAndFinalize(false);
+        };
 
-    activeRecognition = recognition;
-    recognition.start();
+        activeRecognition = recognition;
+        recognition.start();
+    }
 
     if (statusDisp) {
-        statusDisp.textContent = "🎙️ 경청하고 있습니다...";
+        statusDisp.textContent = "🎙️ 말씀해 주세요...";
         statusDisp.style.color = "#f0d078";
     }
+
+    runRecognition();
 }
+
 
 
 
