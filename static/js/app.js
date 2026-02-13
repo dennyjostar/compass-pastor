@@ -222,13 +222,47 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V8.2 중복 반복 완전 차단 + 긴 문장 누적 보존 엔진)
+// 5. 음성 인식 (V9.0 전역 엔진 - 중복 및 버튼 먹통 완전 해결)
 let activeRecognition = null;
-let masterTranscript = ""; // 전체 대화 누적 보관함
+let voiceSource = 'main';
+
+// 마이크 및 음성 인식 상태 강제 종료 및 전송 함수 (전역)
+function stopAndFinalize(shouldSend) {
+    if (!activeRecognition) return;
+
+    const source = voiceSource;
+    const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+    const targetInput = document.getElementById(inputId);
+    const micBtn = source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
+    const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
+
+    // 이벤트 리스너 제거 후 중지 (무한 루프 방지)
+    activeRecognition.onresult = null;
+    activeRecognition.onend = null;
+    activeRecognition.onerror = null;
+    try { activeRecognition.stop(); } catch (e) { }
+    activeRecognition = null;
+
+    if (micBtn) micBtn.classList.remove('active-mic');
+    if (statusDisp) {
+        statusDisp.textContent = "반갑습니다"; // 기본 상태 복원
+        statusDisp.style.color = "";
+    }
+
+    if (shouldSend && targetInput && targetInput.value.trim().length > 0) {
+        sendMessage(source);
+    }
+}
 
 function startVoice(el, source) {
     if (!isRegistered) {
         handleFeatureClick();
+        return;
+    }
+
+    // 이미 실행 중이면 끄기
+    if (activeRecognition) {
+        stopAndFinalize(true);
         return;
     }
 
@@ -239,102 +273,57 @@ function startVoice(el, source) {
         return;
     }
 
-    if (activeRecognition) {
-        stopAndFinalize(true);
-        return;
-    }
-
-    const micBtn = el || document.querySelector(source === 'modal' ? '.modal-mic' : '.mic-btn:not(.modal-mic)');
-    const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
+    voiceSource = source || 'main';
+    const inputId = voiceSource === 'modal' ? 'modalChatInput' : 'chatInput';
     const targetInput = document.getElementById(inputId);
+    const micBtn = el;
     const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
-    const oldStatus = statusDisp ? statusDisp.textContent : "";
 
-    // 세션 초기화
-    masterTranscript = "";
-    let isEnding = false;
     if (targetInput) targetInput.value = "";
     if (micBtn) micBtn.classList.add('active-mic');
-
-    let silenceTimer = null;
-
-    function stopAndFinalize(shouldSend) {
-        isEnding = true;
-        if (silenceTimer) clearTimeout(silenceTimer);
-        if (activeRecognition) {
-            activeRecognition.onresult = null;
-            activeRecognition.onend = null;
-            activeRecognition.stop();
-            activeRecognition = null;
-        }
-        if (micBtn) micBtn.classList.remove('active-mic');
-        if (statusDisp) {
-            statusDisp.textContent = oldStatus;
-            statusDisp.style.color = "";
-        }
-        if (shouldSend && targetInput && targetInput.value.trim()) {
-            sendMessage(source);
-        }
-    }
-
-    function runRecognition() {
-        if (isEnding) return;
-
-        const recognition = new Recognition();
-        recognition.lang = 'ko-KR';
-        recognition.interimResults = true;
-        recognition.continuous = true;
-
-        let sessionLastIndex = -1;
-
-        recognition.onresult = (e) => {
-            if (silenceTimer) clearTimeout(silenceTimer);
-            silenceTimer = setTimeout(() => stopAndFinalize(true), 12000);
-
-            let interimPart = "";
-
-            for (let i = e.resultIndex; i < e.results.length; i++) {
-                const tr = e.results[i][0].transcript.trim();
-                if (e.results[i].isFinal) {
-                    if (i > sessionLastIndex) {
-                        // 중복 체크: 이미 저장된 문장과 겹치는지 검사
-                        const cleanMaster = masterTranscript.replace(/\s+/g, '');
-                        const cleanTr = tr.replace(/\s+/g, '');
-                        if (!cleanMaster.endsWith(cleanTr)) {
-                            masterTranscript += (masterTranscript ? " " : "") + tr;
-                        }
-                        sessionLastIndex = i;
-                    }
-                } else {
-                    interimPart = tr;
-                }
-            }
-
-            if (targetInput) {
-                const fullText = (masterTranscript + " " + interimPart).trim();
-                // 단어 단위 중복 제거
-                targetInput.value = fullText.split(/\s+/).filter((w, i, a) => w !== a[i - 1]).join(' ');
-            }
-        };
-
-        recognition.onend = () => {
-            if (!isEnding) runRecognition();
-        };
-
-        recognition.onerror = () => {
-            if (!isEnding) stopAndFinalize(false);
-        };
-
-        activeRecognition = recognition;
-        recognition.start();
-    }
-
     if (statusDisp) {
-        statusDisp.textContent = "🎙️ 말씀해 주세요...";
+        statusDisp.textContent = "🎙️ 듣고 있습니다... (다시 누르면 전송)";
         statusDisp.style.color = "#f0d078";
     }
 
-    runRecognition();
+    const recognition = new Recognition();
+    recognition.lang = 'ko-KR';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    recognition.onresult = (e) => {
+        let finalText = "";
+        let interimText = "";
+
+        // ★ V9.0 핵심: 누적하지 않고 매번 전체 배열에서 문장을 새로 만듭니다 (중복 방지) ★
+        for (let i = 0; i < e.results.length; i++) {
+            const transcript = e.results[i][0].transcript.trim();
+            if (e.results[i].isFinal) {
+                // 이미 들어간 문장과 겹치는지 체크 (안드로이드 버그 방어)
+                if (!finalText.includes(transcript)) {
+                    finalText += (finalText ? " " : "") + transcript;
+                }
+            } else {
+                interimText = transcript;
+            }
+        }
+
+        if (targetInput) {
+            targetInput.value = (finalText + " " + interimText).trim();
+        }
+    };
+
+    recognition.onend = () => {
+        // 끊긴 경우 세션을 유지하되 UI는 그대로 둠
+        if (activeRecognition) {
+            try { recognition.start(); } catch (e) { }
+        }
+    };
+
+    recognition.onerror = () => stopAndFinalize(false);
+
+    activeRecognition = recognition;
+    recognition.start();
 }
 
 
