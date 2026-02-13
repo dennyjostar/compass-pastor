@@ -80,8 +80,8 @@ a {
 
 .compass-wrapper {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 130px;
+    height: 130px;
 }
 
 /* 외부 장식 링 (고정) */
@@ -903,6 +903,7 @@ a {
     cursor: pointer;
     margin-top: 16px;
 }
+
 .mic-guide {
     font-size: 10px;
     color: #c9a84c;
