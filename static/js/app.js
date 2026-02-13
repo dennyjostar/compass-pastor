@@ -222,10 +222,8 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V7.0 안드로이드 중복 방지 최종 엔진)
+// 5. 음성 인식 (V7.1 하이브리드 중복 차단 엔진)
 let activeRecognition = null;
-let finalTranscript = ""; // 이번 마이크 세션에서 확정된 전체 문구
-let isSessionEnding = false;
 
 function startVoice(el, source) {
     if (!isRegistered) {
@@ -236,40 +234,34 @@ function startVoice(el, source) {
     const { SpeechRecognition, webkitSpeechRecognition } = window;
     const Recognition = SpeechRecognition || webkitSpeechRecognition;
     if (!Recognition) {
-        alert("🎤 현재 브라우저는 음성 인식을 지원하지 않습니다.");
+        alert("🎤 지원하지 않는 브라우저입니다.");
         return;
     }
 
+    // 이미 실행 중이면 중지 및 전송
     if (activeRecognition) {
         stopAndFinalize(true);
         return;
     }
 
-    const micBtn = el || (source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)'));
+    const micBtn = el || document.querySelector(source === 'modal' ? '.modal-mic' : '.mic-btn:not(.modal-mic)');
     const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
     const targetInput = document.getElementById(inputId);
     const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldStatus = statusDisp ? statusDisp.textContent : "";
 
-    // 초기화
-    finalTranscript = "";
-    isSessionEnding = false;
     if (targetInput) targetInput.value = "";
     if (micBtn) micBtn.classList.add('active-mic');
 
     let silenceTimer = null;
-
-    const resetSilenceTimer = () => {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(() => stopAndFinalize(true), 8000);
-    };
+    let isEnding = false;
 
     function stopAndFinalize(shouldSend) {
-        isSessionEnding = true;
+        isEnding = true;
         if (silenceTimer) clearTimeout(silenceTimer);
         if (activeRecognition) {
-            activeRecognition.onend = null;
             activeRecognition.onresult = null;
+            activeRecognition.onend = null;
             activeRecognition.stop();
             activeRecognition = null;
         }
@@ -278,59 +270,66 @@ function startVoice(el, source) {
             statusDisp.textContent = oldStatus;
             statusDisp.style.color = "";
         }
-        if (shouldSend && targetInput && targetInput.value.trim().length > 0) {
+        if (shouldSend && targetInput && targetInput.value.trim()) {
             sendMessage(source);
         }
     }
 
-    function runNewRecognition() {
-        if (isSessionEnding) return;
+    const recognition = new Recognition();
+    recognition.lang = 'ko-KR';
+    recognition.interimResults = true;
+    recognition.continuous = true;
 
-        const recognition = new Recognition();
-        recognition.lang = 'ko-KR';
-        recognition.interimResults = true;
-        recognition.continuous = true;
+    recognition.onresult = (e) => {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => stopAndFinalize(true), 8000);
 
-        recognition.onresult = (e) => {
-            resetSilenceTimer();
-            let interim = "";
+        let finalPart = "";
+        let interimPart = "";
 
-            // ★ V7.0 핵심: resultIndex 이후의 '새로운' 결과만 누적 ★
-            for (let i = e.resultIndex; i < e.results.length; i++) {
-                const tr = e.results[i][0].transcript.trim();
-                if (e.results[i].isFinal) {
-                    // 이미 확정된 문구와 중복되는지 체크 (안드로이드 버그 방어)
-                    if (!finalTranscript.includes(tr)) {
-                        finalTranscript += (finalTranscript ? " " : "") + tr;
+        // ★ V7.1 핵심: Set을 사용하여 중복 문장 완벽 제거 ★
+        const finalSet = new Set();
+
+        for (let i = 0; i < e.results.length; i++) {
+            const transcript = e.results[i][0].transcript.trim();
+            if (e.results[i].isFinal) {
+                // 안드로이드 중복 버그: 이미 있는 문장이거나, 
+                // 이전 문장이 현재 문장에 포함되는 경우 처리
+                let isDuplicate = false;
+                finalSet.forEach(existing => {
+                    if (existing.includes(transcript) || transcript.includes(existing)) {
+                        if (transcript.length > existing.length) {
+                            finalSet.delete(existing);
+                            finalSet.add(transcript);
+                        }
+                        isDuplicate = true;
                     }
-                } else {
-                    interim += tr;
-                }
+                });
+                if (!isDuplicate) finalSet.add(transcript);
+            } else {
+                interimPart = transcript;
             }
+        }
 
-            if (targetInput) {
-                // "안녕하세요안녕하세요" 식의 처리를 위한 최종 단어 중복 필터
-                let combined = (finalTranscript + " " + interim).trim();
-                targetInput.value = combined.split(' ').filter((w, i, a) => w !== a[i - 1]).join(' ');
-            }
-        };
+        finalPart = Array.from(finalSet).join(" ");
+        if (targetInput) {
+            targetInput.value = (finalPart + " " + interimPart).trim();
+        }
+    };
 
-        recognition.onend = () => {
-            if (!isSessionEnding) runNewRecognition();
-        };
+    recognition.onend = () => {
+        if (!isEnding) recognition.start();
+    };
 
-        recognition.onerror = () => stopAndFinalize(false);
-        activeRecognition = recognition;
-        recognition.start();
-    }
+    recognition.onerror = () => stopAndFinalize(false);
+
+    activeRecognition = recognition;
+    recognition.start();
 
     if (statusDisp) {
-        statusDisp.textContent = "🎙️ 듣고 있습니다...";
+        statusDisp.textContent = "🎙️ 말씀해 주세요...";
         statusDisp.style.color = "#f0d078";
     }
-
-    runNewRecognition();
-    resetSilenceTimer();
 }
 
 
