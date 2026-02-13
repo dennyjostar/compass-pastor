@@ -222,8 +222,9 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V7.1 하이브리드 중복 차단 엔진)
+// 5. 음성 인식 (V8.0 긴 문장 보존 + 앞부분 삭제 방지 엔진)
 let activeRecognition = null;
+let masterTranscript = ""; // 세션 전체에서 확정된 텍스트 누적 보관함
 
 function startVoice(el, source) {
     if (!isRegistered) {
@@ -238,7 +239,6 @@ function startVoice(el, source) {
         return;
     }
 
-    // 이미 실행 중이면 중지 및 전송
     if (activeRecognition) {
         stopAndFinalize(true);
         return;
@@ -250,11 +250,15 @@ function startVoice(el, source) {
     const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldStatus = statusDisp ? statusDisp.textContent : "";
 
+    // 초기화
+    masterTranscript = "";
+    let lastConfirmedIndex = -1;
+    let isEnding = false;
+
     if (targetInput) targetInput.value = "";
     if (micBtn) micBtn.classList.add('active-mic');
 
     let silenceTimer = null;
-    let isEnding = false;
 
     function stopAndFinalize(shouldSend) {
         isEnding = true;
@@ -282,43 +286,43 @@ function startVoice(el, source) {
 
     recognition.onresult = (e) => {
         if (silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(() => stopAndFinalize(true), 8000);
+        // 긴 문장 말씀하실 때 끊기지 않도록 대기 시간 12초로 연장
+        silenceTimer = setTimeout(() => stopAndFinalize(true), 12000);
 
-        let finalPart = "";
         let interimPart = "";
 
-        // ★ V7.1 핵심: Set을 사용하여 중복 문장 완벽 제거 ★
-        const finalSet = new Set();
-
+        // ★ V8.0 핵심: 앞부분이 사라지지 않도록 새로운 결과만 masterTranscript에 누적 ★
         for (let i = 0; i < e.results.length; i++) {
             const transcript = e.results[i][0].transcript.trim();
+
             if (e.results[i].isFinal) {
-                // 안드로이드 중복 버그: 이미 있는 문장이거나, 
-                // 이전 문장이 현재 문장에 포함되는 경우 처리
-                let isDuplicate = false;
-                finalSet.forEach(existing => {
-                    if (existing.includes(transcript) || transcript.includes(existing)) {
-                        if (transcript.length > existing.length) {
-                            finalSet.delete(existing);
-                            finalSet.add(transcript);
-                        }
-                        isDuplicate = true;
+                // 이 인덱스의 결과가 처음으로 '확정'된 경우에만 누적함
+                if (i > lastConfirmedIndex) {
+                    // 안드로이드 특유의 중복 전송 방어: 이전 확정 문구와 똑같은지 체크
+                    if (!masterTranscript.endsWith(transcript)) {
+                        masterTranscript += (masterTranscript ? " " : "") + transcript;
                     }
-                });
-                if (!isDuplicate) finalSet.add(transcript);
+                    lastConfirmedIndex = i;
+                }
             } else {
+                // 아직 '진행중'인 말은 임시로 보여줌
                 interimPart = transcript;
             }
         }
 
-        finalPart = Array.from(finalSet).join(" ");
         if (targetInput) {
-            targetInput.value = (finalPart + " " + interimPart).trim();
+            // [지금까지 확정된 전체 문장] + [지금 말하고 있는 부분]
+            const finalDisplay = (masterTranscript + " " + interimPart).trim();
+            // 단어 단위 중복 제거 (최종 안전망)
+            targetInput.value = finalDisplay.split(' ').filter((w, i, a) => w !== a[i - 1]).join(' ');
         }
     };
 
     recognition.onend = () => {
-        if (!isEnding) recognition.start();
+        if (!isEnding) {
+            console.log("세션 유지 중...");
+            recognition.start();
+        }
     };
 
     recognition.onerror = () => stopAndFinalize(false);
@@ -327,10 +331,11 @@ function startVoice(el, source) {
     recognition.start();
 
     if (statusDisp) {
-        statusDisp.textContent = "🎙️ 말씀해 주세요...";
+        statusDisp.textContent = "🎙️ 경청하고 있습니다...";
         statusDisp.style.color = "#f0d078";
     }
 }
+
 
 
 
