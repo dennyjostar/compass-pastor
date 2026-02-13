@@ -222,7 +222,7 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V6.7 정밀 필터링 엔진: 중복 증폭 방지)
+// 5. 음성 인식 (V6.8 정밀 필터링 엔진: 중복 복제 방지 로직 강화)
 let activeRecognition = null;
 let masterTranscript = ""; // 세션이 바뀌어도 유지되는 '확정' 텍스트
 let isSessionEnding = false;
@@ -258,7 +258,7 @@ function startVoice(el, source) {
     if (micBtn) micBtn.classList.add('active-mic');
 
     let silenceTimer = null;
-    let lastSessionFinal = ""; // 현재 세션에서만 확정된 텍스트
+    let currentSessionFinal = ""; // 현재 세션에서 모인 확정 텍스트
 
     const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
@@ -273,6 +273,7 @@ function startVoice(el, source) {
         if (silenceTimer) clearTimeout(silenceTimer);
         if (activeRecognition) {
             activeRecognition.onend = null;
+            activeRecognition.onresult = null;
             activeRecognition.stop();
             activeRecognition = null;
         }
@@ -296,25 +297,38 @@ function startVoice(el, source) {
 
         recognition.onresult = (e) => {
             resetSilenceTimer();
-            let sessionFinal = "";
-            let sessionInterim = "";
-            for (let i = 0; i < e.results.length; i++) {
-                if (e.results[i].isFinal) sessionFinal += e.results[i][0].transcript;
-                else sessionInterim += e.results[i][0].transcript;
+            let interimTranscript = "";
+            let newFinals = "";
+
+            // resultIndex부터 시작하여 '새로운' 결과만 처리 (중복 방지 핵심)
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const transcript = e.results[i][0].transcript;
+                if (e.results[i].isFinal) {
+                    // 동일한 내용이 연속으로 들어오는 브라우저 버그 방지
+                    if (!currentSessionFinal.endsWith(transcript.trim())) {
+                        newFinals += transcript;
+                    }
+                } else {
+                    interimTranscript += transcript;
+                }
             }
-            lastSessionFinal = sessionFinal; // 세션 확정분 업데이트
+
+            currentSessionFinal += newFinals;
+
             if (targetInput) {
-                // 부장님, 여기가 핵심입니다: [마스터(이전확정)] + [현재세션확정] + [지금들리는말]
-                targetInput.value = (masterTranscript + sessionFinal + sessionInterim).trim();
+                // [이전 세션들] + [이번 세션 확정분] + [지금 말하는 중인 내용]
+                const totalText = (masterTranscript + " " + currentSessionFinal + " " + interimTranscript).trim();
+                // "안녕하세요 안녕하세요" 같은 단어 단위 중복 필터링 (최종 안전장치)
+                targetInput.value = totalText.split(' ').filter((word, idx, arr) => word !== arr[idx - 1]).join(' ');
             }
         };
 
         recognition.onend = () => {
             if (!isSessionEnding) {
-                console.log("연결 전환 중: 중복 없이 이어갑니다...");
-                // 중요: 현재 세션의 '확정된' 것만 마스터에 더하고 재시작
-                masterTranscript += lastSessionFinal + " ";
-                lastSessionFinal = ""; // 세션 초기화
+                console.log("연결 전환 중: 데이터 보존 후 재시작");
+                // 현재 세션의 결과물을 마스터로 합치고 초기화
+                masterTranscript = (masterTranscript + " " + currentSessionFinal).trim();
+                currentSessionFinal = "";
                 runNewRecognition();
             }
         };
@@ -337,6 +351,7 @@ function startVoice(el, source) {
     runNewRecognition();
     resetSilenceTimer();
 }
+
 
 // 6. 사용자 등록 로직 (V4.8 필수 함수 복원)
 function showRegisterScreen() {
