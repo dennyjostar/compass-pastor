@@ -222,9 +222,9 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V6.9 정밀 필터링 엔진: 중복 누적 오류 완전 해결)
+// 5. 음성 인식 (V7.0 안드로이드 중복 방지 최종 엔진)
 let activeRecognition = null;
-let masterTranscript = ""; // 이전 세션들의 '확정' 텍스트
+let finalTranscript = ""; // 이번 마이크 세션에서 확정된 전체 문구
 let isSessionEnding = false;
 
 function startVoice(el, source) {
@@ -241,7 +241,6 @@ function startVoice(el, source) {
     }
 
     if (activeRecognition) {
-        console.log("사용자 완료 요청: 전송 개시");
         stopAndFinalize(true);
         return;
     }
@@ -252,7 +251,8 @@ function startVoice(el, source) {
     const statusDisp = document.getElementById('compassStatus') || document.getElementById('statusMsg');
     const oldStatus = statusDisp ? statusDisp.textContent : "";
 
-    masterTranscript = "";
+    // 초기화
+    finalTranscript = "";
     isSessionEnding = false;
     if (targetInput) targetInput.value = "";
     if (micBtn) micBtn.classList.add('active-mic');
@@ -261,10 +261,7 @@ function startVoice(el, source) {
 
     const resetSilenceTimer = () => {
         if (silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(() => {
-            console.log("침묵 감지: 자동 완료");
-            stopAndFinalize(true);
-        }, 8000);
+        silenceTimer = setTimeout(() => stopAndFinalize(true), 8000);
     };
 
     function stopAndFinalize(shouldSend) {
@@ -296,61 +293,39 @@ function startVoice(el, source) {
 
         recognition.onresult = (e) => {
             resetSilenceTimer();
+            let interim = "";
 
-            // ★ V6.9 핵심: 누적(+=)이 아니라 전체 결과 배열에서 매번 새로 생성 ★
-            let currentSessionFinals = "";
-            let currentSessionInterim = "";
-
-            for (let i = 0; i < e.results.length; i++) {
-                const transcript = e.results[i][0].transcript;
+            // ★ V7.0 핵심: resultIndex 이후의 '새로운' 결과만 누적 ★
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const tr = e.results[i][0].transcript.trim();
                 if (e.results[i].isFinal) {
-                    currentSessionFinals += transcript;
+                    // 이미 확정된 문구와 중복되는지 체크 (안드로이드 버그 방어)
+                    if (!finalTranscript.includes(tr)) {
+                        finalTranscript += (finalTranscript ? " " : "") + tr;
+                    }
                 } else {
-                    currentSessionInterim += transcript;
+                    interim += tr;
                 }
             }
 
             if (targetInput) {
-                // 이전 세션 결과 + 현재 세션 확정분 + 현재 세션 진행분
-                const rawText = (masterTranscript + " " + currentSessionFinals + " " + currentSessionInterim).trim();
-
-                // 단어 단위 중복 제거 (예: "안녕하세요 안녕하세요" -> "안녕하세요")
-                const words = rawText.split(/\s+/);
-                const filteredWords = words.filter((word, idx, arr) => {
-                    if (idx === 0) return true;
-                    // 앞 단어와 동일하거나, 앞 단어에 포함된 경우 중복으로 간주 (긴 단어 우선)
-                    return word !== arr[idx - 1];
-                });
-
-                targetInput.value = filteredWords.join(' ');
+                // "안녕하세요안녕하세요" 식의 처리를 위한 최종 단어 중복 필터
+                let combined = (finalTranscript + " " + interim).trim();
+                targetInput.value = combined.split(' ').filter((w, i, a) => w !== a[i - 1]).join(' ');
             }
         };
 
         recognition.onend = () => {
-            if (!isSessionEnding) {
-                // 세션 종료 시 현재까지의 '확정분'을 마스터로 저장
-                let sessionFinals = "";
-                // e.results에 접근할 수 없으므로 input의 현재 값을 기반으로 상태 보존
-                if (targetInput) {
-                    masterTranscript = targetInput.value.trim();
-                }
-                console.log("세션 재시작: " + masterTranscript);
-                runNewRecognition();
-            }
+            if (!isSessionEnding) runNewRecognition();
         };
 
-        recognition.onerror = (e) => {
-            if (e.error === 'not-allowed' || e.error === 'network') {
-                stopAndFinalize(false);
-            }
-        };
-
+        recognition.onerror = () => stopAndFinalize(false);
         activeRecognition = recognition;
         recognition.start();
     }
 
     if (statusDisp) {
-        statusDisp.textContent = "🎙️ 경청하고 있습니다... (다시 누르면 완료)";
+        statusDisp.textContent = "🎙️ 듣고 있습니다...";
         statusDisp.style.color = "#f0d078";
     }
 
