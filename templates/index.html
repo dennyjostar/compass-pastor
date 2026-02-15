@@ -9,8 +9,288 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=39.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=39.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=40.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=40.0">
+
+    <!-- 찬양 모달 스타일 (인라인) -->
+    <style>
+        /* 찬양 모달 */
+        .hymn-modal {
+            max-width: 420px;
+            width: 92%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            padding: 0;
+        }
+
+        /* 헤더 */
+        .hymn-header {
+            padding: 20px 20px 16px;
+            background: linear-gradient(180deg, rgba(201, 168, 76, 0.1) 0%, transparent 100%);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+        }
+
+        .hymn-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hymn-header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e8d48b;
+        }
+
+        .hymn-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hymn-header-sub {
+            font-size: 12px;
+            color: rgba(201, 168, 76, 0.5);
+            margin-top: 4px;
+        }
+
+        /* 검색 */
+        .hymn-search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(201, 168, 76, 0.12);
+        }
+
+        .hymn-search-icon {
+            flex-shrink: 0;
+        }
+
+        .hymn-search-wrap input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .hymn-search-wrap input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* 곡 수 */
+        .hymn-count {
+            padding: 8px 20px;
+            font-size: 11px;
+            color: rgba(201, 168, 76, 0.4);
+            text-align: right;
+        }
+
+        /* 현재 재생 중 바 */
+        .hymn-now-playing {
+            margin: 0 16px 8px;
+            padding: 12px 14px;
+            background: rgba(201, 168, 76, 0.12);
+            border-radius: 14px;
+            border: 1px solid rgba(201, 168, 76, 0.25);
+        }
+
+        .hymn-now-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hymn-now-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .hymn-now-detail {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hymn-now-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e8d48b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hymn-now-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .hymn-now-bar {
+            flex: 1;
+            height: 3px;
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .hymn-now-fill {
+            height: 100%;
+            width: 0%;
+            background: #c9a84c;
+            border-radius: 2px;
+            transition: width 0.3s linear;
+        }
+
+        .hymn-now-time {
+            font-size: 10px;
+            color: rgba(201, 168, 76, 0.6);
+            min-width: 30px;
+        }
+
+        .hymn-now-pause {
+            background: rgba(201, 168, 76, 0.2);
+            border: none;
+            color: #c9a84c;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* 목록 */
+        .hymn-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 16px 16px;
+            max-height: 50vh;
+        }
+
+        .hymn-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .hymn-item:active {
+            background: rgba(201, 168, 76, 0.1);
+        }
+
+        .hymn-item.playing {
+            background: rgba(201, 168, 76, 0.08);
+            border-color: rgba(201, 168, 76, 0.2);
+        }
+
+        .hymn-play-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(201, 168, 76, 0.1);
+            color: #c9a84c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .hymn-item.playing .hymn-play-btn {
+            background: #c9a84c;
+            color: #1a1a2e;
+        }
+
+        .hymn-item-right {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hymn-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hymn-item.playing .hymn-title {
+            color: #e8d48b;
+        }
+
+        /* 로딩 */
+        .hymn-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 50px 20px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+        }
+
+        .hymn-loading-spinner {
+            width: 28px;
+            height: 28px;
+            border: 2px solid rgba(201, 168, 76, 0.15);
+            border-top-color: #c9a84c;
+            border-radius: 50%;
+            animation: hymnSpin 0.8s linear infinite;
+        }
+
+        @keyframes hymnSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hymn-coming-soon {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hymn-coming-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 스크롤바 */
+        .hymn-list::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .hymn-list::-webkit-scrollbar-thumb {
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 2px;
+        }
+    </style>
 </head>
 
 <body>
