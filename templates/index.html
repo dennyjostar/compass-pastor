@@ -389,43 +389,69 @@
     <!-- 목사님 찬양 모달 -->
     <div class="modal-overlay" id="hymnModal" style="display:none;" onclick="if(event.target===this)closeHymnModal()">
         <div class="modal-content hymn-modal">
-            <div class="modal-header">
-                <h2>🎵 목사님 찬양</h2>
-                <p class="hymn-subtitle">김성수 목사님이 부르신 찬양</p>
-                <button class="modal-close" onclick="closeHymnModal()">✕</button>
+            <!-- 헤더 -->
+            <div class="hymn-header">
+                <div class="hymn-header-top">
+                    <span class="hymn-header-title">🎵 목사님 찬양</span>
+                    <button class="hymn-close-btn" onclick="closeHymnModal()">✕</button>
+                </div>
+                <p class="hymn-header-sub">김성수 목사님이 부르신 찬양</p>
+                <!-- 검색 -->
+                <div class="hymn-search-wrap">
+                    <svg class="hymn-search-icon" viewBox="0 0 24 24" width="16" height="16"
+                        fill="rgba(255,255,255,0.3)">
+                        <path
+                            d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                    </svg>
+                    <input type="text" id="hymnSearch" placeholder="찬양 제목 검색..." oninput="filterHymns()">
+                </div>
             </div>
-            <div class="hymn-search">
-                <input type="text" id="hymnSearch" placeholder="찬양 제목 검색..." oninput="filterHymns()">
-            </div>
+
+            <!-- 곡 수 -->
             <div class="hymn-count" id="hymnCount"></div>
+
+            <!-- 현재 재생 중 표시 -->
+            <div class="hymn-now-playing" id="hymnNowPlaying" style="display:none;">
+                <div class="hymn-now-info">
+                    <div class="hymn-now-icon">🎵</div>
+                    <div class="hymn-now-detail">
+                        <div class="hymn-now-title" id="hymnNowTitle"></div>
+                        <div class="hymn-now-progress">
+                            <div class="hymn-now-bar">
+                                <div class="hymn-now-fill" id="hymnNowFill"></div>
+                            </div>
+                            <span class="hymn-now-time" id="hymnNowTime">0:00</span>
+                        </div>
+                    </div>
+                    <button class="hymn-now-pause" id="hymnNowPauseBtn" onclick="toggleCurrentHymn()">⏸</button>
+                </div>
+            </div>
+
+            <!-- 찬양 목록 -->
             <div class="hymn-list" id="hymnList">
-                <div class="hymn-loading">찬양 목록을 불러오는 중...</div>
+                <div class="hymn-loading">
+                    <div class="hymn-loading-spinner"></div>
+                    찬양 목록을 불러오는 중...
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=39.0"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=39.0"></script>
+    <script src="{{ url_for('static', filename='js/compass.js') }}?v=40.0"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=40.0"></script>
 
     <script>
         /* ═══════════════════════════════════════
-           목사님 찬양 - Google Drive 자동 연동
+           목사님 찬양 - Google Drive 프록시 재생
            ═══════════════════════════════════════ */
         var hymnData = [];
         var hymnFiltered = [];
         var currentAudio = null;
         var currentIdx = -1;
 
-        function getDriveUrl(fileId) {
-            return 'https://drive.google.com/uc?export=download&id=' + fileId;
-        }
-
         function loadHymns() {
-            var container = document.getElementById('hymnList');
-            container.innerHTML = '<div class="hymn-loading">찬양 목록을 불러오는 중...</div>';
-
             fetch('/api/hymns')
-                .then(function (res) { return res.json(); })
+                .then(function (r) { return r.json(); })
                 .then(function (data) {
                     hymnData = data.hymns || [];
                     hymnFiltered = hymnData;
@@ -433,135 +459,130 @@
                     renderHymns(hymnFiltered);
                 })
                 .catch(function () {
-                    container.innerHTML =
-                        '<div class="hymn-coming-soon">' +
-                        '<div class="hymn-coming-icon">⚠️</div>' +
-                        '<div class="hymn-coming-text">목록을 불러올 수 없습니다</div>' +
-                        '<div class="hymn-coming-sub">잠시 후 다시 시도해주세요</div>' +
-                        '</div>';
+                    document.getElementById('hymnList').innerHTML =
+                        '<div class="hymn-coming-soon"><div class="hymn-coming-text">⚠️ 목록을 불러올 수 없습니다</div></div>';
                 });
         }
 
         function renderHymns(list) {
-            var container = document.getElementById('hymnList');
+            var c = document.getElementById('hymnList');
             if (!list.length) {
-                container.innerHTML =
-                    '<div class="hymn-coming-soon">' +
-                    '<div class="hymn-coming-text">검색 결과가 없습니다</div>' +
-                    '</div>';
+                c.innerHTML = '<div class="hymn-coming-soon"><div class="hymn-coming-text">검색 결과가 없습니다</div></div>';
                 return;
             }
-
-            var html = '';
+            var h = '';
             for (var i = 0; i < list.length; i++) {
-                html +=
-                    '<div class="hymn-item" id="hymn' + i + '" onclick="playHymn(' + i + ')">' +
-                    '  <div class="hymn-item-left">' +
-                    '    <div class="hymn-play-btn" id="hymnBtn' + i + '">▶</div>' +
-                    '  </div>' +
-                    '  <div class="hymn-item-right">' +
-                    '    <div class="hymn-title">' + list[i].title + '</div>' +
-                    '    <div class="hymn-progress" id="hymnProgress' + i + '" style="display:none;">' +
-                    '      <div class="hymn-progress-bar">' +
-                    '        <div class="hymn-progress-fill" id="hymnFill' + i + '"></div>' +
-                    '      </div>' +
-                    '      <span class="hymn-time" id="hymnTime' + i + '">0:00</span>' +
-                    '    </div>' +
-                    '  </div>' +
+                h += '<div class="hymn-item" id="hymn' + i + '" onclick="playHymn(' + i + ')">' +
+                    '<div class="hymn-play-btn" id="hymnBtn' + i + '">▶</div>' +
+                    '<div class="hymn-item-right"><div class="hymn-title">' + list[i].title + '</div></div>' +
                     '</div>';
             }
-            container.innerHTML = html;
+            c.innerHTML = h;
         }
 
         function playHymn(idx) {
             var hymn = hymnFiltered[idx];
 
+            // 같은 곡 토글
             if (currentIdx === idx && currentAudio) {
-                if (currentAudio.paused) {
-                    currentAudio.play();
-                    document.getElementById('hymnBtn' + idx).textContent = '⏸';
-                } else {
-                    currentAudio.pause();
-                    document.getElementById('hymnBtn' + idx).textContent = '▶';
-                }
+                toggleCurrentHymn();
                 return;
             }
 
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-                if (currentIdx >= 0) {
-                    var prev = document.getElementById('hymn' + currentIdx);
-                    if (prev) prev.classList.remove('playing');
-                    var prevBtn = document.getElementById('hymnBtn' + currentIdx);
-                    if (prevBtn) prevBtn.textContent = '▶';
-                    var prevProg = document.getElementById('hymnProgress' + currentIdx);
-                    if (prevProg) prevProg.style.display = 'none';
-                }
-            }
+            // 이전 곡 정리
+            stopCurrent();
 
             currentIdx = idx;
-            currentAudio = new Audio(getDriveUrl(hymn.fileId));
+            // ★ 프록시 URL 사용 (CORS 우회)
+            currentAudio = new Audio('/api/hymn-play/' + hymn.fileId);
 
-            document.getElementById('hymn' + idx).classList.add('playing');
-            document.getElementById('hymnBtn' + idx).textContent = '⏸';
-            document.getElementById('hymnProgress' + idx).style.display = 'flex';
+            var item = document.getElementById('hymn' + idx);
+            if (item) item.classList.add('playing');
+            var btn = document.getElementById('hymnBtn' + idx);
+            if (btn) btn.textContent = '⏸';
+
+            // 상단 재생 바 표시
+            var np = document.getElementById('hymnNowPlaying');
+            np.style.display = 'block';
+            document.getElementById('hymnNowTitle').textContent = hymn.title;
+            document.getElementById('hymnNowPauseBtn').textContent = '⏸';
+            document.getElementById('hymnNowFill').style.width = '0%';
+            document.getElementById('hymnNowTime').textContent = '0:00';
 
             currentAudio.play();
 
             currentAudio.addEventListener('timeupdate', function () {
                 if (currentAudio && currentAudio.duration) {
                     var pct = (currentAudio.currentTime / currentAudio.duration) * 100;
-                    var fill = document.getElementById('hymnFill' + idx);
-                    if (fill) fill.style.width = pct + '%';
-
-                    var min = Math.floor(currentAudio.currentTime / 60);
-                    var minSec = Math.floor(currentAudio.currentTime % 60);
-                    var timeEl = document.getElementById('hymnTime' + idx);
-                    if (timeEl) timeEl.textContent = min + ':' + (minSec < 10 ? '0' : '') + minSec;
+                    document.getElementById('hymnNowFill').style.width = pct + '%';
+                    var m = Math.floor(currentAudio.currentTime / 60);
+                    var s = Math.floor(currentAudio.currentTime % 60);
+                    document.getElementById('hymnNowTime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
                 }
             });
 
             currentAudio.addEventListener('ended', function () {
-                var el = document.getElementById('hymn' + idx);
-                if (el) el.classList.remove('playing');
-                var btn = document.getElementById('hymnBtn' + idx);
-                if (btn) btn.textContent = '▶';
-                var fill = document.getElementById('hymnFill' + idx);
-                if (fill) fill.style.width = '0%';
-                var prog = document.getElementById('hymnProgress' + idx);
-                if (prog) prog.style.display = 'none';
-                currentIdx = -1;
-                currentAudio = null;
+                stopCurrent();
+            });
+
+            currentAudio.addEventListener('error', function () {
+                alert('이 찬양을 재생할 수 없습니다. 잠시 후 다시 시도해주세요.');
+                stopCurrent();
             });
         }
 
+        function toggleCurrentHymn() {
+            if (!currentAudio) return;
+            if (currentAudio.paused) {
+                currentAudio.play();
+                var btn = document.getElementById('hymnBtn' + currentIdx);
+                if (btn) btn.textContent = '⏸';
+                document.getElementById('hymnNowPauseBtn').textContent = '⏸';
+            } else {
+                currentAudio.pause();
+                var btn2 = document.getElementById('hymnBtn' + currentIdx);
+                if (btn2) btn2.textContent = '▶';
+                document.getElementById('hymnNowPauseBtn').textContent = '▶';
+            }
+        }
+
+        function stopCurrent() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            if (currentIdx >= 0) {
+                var prev = document.getElementById('hymn' + currentIdx);
+                if (prev) prev.classList.remove('playing');
+                var prevBtn = document.getElementById('hymnBtn' + currentIdx);
+                if (prevBtn) prevBtn.textContent = '▶';
+            }
+            document.getElementById('hymnNowPlaying').style.display = 'none';
+            currentIdx = -1;
+        }
+
         function filterHymns() {
-            var keyword = document.getElementById('hymnSearch').value.toLowerCase();
+            var kw = document.getElementById('hymnSearch').value.toLowerCase();
             hymnFiltered = hymnData.filter(function (h) {
-                return h.title.toLowerCase().indexOf(keyword) >= 0;
+                return h.title.toLowerCase().indexOf(kw) >= 0;
             });
             document.getElementById('hymnCount').textContent = '총 ' + hymnFiltered.length + '곡';
             renderHymns(hymnFiltered);
         }
 
         function openHymnModal() {
-            var modal = document.getElementById('hymnModal');
-            if (modal) {
-                modal.style.display = 'flex';
+            var m = document.getElementById('hymnModal');
+            if (m) {
+                m.style.display = 'flex';
                 if (!hymnData.length) loadHymns();
             }
         }
 
         function closeHymnModal() {
-            var modal = document.getElementById('hymnModal');
-            if (modal) {
-                modal.style.display = 'none';
-                if (currentAudio) {
-                    currentAudio.pause();
-                    currentAudio = null;
-                    currentIdx = -1;
-                }
+            var m = document.getElementById('hymnModal');
+            if (m) {
+                m.style.display = 'none';
+                stopCurrent();
             }
         }
     </script>
