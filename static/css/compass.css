@@ -45,7 +45,7 @@
 }
 
 .degree-display {
-    font-size: 13px;
+    font-size: 15px !important;
     font-weight: 200;
     color: #c9a84c;
     letter-spacing: 2px;
@@ -53,7 +53,7 @@
 }
 
 .degree-display span {
-    font-size: 7px;
+    font-size: 8px !important;
     vertical-align: super;
     color: rgba(201, 168, 76, 0.6);
 }

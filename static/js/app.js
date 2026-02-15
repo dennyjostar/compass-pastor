@@ -179,14 +179,18 @@ function appendMessageToUI(type, content, isNew) {
     msg.className = `message ${type}`;
 
     if (type === 'ai') {
-        // [심층 분석] 섹션 분리 로직 (번호, 마침표, 괄호, 별표 등 모든 변칙 대응)
-        const parts = content.split(/[\n\s]*[\*\d]*[\.\)\:\]\s]+\[?심층\s*분석\]?[\:\-\s]*/i);
-        let generalPart = parts[0].replace(/[\*\d]*[\.\)\:\]\s]*\[?일반\s*답변\]?[\:\-\s]*/i, '').trim();
-        let deepPart = parts.length > 1 ? parts[1].trim() : null;
+        // [심층 분석] 섹션 분리 (극강의 유연성: 번호, 기호, 공백 무시하고 핵심 단어로 분리)
+        const deepMarker = /[\n\s]*[\*\d\.\w\)\:\[\]\s]*(?:심층\s*분석)[\s\:\-\]]*/i;
+        const generalMarker = /[\*\d\.\w\)\:\[\]\s]*(?:일반\s*답변)[\s\:\-\]]*/i;
 
-        let html = generalPart.replace(/\n/g, '<br>');
+        const parts = content.split(deepMarker);
 
-        if (deepPart) {
+        if (parts.length > 1) {
+            let generalPart = parts[0].replace(generalMarker, '').trim();
+            let deepPart = parts[1].trim();
+
+            let html = generalPart.replace(/\n/g, '<br>');
+
             const deepId = 'deep_' + Math.random().toString(36).substr(2, 9);
             html += `
                 <button class="deep-btn" onclick="toggleDeep('${deepId}')">
@@ -196,8 +200,11 @@ function appendMessageToUI(type, content, isNew) {
                     ${deepPart.replace(/\n/g, '<br>')}
                 </div>
             `;
+            msg.innerHTML = html;
+        } else {
+            // 버튼 형식이 아닐 경우 일반 텍스트 출력
+            msg.innerHTML = content.replace(/\n/g, '<br>');
         }
-        msg.innerHTML = html;
     } else {
         msg.textContent = content;
     }
