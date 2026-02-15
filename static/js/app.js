@@ -209,9 +209,10 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식
+// 5. 음성 인식 (V32.0 - 반복 방지 로직 적용)
 let activeRecognition = null;
 let voiceSource = 'main';
+let finalTranscriptSnapshot = ''; // 확정된 텍스트 누적용
 
 function stopAndFinalize(shouldSend) {
     if (!activeRecognition) return;
@@ -238,41 +239,68 @@ function startVoice(el, source) {
         handleFeatureClick();
         return;
     }
+
     if (activeRecognition) {
         stopAndFinalize(true);
         return;
     }
+
     const { SpeechRecognition, webkitSpeechRecognition } = window;
     const Recognition = SpeechRecognition || webkitSpeechRecognition;
     if (!Recognition) {
         alert("🎤 지원하지 않는 브라우저입니다.");
         return;
     }
+
     voiceSource = source || 'main';
     const inputId = voiceSource === 'modal' ? 'modalChatInput' : 'chatInput';
     const targetInput = document.getElementById(inputId);
+
+    // 초기화
     if (targetInput) targetInput.value = "";
+    finalTranscriptSnapshot = '';
     if (el) el.classList.add('active-mic');
 
     const recognition = new Recognition();
     recognition.lang = 'ko-KR';
     recognition.interimResults = true;
-    recognition.continuous = true;
-    recognition.onresult = (e) => {
-        let finalText = "";
-        let interimText = "";
-        for (let i = 0; i < e.results.length; i++) {
-            const transcript = e.results[i][0].transcript.trim();
-            if (e.results[i].isFinal) {
-                if (!finalText.includes(transcript)) finalText += (finalText ? " " : "") + transcript;
+    recognition.continuous = false; // ★ 핵심: 반복 방지를 위해 false 설정
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+
+        // ★ 결과 처리 - 반복 방지 핵심 (resultIndex 활용)
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscriptSnapshot += transcript;
             } else {
-                interimText = transcript;
+                interimTranscript += transcript;
             }
         }
-        if (targetInput) targetInput.value = (finalText + " " + interimText).trim();
+
+        if (targetInput) {
+            targetInput.value = (finalTranscriptSnapshot + interimTranscript).trim();
+        }
     };
-    recognition.onend = () => { if (activeRecognition) try { recognition.start(); } catch (e) { } };
-    recognition.onerror = () => stopAndFinalize(false);
+
+    recognition.onend = () => {
+        if (activeRecognition) {
+            // 소리가 끝나서 자동으로 멈춘 경우 UI 정리
+            const micBtn = voiceSource === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
+            if (micBtn) micBtn.classList.remove('active-mic');
+            activeRecognition = null;
+        }
+    };
+
+    recognition.onerror = (event) => {
+        console.error('음성 인식 오류:', event.error);
+        stopAndFinalize(false);
+        if (event.error === 'not-allowed') {
+            alert('마이크 권한을 허용해 주세요.');
+        }
+    };
+
     activeRecognition = recognition;
     recognition.start();
 }
