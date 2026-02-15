@@ -9,8 +9,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=20.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=30.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=30.0">
 </head>
 
 <body>
@@ -411,8 +411,8 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=20.0"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=20.0"></script>
+    <script src="{{ url_for('static', filename='js/compass.js') }}?v=30.0"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=30.0"></script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)
         fetch('/terms').then(r => r.text()).then(html => {
