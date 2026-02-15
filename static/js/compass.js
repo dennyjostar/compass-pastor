@@ -104,6 +104,8 @@
     function onAbsoluteOrientation(e) {
         if (e.alpha !== null) {
             let heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+            // 부장님 기기 특성 대응: 정반대 현상 해결 (+180)
+            heading = (heading + 180) % 360;
             const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
             updateHeading((heading + orientation + 360) % 360);
         }
@@ -118,6 +120,8 @@
     function onGenericOrientation(e) {
         if (e.alpha !== null) {
             let heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+            // 부장님 기기 특성 대응: 정반대 현상 해결 (+180)
+            heading = (heading + 180) % 360;
             const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
             updateHeading((heading + orientation + 360) % 360);
         }
