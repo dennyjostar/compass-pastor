@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>나침반(Compass)</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=11.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=11.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=12.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=12.0">
 </head>
 
 <body>
@@ -136,7 +136,7 @@
                     <div class="degree-display" id="degreeDisplay">0<span>°</span></div>
                     <div class="direction-text" id="directionText">북쪽을 향하고 있습니다</div>
                 </div>
-                <div class="compass-status active" id="compassStatus">나침반 활성</div>
+                <div class="compass-status active" id="compassStatus">나침반 센서 교정 완료</div>
                 <button class="compass-permission-btn" id="compassPermBtn" onclick="requestCompassPermission()">나침반 권한
                     허용</button>
             </div>
@@ -407,8 +407,8 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=11.0"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=11.0"></script>
+    <script src="{{ url_for('static', filename='js/compass.js') }}?v=12.0"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=12.0"></script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)
         fetch('/terms').then(r => r.text()).then(html => {

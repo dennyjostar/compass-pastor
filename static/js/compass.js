@@ -87,11 +87,11 @@
             animRunning = true;
             animate();
         }
-        
+
         // 0~359도 범위로 정규화
         var deg = (Math.round(heading) % 360 + 360) % 360;
         targetRotation = -heading;
-        
+
         if (degreeDisplay) degreeDisplay.innerHTML = deg + '<span>°</span>';
         if (directionText) directionText.textContent = getDirectionKo(deg);
     }
@@ -100,35 +100,59 @@
     //  센서 핸들러 (Android + iOS 모두 지원)
     // ══════════════════════════════════════
 
+    // ★ 고정밀 방향 계산 (기울기 보정 포함) ★
+    function getAbsoluteHeading(alpha, beta, gamma) {
+        const _x = beta ? beta * (Math.PI / 180) : 0;
+        const _y = gamma ? gamma * (Math.PI / 180) : 0;
+        const _z = alpha ? alpha * (Math.PI / 180) : 0;
+
+        const cX = Math.cos(_x);
+        const cY = Math.cos(_y);
+        const cZ = Math.cos(_z);
+        const sX = Math.sin(_x);
+        const sY = Math.sin(_y);
+        const sZ = Math.sin(_z);
+
+        // 회전 행렬 컴포넌트
+        const Vx = -cZ * sY - sZ * sX * cY;
+        const Vy = -sZ * sY + cZ * sX * cY;
+        const Vz = -cX * cY;
+
+        // 아크탄젠트로 방향(Heading) 도출
+        let heading = Math.atan2(Vx, Vy) * (180 / Math.PI);
+        if (heading < 0) heading += 360;
+
+        return heading;
+    }
+
     // ★ Android 핵심: deviceorientationabsolute ★
     function onAbsoluteOrientation(e) {
         if (e.alpha !== null) {
-            // Android Chrome: alpha는 북쪽 0도 기준 반시계방향 증가
-            // 표준 시계방향 Heading으로 변환: (360 - alpha) % 360
-            let heading = (360 - e.alpha) % 360;
+            // 기울기(beta, gamma)를 포함하여 정확한 북쪽 계산
+            const heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
 
-            // 화면 회전(가로/세로) 보정
+            // 화면 회전 보정
             const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
-            heading = (heading + orientation + 360) % 360;
+            const finalHeading = (heading + orientation + 360) % 360;
 
-            updateHeading(heading);
+            updateHeading(finalHeading);
         }
     }
 
-    // iOS: webkitCompassHeading
+    // iOS: webkitCompassHeading (iOS는 자체적으로 보정된 값을 줌)
     function onIOSOrientation(e) {
         if (e.webkitCompassHeading !== undefined) {
             updateHeading(e.webkitCompassHeading);
         }
     }
 
-    // 폴백: absolute 플래그가 true인 일반 이벤트
+    // 폴백: 일반 이벤트
     function onGenericOrientation(e) {
-        if (e.absolute && e.alpha !== null) {
-            let heading = (360 - e.alpha) % 360;
+        if (e.alpha !== null) {
+            const heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
             const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
-            heading = (heading + orientation + 360) % 360;
-            updateHeading(heading);
+            const finalHeading = (heading + orientation + 360) % 360;
+            updateHeading(finalHeading);
         }
     }
 
@@ -157,8 +181,8 @@
             compassStatus.textContent = '나침반 활성';
         }
 
-        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
         if (isIOS) {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
