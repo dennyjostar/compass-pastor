@@ -1,4 +1,4 @@
-// ===== [COMPASS V30.0] 통합 제어 엔진 =====
+// ===== [COMPASS V33.0] 통합 제어 엔진 =====
 
 // 1. 상태 및 권한 관리
 let isRegistered = localStorage.getItem('compass_registered') === 'true';
@@ -101,7 +101,7 @@ function renderHistory() {
 
 window.handleClick = handleFeatureClick;
 
-// 4. 채팅 시스템 (V30.0 고유 구분자 방식)
+// 4. 채팅 시스템
 function sendMessage(source) {
     if (!isRegistered) {
         handleFeatureClick();
@@ -164,8 +164,6 @@ function appendMessageToUI(type, content, isNew) {
     msg.className = `message ${type}`;
 
     if (type === 'ai') {
-        // [심층 분석] 섹션 분리 (고유 구분자 플래그 V30.0)
-        // AI가 [일반 답변 시작] 어쩌구 [심층 분석 시작] 저쩌구 형태로 답함
         const parts = content.split(/\[심층\s*분석\s*시작\]/i);
 
         if (parts.length > 1) {
@@ -209,29 +207,61 @@ window.toggleDeep = function (id) {
     }
 };
 
-// 5. 음성 인식 (V32.0 - 반복 방지 로직 적용)
-let activeRecognition = null;
+// 5. 음성 인식 (STT) - V33.0 클로드 가이드라인 적용
+let recognition = null;
+let isListening = false;
+let finalTranscript = ''; // 확정된 텍스트 누적
 let voiceSource = 'main';
-let finalTranscriptSnapshot = ''; // 확정된 텍스트 누적용
 
-function stopAndFinalize(shouldSend) {
-    if (!activeRecognition) return;
-    const source = voiceSource;
-    const inputId = source === 'modal' ? 'modalChatInput' : 'chatInput';
-    const targetInput = document.getElementById(inputId);
-    const micBtn = source === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
-
-    activeRecognition.onresult = null;
-    activeRecognition.onend = null;
-    activeRecognition.onerror = null;
-    try { activeRecognition.stop(); } catch (e) { }
-    activeRecognition = null;
-
-    if (micBtn) micBtn.classList.remove('active-mic');
-
-    if (shouldSend && targetInput && targetInput.value.trim().length > 0) {
-        sendMessage(source);
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.warn('음성 인식을 지원하지 않는 브라우저입니다.');
+        return;
     }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = false;      // ★ 핵심: 말이 끝나면 자동 종료하여 반복 방지
+    recognition.interimResults = true;   // 실시간 중간 결과 표시
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = function (event) {
+        let interimTranscript = '';
+
+        // ★ 결과 처리 - 반복 방지 핵심 로직 (resultIndex부터 루프)
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript;
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+
+        const inputId = voiceSource === 'modal' ? 'modalChatInput' : 'chatInput';
+        const targetInput = document.getElementById(inputId);
+        if (targetInput) {
+            targetInput.value = (finalTranscript + interimTranscript).trim();
+        }
+    };
+
+    recognition.onend = function () {
+        isListening = false;
+        const micBtn = voiceSource === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
+        if (micBtn) micBtn.classList.remove('active-mic');
+    };
+
+    recognition.onerror = function (event) {
+        console.error('음성 인식 오류:', event.error);
+        isListening = false;
+        const micBtn = voiceSource === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
+        if (micBtn) micBtn.classList.remove('active-mic');
+
+        if (event.error === 'not-allowed') {
+            alert('마이크 권한을 허용해 주세요.');
+        }
+    };
 }
 
 function startVoice(el, source) {
@@ -240,70 +270,33 @@ function startVoice(el, source) {
         return;
     }
 
-    if (activeRecognition) {
-        stopAndFinalize(true);
-        return;
-    }
-
-    const { SpeechRecognition, webkitSpeechRecognition } = window;
-    const Recognition = SpeechRecognition || webkitSpeechRecognition;
-    if (!Recognition) {
-        alert("🎤 지원하지 않는 브라우저입니다.");
-        return;
-    }
-
     voiceSource = source || 'main';
-    const inputId = voiceSource === 'modal' ? 'modalChatInput' : 'chatInput';
-    const targetInput = document.getElementById(inputId);
 
-    // 초기화
-    if (targetInput) targetInput.value = "";
-    finalTranscriptSnapshot = '';
-    if (el) el.classList.add('active-mic');
+    if (!recognition) {
+        initSpeechRecognition();
+    }
 
-    const recognition = new Recognition();
-    recognition.lang = 'ko-KR';
-    recognition.interimResults = true;
-    recognition.continuous = false; // ★ 핵심: 반복 방지를 위해 false 설정
+    if (isListening) {
+        recognition.stop();
+        isListening = false;
+        if (el) el.classList.remove('active-mic');
+        // 수동 중지 시 즉시 전송
+        setTimeout(() => sendMessage(voiceSource), 100);
+    } else {
+        finalTranscript = ''; // ★ 시작할 때 이전 텍스트 초기화 (반복 방지)
+        isListening = true;
+        if (el) el.classList.add('active-mic');
 
-    recognition.onresult = (event) => {
-        let interimTranscript = '';
+        const inputId = voiceSource === 'modal' ? 'modalChatInput' : 'chatInput';
+        const targetInput = document.getElementById(inputId);
+        if (targetInput) targetInput.value = '';
 
-        // ★ 결과 처리 - 반복 방지 핵심 (resultIndex 활용)
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                finalTranscriptSnapshot += transcript;
-            } else {
-                interimTranscript += transcript;
-            }
-        }
-
-        if (targetInput) {
-            targetInput.value = (finalTranscriptSnapshot + interimTranscript).trim();
-        }
-    };
-
-    recognition.onend = () => {
-        if (activeRecognition) {
-            // 소리가 끝나서 자동으로 멈춘 경우 UI 정리
-            const micBtn = voiceSource === 'modal' ? document.querySelector('.modal-mic') : document.querySelector('.mic-btn:not(.modal-mic)');
-            if (micBtn) micBtn.classList.remove('active-mic');
-            activeRecognition = null;
-        }
-    };
-
-    recognition.onerror = (event) => {
-        console.error('음성 인식 오류:', event.error);
-        stopAndFinalize(false);
-        if (event.error === 'not-allowed') {
-            alert('마이크 권한을 허용해 주세요.');
-        }
-    };
-
-    activeRecognition = recognition;
-    recognition.start();
+        recognition.start();
+    }
 }
+
+// 명칭 호환성 유지
+window.startVoice = startVoice;
 
 // 6. 사용자 등록
 function showRegisterScreen() {
