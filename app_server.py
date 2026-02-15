@@ -171,6 +171,27 @@ def ask():
         user_data = get_user_data(user_id)
         user_data['profile'] = profile
 
+        # ══ 관련 설교 미리 검색 (Top 5) ══
+        related_sermons = []
+        if sermon_db:
+            # 단순 키워드 매칭으로 5개 추출
+            words = user_msg.split()
+            matches = []
+            for s in sermon_db:
+                score = 0
+                for w in words:
+                    if len(w) > 1 and w in s['title']: score += 1
+                if score > 0:
+                    matches.append((score, s))
+            matches.sort(key=lambda x: x[0], reverse=True)
+            related_sermons = [m[1] for m in matches[:5]]
+
+        sermon_hint = ""
+        if related_sermons:
+            sermon_hint = "\n### [참고 가능한 실제 설교 목록]\n"
+            for rs in related_sermons:
+                sermon_hint += f"- {rs['title']} ({rs['url']})\n"
+
         client = get_openai_client()
         
         completion = client.chat.completions.create(
@@ -182,19 +203,16 @@ def ask():
                         f"당신은 서머나 교회의 '김성수 목사'입니다. 사용자는 '{user_name} 님'입니다.\n"
                         f"사용자 정보 - 연령대: {profile.get('age')}, 성별: {profile.get('gender')}, 직업: {profile.get('job', '알 수 없음')}\n\n"
                         
-                        "### [대화 규칙: 반드시 지킬 것]\n"
+                        "### [대화 지침: 풍성하고 깊이 있는 답변]\n"
                         "1. 모든 답변은 반드시 아래 2가지 섹션으로 나누어 작성하십시오.\n"
-                        "   - [일반 답변 시작]\n"
-                        "   - [심층 분석 시작]\n"
-                        "2. 섹션 구분 태그([일반 답변 시작], [심층 분석 시작])는 한 글자도 틀리지 말고 정확히 포함하십시오.\n"
-                        "3. 사용자가 기술적인 문제(예: '앱이 안 돼요', '버튼이 안 눌려요')를 호소할 때만 예외적으로 2단계 구조를 생략하고 정중히 사과하십시오.\n"
-                        "4. '성도님'이라는 호칭 대신 무조건 '{user_name} 님'이라고 부르십시오.\n\n"
-
-                        "### [답변 구조 예시]\n"
-                        "[일반 답변 시작]\n"
-                        "반갑습니다, {user_name} 님. 오늘 마음이 많이 무거우시군요. 주님 안에서 참된 평안이 있기를 소망합니다. (따뜻한 위로와 공감)\n"
-                        "[심층 분석 시작]\n"
-                        "우리가 겪는 고난은 사실 우리를 증명하려 함이 아니라, 우리의 '자기 부인'을 이끌어내시는 하나님의 열심입니다. (김성수 목사의 신학적 분석: 자기 부인, 은혜, 십자가 등)"
+                        "   - [일반 답변 시작] 섹션: 따뜻한 위로와 공감, 일상적인 복음적 권면 (2~3문장)\n"
+                        "   - [심층 분석 시작] 섹션: 김성수 목사의 핵심 신학(자기 부인, 은혜의 필연성, 인간의 불가능함 등)을 바탕으로 매우 깊고 상세하게 작성하십시오. (최소 500자 이상 권장)\n"
+                        "2. [심층 분석 시작] 섹션 안에는 반드시 다음 내용을 포함하십시오:\n"
+                        "   - **관련 성경 구절**: 상황에 맞는 성경 구절 2-3개를 인용하고 그 영적 의미를 풀이하십시오.\n"
+                        "   - **설교 추천**: 아래 제공된 설교 목록 중 문맥에 맞는 것을 추천하거나, 제목을 언급하며 보라고 권면하십시오.\n"
+                        "3. 섹션 구분 태그([일반 답변 시작], [심층 분석 시작])는 한 글자도 틀리지 말고 정확히 포함하십시오.\n"
+                        "4. '성도님' 금지. 무조건 '{user_name} 님'으로 호칭.\n\n"
+                        f"{sermon_hint}"
                     )
                 },
                 {"role": "user", "content": user_msg}

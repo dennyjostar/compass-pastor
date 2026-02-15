@@ -166,23 +166,31 @@ function appendMessageToUI(type, content, isNew) {
     if (type === 'ai') {
         const parts = content.split(/\[심층\s*분석\s*시작\]/i);
 
+        // URL을 링크로 변환하는 함수
+        function linkify(text) {
+            const urlPattern = /(https?:\/\/[^\s<]+)/g;
+            return text.replace(urlPattern, function (url) {
+                return '<a href="' + url + '" target="_blank" style="color: #c9a84c; text-decoration: underline;">' + url + '</a>';
+            });
+        }
+
         if (parts.length > 1) {
             let generalPart = parts[0].replace(/\[일반\s*답변\s*시작\]/i, '').trim();
             let deepPart = parts[1].trim();
 
-            let html = generalPart.replace(/\n/g, '<br>');
+            let html = linkify(generalPart).replace(/\n/g, '<br>');
             const deepId = 'deep_' + Math.random().toString(36).substr(2, 9);
             html += `
                 <button class="deep-btn" onclick="toggleDeep('${deepId}')">
                     🔍 김성수 목사님의 심층 신학 분석 보기
                 </button>
                 <div id="${deepId}" class="deep-content">
-                    ${deepPart.replace(/\n/g, '<br>')}
+                    ${linkify(deepPart).replace(/\n/g, '<br>')}
                 </div>
             `;
             msg.innerHTML = html;
         } else {
-            msg.innerHTML = content.replace(/\[일반\s*답변\s*시작\]/i, '').replace(/\n/g, '<br>').trim();
+            msg.innerHTML = linkify(content).replace(/\[일반\s*답변\s*시작\]/i, '').replace(/\n/g, '<br>').trim();
         }
     } else {
         msg.textContent = content;
