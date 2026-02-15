@@ -179,9 +179,9 @@ function appendMessageToUI(type, content, isNew) {
     msg.className = `message ${type}`;
 
     if (type === 'ai') {
-        // [심층 분석] 섹션 분리 로직 (마침표와 괄호 모두 대응)
-        const parts = content.split(/2[\.\)]\s*\[심층 분석\]/i);
-        let generalPart = parts[0].replace(/1[\.\)]\s*\[일반 답변\]/i, '').trim();
+        // [심층 분석] 섹션 분리 로직 (대괄호, 마침표, 괄호, 공백 유무에 상관없이 유연하게 대응)
+        const parts = content.split(/2[\.\)\:\s]*\[?심층\s*분석\]?[\:\-\s]*/i);
+        let generalPart = parts[0].replace(/1[\.\)\:\s]*\[?일반\s*답변\]?[\:\-\s]*/i, '').trim();
         let deepPart = parts.length > 1 ? parts[1].trim() : null;
 
         let html = generalPart.replace(/\n/g, '<br>');
