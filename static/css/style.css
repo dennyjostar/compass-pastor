@@ -116,7 +116,7 @@ a {
 }
 
 .degree-display {
-    font-size: 30px;
+    font-size: 15px;
     font-weight: 200;
     color: #c9a84c;
     letter-spacing: 2px;
@@ -124,7 +124,7 @@ a {
 }
 
 .degree-display span {
-    font-size: 16px;
+    font-size: 8px;
     vertical-align: super;
     color: rgba(201, 168, 76, 0.6);
 }

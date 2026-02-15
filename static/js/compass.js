@@ -87,10 +87,13 @@
             animRunning = true;
             animate();
         }
-        var deg = Math.round(heading);
+        
+        // 0~359도 범위로 정규화
+        var deg = (Math.round(heading) % 360 + 360) % 360;
         targetRotation = -heading;
+        
         if (degreeDisplay) degreeDisplay.innerHTML = deg + '<span>°</span>';
-        if (directionText) directionText.textContent = getDirectionKo(heading);
+        if (directionText) directionText.textContent = getDirectionKo(deg);
     }
 
     // ══════════════════════════════════════
@@ -100,7 +103,15 @@
     // ★ Android 핵심: deviceorientationabsolute ★
     function onAbsoluteOrientation(e) {
         if (e.alpha !== null) {
-            updateHeading((360 - e.alpha) % 360);
+            // Android Chrome: alpha는 북쪽 0도 기준 반시계방향 증가
+            // 표준 시계방향 Heading으로 변환: (360 - alpha) % 360
+            let heading = (360 - e.alpha) % 360;
+
+            // 화면 회전(가로/세로) 보정
+            const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
+            heading = (heading + orientation + 360) % 360;
+
+            updateHeading(heading);
         }
     }
 
@@ -114,7 +125,10 @@
     // 폴백: absolute 플래그가 true인 일반 이벤트
     function onGenericOrientation(e) {
         if (e.absolute && e.alpha !== null) {
-            updateHeading((360 - e.alpha) % 360);
+            let heading = (360 - e.alpha) % 360;
+            const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
+            heading = (heading + orientation + 360) % 360;
+            updateHeading(heading);
         }
     }
 
@@ -143,7 +157,8 @@
             compassStatus.textContent = '나침반 활성';
         }
 
-        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
         if (isIOS) {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -155,9 +170,10 @@
             // ★ Android: absolute 이벤트 우선 ★
             if ('ondeviceorientationabsolute' in window) {
                 window.addEventListener('deviceorientationabsolute', onAbsoluteOrientation, true);
+            } else {
+                // 폴백
+                window.addEventListener('deviceorientation', onGenericOrientation, true);
             }
-            // 폴백
-            window.addEventListener('deviceorientation', onGenericOrientation, true);
         }
     }
 
