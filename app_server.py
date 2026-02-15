@@ -4,8 +4,13 @@ import openai
 import json
 from datetime import datetime
 import difflib
+import requests
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+
+# ══ Google Drive 찬양 설정 ══
+GOOGLE_API_KEY = 'AIzaSyBUvxZTwsN60wyC9YZJjidR6VfhWjFazB8'
+DRIVE_FOLDER_ID = '1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9'
 
 # API Key 설정 (환경변수 필수)
 def get_openai_client():
@@ -15,10 +20,9 @@ def get_openai_client():
     if not key:
         raise ValueError(f"OPENAI_API_KEY 환경 변수가 없습니다. (현재 프로젝트명: {project_name}) Railway 설정(Variables)에서 키를 넣었는지 다시 확인해주세요.")
     
-    # 앞뒤 공백 제거 (부장님의 편의를 위해!)
     key = key.strip()
     
-    if len(key) < 20: # 너무 짧으면 잘못된 키일 가능성
+    if len(key) < 20:
         raise ValueError(f"입력된 API 키가 지나치게 짧습니다. (현재 프로젝트명: {project_name}) 키 전체를 정확히 복사했는지 확인해주세요.")
         
     print(f"[DEBUG] API Key valid. Starts with: {key[:7]}...")
@@ -85,6 +89,38 @@ def ai_notice():
 def compass_test():
     return render_template('compass-test.html')
 
+# ══ 목사님 찬양 API ══
+@app.route('/api/hymns')
+def get_hymns():
+    """Google Drive 폴더에서 찬양 목록 자동 조회"""
+    url = 'https://www.googleapis.com/drive/v3/files'
+    params = {
+        'q': f"'{DRIVE_FOLDER_ID}' in parents and mimeType='audio/mpeg'",
+        'key': GOOGLE_API_KEY,
+        'fields': 'files(id,name,size)',
+        'orderBy': 'name',
+        'pageSize': 100
+    }
+    
+    try:
+        res = requests.get(url, params=params)
+        data = res.json()
+        
+        hymns = []
+        for f in data.get('files', []):
+            title = f['name'].replace('.mp3', '')
+            hymns.append({
+                'title': title,
+                'fileId': f['id'],
+                'size': f.get('size', '0')
+            })
+        
+        return jsonify({'hymns': hymns})
+    
+    except Exception as e:
+        print(f"[ERROR] Hymn API failed: {e}")
+        return jsonify({'hymns': [], 'error': str(e)}), 500
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:
@@ -92,9 +128,8 @@ def ask():
         user_msg = data.get('message', '')
         profile = data.get('profile', {})
         user_name = profile.get('name', '익명')
-        user_id = user_name # 실제론 고유 ID가 권장됨
+        user_id = user_name
 
-        # 과거 데이터 로드
         user_data = get_user_data(user_id)
         user_data['profile'] = profile
 
@@ -132,9 +167,6 @@ def ask():
         
         reply = completion.choices[0].message.content
         
-        # 설교 추천 및 링크 치환 로직 제거 (대표님 요청)
-        
-        # 이력 저장
         user_data['history'].append({"t": datetime.now().isoformat(), "q": user_msg, "a": reply})
         save_user_data(user_id, user_data)
 
@@ -145,6 +177,5 @@ def ask():
         return jsonify({"response": f"오류가 발생했습니다: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    # Railway 등 클라우드 배포를 위한 포트 설정
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
