@@ -30,119 +30,90 @@
         <!-- 메인 콘텐츠 -->
         <div class="main-content" style="padding-bottom: 120px;">
             <!-- ══ 나침반 섹션 (V4.5 모듈화) ══ -->
+            <!-- 나침반 섹션 -->
             <div class="compass-section">
                 <div class="compass-wrapper">
-                    <div class="compass-ring"></div>
                     <div class="compass-body" id="compassBody">
-                        <svg class="compass-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="compass-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
                             <defs>
-                                <linearGradient id="gd1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#f0e6b0" />
-                                    <stop offset="30%" stop-color="#c9a84c" />
-                                    <stop offset="70%" stop-color="#b8943f" />
-                                    <stop offset="100%" stop-color="#8a7030" />
-                                </linearGradient>
-                                <linearGradient id="ringG" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#d4b85c" stop-opacity="0.5" />
-                                    <stop offset="50%" stop-color="#a8893a" stop-opacity="0.25" />
-                                    <stop offset="100%" stop-color="#d4b85c" stop-opacity="0.5" />
-                                </linearGradient>
-                                <linearGradient id="nN" x1="0.5" y1="1" x2="0.5" y2="0">
+                                <!-- 배경 그라데이션 -->
+                                <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#1a1a2e" />
+                                    <stop offset="85%" stop-color="#0d0d1a" />
+                                    <stop offset="100%" stop-color="#000" />
+                                </radialGradient>
+                                <!-- 외곽 링 그라데이션 -->
+                                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
                                     <stop offset="0%" stop-color="#c9a84c" />
-                                    <stop offset="40%" stop-color="#d45040" />
-                                    <stop offset="100%" stop-color="#e86050" />
+                                    <stop offset="50%" stop-color="#e8d48b" />
+                                    <stop offset="100%" stop-color="#8a6d2b" />
                                 </linearGradient>
-                                <linearGradient id="nS" x1="0.5" y1="0" x2="0.5" y2="1">
-                                    <stop offset="0%" stop-color="#a89060" />
-                                    <stop offset="100%" stop-color="#504530" />
-                                </linearGradient>
-                                <linearGradient id="nE" x1="0" y1="0.5" x2="1" y2="0.5">
-                                    <stop offset="0%" stop-color="#a89060" />
-                                    <stop offset="100%" stop-color="#706040" />
-                                </linearGradient>
-                                <linearGradient id="nW" x1="1" y1="0.5" x2="0" y2="0.5">
-                                    <stop offset="0%" stop-color="#a89060" />
-                                    <stop offset="100%" stop-color="#706040" />
-                                </linearGradient>
-                                <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(201,168,76,0.07)" />
-                                    <stop offset="100%" stop-color="rgba(201,168,76,0)" />
-                                </radialGradient>
-                                <radialGradient id="centerG" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(201,168,76,0.2)" />
-                                    <stop offset="60%" stop-color="rgba(201,168,76,0.04)" />
-                                    <stop offset="100%" stop-color="rgba(201,168,76,0)" />
-                                </radialGradient>
+                                <!-- 북쪽 바늘 (빨간색) -->
+                                <linearGradient id="needleN" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#ff4444" />
+                                    <stop offset="100%" stop-color="#cc0000" />
+                                    </radialGradient>
+                                    <!-- 남쪽 바늘 (흰색) -->
+                                    <linearGradient id="needleS" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#e0e0e0" />
+                                        <stop offset="100%" stop-color="#999" />
+                                    </linearGradient>
+                                    <!-- 바늘 그림자 -->
+                                    <filter id="needleShadow">
+                                        <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.5)" />
+                                    </filter>
+                                    <!-- 중심 원 그라데이션 -->
+                                    <radialGradient id="centerGrad" cx="50%" cy="40%" r="50%">
+                                        <stop offset="0%" stop-color="#e8d48b" />
+                                        <stop offset="100%" stop-color="#8a6d2b" />
+                                    </radialGradient>
                             </defs>
 
-                            <circle cx="200" cy="200" r="195" fill="url(#bgGlow)" />
-                            <circle cx="200" cy="200" r="185" fill="none" stroke="url(#ringG)" stroke-width="1.5" />
-                            <circle cx="200" cy="200" r="180" fill="none" stroke="url(#gd1)" stroke-width="0.6"
-                                opacity="0.2" />
-                            <circle cx="200" cy="200" r="170" fill="none" stroke="url(#gd1)" stroke-width="0.3"
-                                opacity="0.1" />
+                            <!-- 배경 원 -->
+                            <circle cx="150" cy="150" r="148" fill="url(#bgGrad)" />
 
+                            <!-- 외곽 링 -->
+                            <circle cx="150" cy="150" r="148" fill="none" stroke="url(#ringGrad)" stroke-width="2.5" />
+                            <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(201,168,76,0.15)"
+                                stroke-width="0.5" />
+
+                            <!-- 눈금 -->
                             <g id="compassTicks"></g>
-                            <g id="compassDegLabels"></g>
 
-                            <circle cx="200" cy="200" r="130" fill="none" stroke="url(#gd1)" stroke-width="0.4"
-                                opacity="0.08" stroke-dasharray="2,5" />
-                            <circle cx="200" cy="200" r="95" fill="none" stroke="url(#gd1)" stroke-width="0.2"
-                                opacity="0.06" />
+                            <!-- 방위 텍스트 -->
+                            <text x="150" y="38" text-anchor="middle" fill="#c9a84c" font-size="22" font-weight="800"
+                                font-family="serif">N</text>
+                            <text x="268" y="155" text-anchor="middle" fill="rgba(201,168,76,0.7)" font-size="14"
+                                font-weight="600">E</text>
+                            <text x="150" y="276" text-anchor="middle" fill="rgba(201,168,76,0.7)" font-size="14"
+                                font-weight="600">S</text>
+                            <text x="32" y="155" text-anchor="middle" fill="rgba(201,168,76,0.7)" font-size="14"
+                                font-weight="600">W</text>
 
-                            <line x1="200" y1="28" x2="200" y2="58" stroke="url(#gd1)" stroke-width="0.4"
-                                opacity="0.15" />
-                            <line x1="200" y1="342" x2="200" y2="372" stroke="url(#gd1)" stroke-width="0.4"
-                                opacity="0.15" />
-                            <line x1="28" y1="200" x2="58" y2="200" stroke="url(#gd1)" stroke-width="0.4"
-                                opacity="0.15" />
-                            <line x1="342" y1="200" x2="372" y2="200" stroke="url(#gd1)" stroke-width="0.4"
-                                opacity="0.15" />
-
-                            <g style="animation: crossPulse 3s ease-in-out infinite;">
-                                <line x1="200" y1="20" x2="200" y2="44" stroke="#e86050" stroke-width="2.5"
-                                    stroke-linecap="round" />
-                                <line x1="191" y1="30" x2="209" y2="30" stroke="#e86050" stroke-width="2"
-                                    stroke-linecap="round" />
+                            <!-- 나침반 바늘 (다이아몬드형) -->
+                            <g filter="url(#needleShadow)">
+                                <!-- 북쪽 바늘 (빨간색) -->
+                                <polygon points="150,30 143,148 150,138 157,148" fill="url(#needleN)" />
+                                <!-- 남쪽 바늘 (흰색/은색) -->
+                                <polygon points="150,270 143,152 150,162 157,152" fill="url(#needleS)" />
                             </g>
 
-                            <text x="355" y="205" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
-                                opacity="0.65">E</text>
-                            <text x="200" y="370" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
-                                opacity="0.65">S</text>
-                            <text x="45" y="205" text-anchor="middle" fill="url(#gd1)" font-size="15" font-weight="600"
-                                opacity="0.65">W</text>
+                            <!-- 중심 원 -->
+                            <circle cx="150" cy="150" r="8" fill="url(#centerGrad)" />
+                            <circle cx="150" cy="150" r="4" fill="#1a1a2e" />
 
-                            <text x="305" y="95" text-anchor="middle" fill="url(#gd1)" font-size="8"
-                                opacity="0.22">NE</text>
-                            <text x="305" y="315" text-anchor="middle" fill="url(#gd1)" font-size="8"
-                                opacity="0.22">SE</text>
-                            <text x="95" y="315" text-anchor="middle" fill="url(#gd1)" font-size="8"
-                                opacity="0.22">SW</text>
-                            <text x="95" y="95" text-anchor="middle" fill="url(#gd1)" font-size="8"
-                                opacity="0.22">NW</text>
-
-                            <polygon points="200,52 193,200 200,187 207,200" fill="url(#nN)" opacity="0.9" />
-                            <polygon points="200,348 207,200 200,213 193,200" fill="url(#nS)" opacity="0.5" />
-                            <polygon points="348,200 200,193 213,200 200,207" fill="url(#nE)" opacity="0.4" />
-                            <polygon points="52,200 200,207 187,200 200,193" fill="url(#nW)" opacity="0.4" />
-
-                            <circle cx="200" cy="200" r="22" fill="url(#centerG)"
-                                style="animation: centerGlow 4s ease-in-out infinite;" />
-                            <circle cx="200" cy="200" r="14" fill="#0a0e1a" stroke="url(#gd1)" stroke-width="2" />
-                            <circle cx="200" cy="200" r="5" fill="url(#gd1)" opacity="0.75" />
+                            <!-- 방위 작은 점 (45도 간격) -->
+                            <circle cx="150" cy="18" r="2" fill="#c9a84c" />
+                            <circle cx="243" cy="57" r="1.5" fill="rgba(201,168,76,0.4)" />
+                            <circle cx="282" cy="150" r="1.5" fill="rgba(201,168,76,0.4)" />
+                            <circle cx="243" cy="243" r="1.5" fill="rgba(201,168,76,0.4)" />
+                            <circle cx="150" cy="282" r="1.5" fill="rgba(201,168,76,0.4)" />
+                            <circle cx="57" cy="243" r="1.5" fill="rgba(201,168,76,0.4)" />
+                            <circle cx="18" cy="150" r="1.5" fill="rgba(201,168,76,0.4)" />
+                            <circle cx="57" cy="57" r="1.5" fill="rgba(201,168,76,0.4)" />
                         </svg>
                     </div>
                 </div>
-
-                <!-- 방위 정보 -->
-                <div class="compass-info">
-                    <div class="degree-display" id="degreeDisplay">0<span>°</span></div>
-                    <div class="direction-text" id="directionText">북쪽을 향하고 있습니다</div>
-                </div>
-                <div class="compass-status active" id="compassStatus">나침반 센서 교정 완료</div>
-                <button class="compass-permission-btn" id="compassPermBtn" onclick="requestCompassPermission()">나침반 권한
-                    허용</button>
             </div>
 
             <!-- AI 배지 및 인사말 -->
