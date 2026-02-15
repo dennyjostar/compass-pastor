@@ -9,8 +9,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=38.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=38.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=39.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=39.0">
 </head>
 
 <body>
@@ -144,16 +144,20 @@
                     <div class="label">오늘의 묵상</div>
                     <div class="desc">오늘의 말씀과 묵상 가이드</div>
                 </div>
-                <div class="feature-card" onclick="handleClick('/chat')">
-                    <div class="icon">💬</div>
-                    <div class="label">목사님 말씀 상담</div>
-                    <div class="desc">AI 영적 상담 대화</div>
+                <div class="feature-card" onclick="openHymnModal()">
+                    <div class="icon">🎵</div>
+                    <div class="label">목사님 찬양</div>
+                    <div class="desc">목사님의 찬양을 들어보세요</div>
                 </div>
             </div>
 
             <!-- 하단 입력바 (사용자 제공 V4.0 정식 기능화) -->
             <div class="bottom-bar">
                 <div class="input-wrap" style="flex-direction: column; align-items: center; padding: 12px 15px;">
+                    <div class="input-label">
+                        <span class="input-label-icon">✝️</span>
+                        <span class="input-label-text">목사님 말씀 상담</span>
+                    </div>
                     <div style="display: flex; align-items: center; width: 100%;">
                         <button class="mic-btn" onclick="startVoice(this)">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -382,8 +386,45 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=38.0"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=38.0"></script>
+    <!-- 목사님 찬양 모달 -->
+    <div class="modal-overlay" id="hymnModal" style="display:none;">
+        <div class="modal-content hymn-modal">
+            <div class="modal-header">
+                <h2>🎵 목사님 찬양</h2>
+                <p class="hymn-subtitle">김성수 목사님이 부르신 찬양</p>
+                <button class="modal-close" onclick="closeHymnModal()"
+                    style="width: auto; position: absolute; top: 0; right: 0; background: none; border: none; color: rgba(255, 255, 255, 0.5); font-size: 20px; cursor: pointer; padding: 4px 8px;">✕</button>
+            </div>
+            <div class="hymn-list" id="hymnList">
+                <div class="hymn-coming-soon">
+                    <div class="hymn-coming-icon">🎵</div>
+                    <div class="hymn-coming-text">찬양이 준비되고 있습니다</div>
+                    <div class="hymn-coming-sub">곧 목사님의 찬양을 들으실 수 있습니다</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/compass.js') }}?v=39.0"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=39.0"></script>
+    <script>
+        /* 목사님 찬양 모달 */
+        function openHymnModal() {
+            var modal = document.getElementById('hymnModal');
+            if (modal) {
+                modal.classList.add('active'); // active 클래스 사용 (기존 CSS 호환)
+                modal.style.display = 'flex';
+            }
+        }
+        function closeHymnModal() {
+            var modal = document.getElementById('hymnModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+                modal.querySelectorAll('audio').forEach(function (a) { a.pause(); });
+            }
+        }
+    </script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)
         fetch('/terms').then(r => r.text()).then(html => {

@@ -913,3 +913,85 @@ a {
     width: 100%;
     pointer-events: none;
 }
+
+/* ══ 입력바 상단 라벨 ══ */
+.input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.input-label-icon {
+    font-size: 14px;
+}
+
+.input-label-text {
+    font-size: 13px;
+    color: #c9a84c;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* ══ 목사님 찬양 모달 ══ */
+.hymn-modal {
+    max-width: 440px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.hymn-modal .modal-header {
+    position: relative;
+    text-align: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+    margin-bottom: 20px;
+}
+
+.hymn-modal .modal-header h2 {
+    font-size: 18px;
+    color: #e8d48b;
+    margin: 0;
+}
+
+.hymn-subtitle {
+    font-size: 13px;
+    color: rgba(201, 168, 76, 0.6);
+    margin-top: 6px;
+}
+
+.hymn-modal .modal-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+/* 찬양 준비 중 */
+.hymn-coming-soon {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.hymn-coming-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+}
+
+.hymn-coming-text {
+    font-size: 16px;
+    color: #e8d48b;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.hymn-coming-sub {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
