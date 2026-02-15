@@ -9,8 +9,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=37.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=37.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=38.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=38.0">
 </head>
 
 <body>
@@ -118,7 +118,7 @@
 
             <!-- AI 배지 및 인사말 -->
             <div class="ai-badge-text">
-                목사님의 말씀, AI가 전합니다<br>
+                김성수 목사님의 말씀이 여기, 계속됩니다<br>
                 🔒 모든 대화는 기기 내 암호화 저장
             </div>
 
@@ -382,8 +382,8 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=37.0"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=37.0"></script>
+    <script src="{{ url_for('static', filename='js/compass.js') }}?v=38.0"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=38.0"></script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)
         fetch('/terms').then(r => r.text()).then(html => {
