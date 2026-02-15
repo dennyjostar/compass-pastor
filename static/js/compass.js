@@ -129,7 +129,10 @@
     function onAbsoluteOrientation(e) {
         if (e.alpha !== null) {
             // 기울기(beta, gamma)를 포함하여 정확한 북쪽 계산
-            const heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+            let heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+
+            // 부장님 기기 반전 대응: (+ 180) 보정 추가
+            heading = (heading + 180) % 360;
 
             // 화면 회전 보정
             const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
@@ -149,7 +152,11 @@
     // 폴백: 일반 이벤트
     function onGenericOrientation(e) {
         if (e.alpha !== null) {
-            const heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+            let heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+
+            // 부장님 기기 반전 대응: (+ 180) 보정 추가
+            heading = (heading + 180) % 360;
+
             const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
             const finalHeading = (heading + orientation + 360) % 360;
             updateHeading(finalHeading);
