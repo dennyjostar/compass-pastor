@@ -121,6 +121,44 @@ def get_hymns():
         print(f"[ERROR] Hymn API failed: {e}")
         return jsonify({'hymns': [], 'error': str(e)}), 500
 
+# ══ 찬양 오디오 프록시 (Google Drive API 직접 다운로드) ══
+@app.route('/api/hymn-play/<file_id>')
+def hymn_play(file_id):
+    """Google Drive API로 파일을 직접 다운로드하여 스트리밍"""
+    from flask import Response
+    
+    try:
+        # Google Drive API v3 미디어 다운로드 엔드포인트
+        drive_url = f'https://www.googleapis.com/drive/v3/files/{file_id}'
+        params = {
+            'alt': 'media',
+            'key': GOOGLE_API_KEY
+        }
+        
+        resp = requests.get(drive_url, params=params, stream=True, timeout=30)
+        
+        if resp.status_code != 200:
+            print(f"[ERROR] Drive API returned {resp.status_code}: {resp.text[:200]}")
+            return 'File not found', 404
+        
+        def generate():
+            for chunk in resp.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+        
+        return Response(
+            generate(),
+            content_type='audio/mpeg',
+            headers={
+                'Accept-Ranges': 'bytes',
+                'Cache-Control': 'public, max-age=86400',
+                'Content-Type': 'audio/mpeg'
+            }
+        )
+    except Exception as e:
+        print(f"[ERROR] Hymn play failed: {e}")
+        return 'Error', 500
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:
