@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════
-   나침반 센서 및 애니메이션
+   나침반 센서 및 애니메이션 (V15.0 고정밀 복구 버전)
    ══════════════════════════════════════ */
 
 (function () {
@@ -11,7 +11,6 @@
     const compassStatus = document.getElementById('compassStatus');
     const compassPermBtn = document.getElementById('compassPermBtn');
 
-    // 요소가 없으면 종료 (다른 페이지에서 오류 방지)
     if (!compassBody) return;
 
     let currentRotation = 0;
@@ -19,7 +18,6 @@
     let sensorActive = false;
     let animRunning = false;
 
-    // ── SVG 눈금 동적 생성 ──
     function createTicks() {
         const g = document.getElementById('compassTicks');
         if (!g) return;
@@ -41,7 +39,6 @@
         g.innerHTML = html;
     }
 
-    // ── 도수 라벨 생성 ──
     function createDegreeLabels() {
         const g = document.getElementById('compassDegLabels');
         if (!g) return;
@@ -57,14 +54,12 @@
         g.innerHTML = html;
     }
 
-    // ── 16방위 ──
     function getDirectionKo(deg) {
         var names = ['북', '북북동', '북동', '동북동', '동', '동남동', '남동', '남남동',
             '남', '남남서', '남서', '서남서', '서', '서북서', '북서', '북북서'];
         return names[Math.round(deg / 22.5) % 16] + '쪽을 향하고 있습니다';
     }
 
-    // ── 부드러운 회전 ──
     function animate() {
         var d = targetRotation - currentRotation;
         while (d > 180) d -= 360;
@@ -74,7 +69,6 @@
         requestAnimationFrame(animate);
     }
 
-    // ── 방향 업데이트 ──
     function updateHeading(heading) {
         if (!sensorActive) {
             sensorActive = true;
@@ -87,34 +81,51 @@
             animRunning = true;
             animate();
         }
-        var deg = Math.round(heading);
+        var deg = (Math.round(heading) % 360 + 360) % 360;
         targetRotation = -heading;
         if (degreeDisplay) degreeDisplay.innerHTML = deg + '<span>°</span>';
-        if (directionText) directionText.textContent = getDirectionKo(heading);
+        if (directionText) directionText.textContent = getDirectionKo(deg);
     }
 
-    // ★ Android 핵심: deviceorientationabsolute ★
+    // ★ 고정밀 회전 행렬 계산 ★
+    function getAbsoluteHeading(alpha, beta, gamma) {
+        const _x = beta ? beta * (Math.PI / 180) : 0;
+        const _y = gamma ? gamma * (Math.PI / 180) : 0;
+        const _z = alpha ? alpha * (Math.PI / 180) : 0;
+        const cX = Math.cos(_x); const cY = Math.cos(_y); const cZ = Math.cos(_z);
+        const sX = Math.sin(_x); const sY = Math.sin(_y); const sZ = Math.sin(_z);
+        const Vx = -cZ * sY - sZ * sX * cY;
+        const Vy = -sZ * sY + cZ * sX * cY;
+        let heading = Math.atan2(Vx, Vy) * (180 / Math.PI);
+        if (heading < 0) heading += 360;
+        return heading;
+    }
+
     function onAbsoluteOrientation(e) {
         if (e.alpha !== null) {
-            updateHeading((360 - e.alpha) % 360);
+            let heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+            // 부장님 기기 반전 보정 (+180)
+            heading = (heading + 180) % 360;
+            const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
+            updateHeading((heading + orientation + 360) % 360);
         }
     }
 
-    // iOS: webkitCompassHeading
     function onIOSOrientation(e) {
         if (e.webkitCompassHeading !== undefined) {
             updateHeading(e.webkitCompassHeading);
         }
     }
 
-    // 폴백: absolute 플래그가 true인 일반 이벤트
     function onGenericOrientation(e) {
-        if (e.absolute && e.alpha !== null) {
-            updateHeading((360 - e.alpha) % 360);
+        if (e.alpha !== null) {
+            let heading = getAbsoluteHeading(e.alpha, e.beta, e.gamma);
+            heading = (heading + 180) % 360;
+            const orientation = window.orientation || (screen.orientation && screen.orientation.angle) || 0;
+            updateHeading((heading + orientation + 360) % 360);
         }
     }
 
-    // ── iOS 권한 요청 ──
     window.requestCompassPermission = function () {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission().then(function (r) {
@@ -126,21 +137,12 @@
         }
     };
 
-    // ── 초기화 ──
     function initCompass() {
         createTicks();
         createDegreeLabels();
-
-        // 기본값 표시
         if (degreeDisplay) degreeDisplay.innerHTML = '0<span>°</span>';
         if (directionText) directionText.textContent = '북쪽을 향하고 있습니다';
-        if (compassStatus) {
-            compassStatus.className = 'compass-status active';
-            compassStatus.textContent = '나침반 활성';
-        }
-
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
         if (isIOS) {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 if (compassPermBtn) compassPermBtn.style.display = 'block';
@@ -148,12 +150,11 @@
                 window.addEventListener('deviceorientation', onIOSOrientation, true);
             }
         } else {
-            // ★ Android: absolute 이벤트 우선 ★
             if ('ondeviceorientationabsolute' in window) {
                 window.addEventListener('deviceorientationabsolute', onAbsoluteOrientation, true);
+            } else {
+                window.addEventListener('deviceorientation', onGenericOrientation, true);
             }
-            // 폴백
-            window.addEventListener('deviceorientation', onGenericOrientation, true);
         }
     }
 
