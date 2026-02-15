@@ -9,8 +9,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=36.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=36.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=37.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=37.0">
 </head>
 
 <body>
@@ -118,13 +118,13 @@
 
             <!-- AI 배지 및 인사말 -->
             <div class="ai-badge-text">
-                🤖 김성수 목사님의 설교를 학습한 AI가 함께합니다<br>
+                목사님의 말씀, AI가 전합니다<br>
                 🔒 모든 대화는 기기 내 암호화 저장
             </div>
 
             <div class="greeting-area">
                 <div class="hello">평안하십니까, <strong id="greetingName">반갑습니다</strong></div>
-                <div class="sub-msg">나침반이 당신의 영적 여정을 기억합니다</div>
+                <div class="sub-msg">나침반이 당신의 영적 여정을 함께합니다</div>
             </div>
 
             <!-- 기능 그리드 -->
@@ -167,7 +167,7 @@
                             onkeypress="if(event.keyCode==13) sendMessage()">
                         <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
                     </div>
-                    <div class="mic-guide">마이크 터치 후 말씀하시고, 다시 한번 터치하세요</div>
+                    <div class="mic-guide">마이크를 눌러 음성으로 질문하세요</div>
                 </div>
             </div>
         </div>
@@ -382,8 +382,8 @@
         <div class="modal-content" id="aiContent"></div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=36.0"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=36.0"></script>
+    <script src="{{ url_for('static', filename='js/compass.js') }}?v=37.0"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=37.0"></script>
     <script>
         // 모달 콘텐츠 로드 (Flask 라우트 호출)
         fetch('/terms').then(r => r.text()).then(html => {
