@@ -227,7 +227,7 @@
             background: rgba(201, 168, 76, 0.06);
             border: 1px solid rgba(201, 168, 76, 0.15);
             border-radius: 25px;
-            padding: 6px 6px 6px 16px;
+            padding: 6px;
         }
 
         .input-row input {
@@ -942,8 +942,6 @@
         <!-- 하단 입력바 -->
         <div class="bottom-input">
             <div class="input-row">
-                <input type="text" id="homeInput" placeholder="무엇이든 물어보세요..."
-                    onkeypress="if(event.key==='Enter') sendFromHome()">
                 <button class="voice-btn" id="voiceBtn" onclick="startVoice()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -953,6 +951,8 @@
                         <line x1="8" y1="23" x2="16" y2="23" />
                     </svg>
                 </button>
+                <input type="text" id="homeInput" placeholder="무엇이든 물어보세요..."
+                    onkeypress="if(event.key==='Enter') sendFromHome()">
                 <button class="send-btn" onclick="sendFromHome()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a0f1e" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
