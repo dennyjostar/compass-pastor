@@ -880,11 +880,12 @@
         </div>
 
         <!-- 오늘의 말씀 카드 -->
-        <div class="daily-verse-card" id="dailyVerseCard">
+        <div class="daily-verse-card" id="dailyVerseCard" onclick="openDailyMeditation()" style="cursor:pointer;">
             <div class="verse-icon">✝️</div>
             <div class="verse-label">오늘의 말씀</div>
             <div class="verse-text" id="dailyVerseText">"여호와는 나의 목자시니 내게 부족함이 없으리로다"</div>
             <div class="verse-ref" id="dailyVerseRef">— 시편 23:1</div>
+            <div style="margin-top:12px; font-size:11px; color:rgba(201,168,76,0.4);">터치하면 오늘의 묵상이 시작됩니다</div>
         </div>
 
         <!-- 인사 -->
@@ -1407,6 +1408,25 @@
 
         function closeProfileModal() {
             document.getElementById('profileModalOverlay').classList.remove('active');
+        }
+
+        /* ── 오늘의 말씀 묵상 연결 ── */
+        function openDailyMeditation() {
+            if (!requireProfile(function () { openDailyMeditation(); })) return;
+
+            var verseText = document.getElementById('dailyVerseText').textContent;
+            var verseRef = document.getElementById('dailyVerseRef').textContent.replace('— ', '');
+
+            currentRoute = 'meditation';
+            document.getElementById('modalTitle').textContent = '✨ 오늘의 묵상';
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('chatModal').classList.add('active');
+
+            var prompt = '오늘의 말씀은 ' + verseRef + ' ' + verseText + ' 입니다. ' +
+                '이 말씀을 바탕으로 김성수 목사님의 따뜻한 시선으로 묵상을 이끌어주세요. ' +
+                '말씀의 의미, 오늘 하루에 적용할 수 있는 실천 방안, 그리고 짧은 기도문을 포함해주세요.';
+
+            sendToAI(prompt, true);
         }
 
         /* ── 대화 초기화 (우측 버튼) ── */
