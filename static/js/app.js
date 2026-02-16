@@ -1,4 +1,4 @@
-/* ===== app.js v41.0 - 나침반(Compass) ===== */
+/* ===== app.js v41.2 - 나침반(Compass) ===== */
 
 /* ===== 메시지 전송 ===== */
 async function sendMessage(source) {
@@ -8,7 +8,6 @@ async function sendMessage(source) {
     const msg = inputEl.value.trim();
     if (!msg) return;
 
-    // ★ 구독 체크 제거됨 - 바로 진행
     inputEl.value = '';
 
     // 채팅 모달 열기
@@ -36,10 +35,8 @@ async function sendMessage(source) {
         });
 
         const data = await resp.json();
-
         if (loadEl) loadEl.style.display = 'none';
 
-        // 정상 응답
         if (data.response) {
             appendMessageToUI('ai', data.response);
         }
@@ -52,37 +49,25 @@ async function sendMessage(source) {
 }
 
 /* ===== 메시지 UI 표시 (심층 분석 파싱) ===== */
-function appendMessageToUI(type, content, isNew) {
+function appendMessageToUI(type, content) {
     const list = document.getElementById('chatMessages');
     if (!list) return;
 
     const msg = document.createElement('div');
-    msg.className = `message ${type}`;
+    msg.className = 'message ' + type;
 
     if (type === 'ai') {
         const parts = content.split(/\[심층\s*분석\s*시작\]/i);
         if (parts.length > 1) {
-            let generalPart = parts[0].replace(/\[일반\s*답변\s*시작\]/i, '').trim();
-            let deepPart = parts[1].trim();
-            let html = generalPart.replace(/\n/g, '<br>');
-            const deepId = 'deep_' + Math.random().toString(36).substr(2, 9);
-            html += `
-                <button class="deep-btn" onclick="toggleDeep('${deepId}')" 
-                        style="display:block;width:100%;margin-top:16px;padding:14px;
-                        border:1.5px solid rgba(201,168,76,0.3);border-radius:12px;
-                        background:rgba(201,168,76,0.06);color:#e8d48b;
-                        font-size:14px;font-weight:600;cursor:pointer;
-                        transition:all 0.2s;">
-                    🔍 김성수 목사님의 심층 신학 분석 보기
-                </button>
-                <div id="${deepId}" class="deep-content" 
-                     style="display:none;margin-top:12px;padding:166px;
-                     background:rgba(201,168,76,0.04);border-radius:12px;
-                     border:1px solid rgba(201,168,76,0.12);
-                     color:rgba(255,255,255,0.8);font-size:14px;line-height:1.8;">
-                    ${deepPart.replace(/\n/g, '<br>')}
-                </div>
-            `;
+            var generalPart = parts[0].replace(/\[일반\s*답변\s*시작\]/i, '').trim();
+            var deepPart = parts[1].trim();
+            var html = generalPart.replace(/\n/g, '<br>');
+            var deepId = 'deep_' + Math.random().toString(36).substr(2, 9);
+            html += '<button class="deep-btn" onclick="toggleDeep(\'' + deepId + '\')">';
+            html += '🔍 김성수 목사님의 심층 신학 분석 보기</button>';
+            html += '<div id="' + deepId + '" class="deep-content">';
+            html += deepPart.replace(/\n/g, '<br>');
+            html += '</div>';
             msg.innerHTML = html;
         } else {
             msg.innerHTML = content
@@ -99,26 +84,20 @@ function appendMessageToUI(type, content, isNew) {
 }
 
 window.toggleDeep = function (id) {
-    const el = document.getElementById(id);
-    if (el) el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+    var el = document.getElementById(id);
+    if (el) el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
 };
 
 /* ===== 모달 제어 ===== */
 function closeModal(id) {
-    const el = document.getElementById(id);
+    var el = document.getElementById(id);
     if (el) el.style.display = 'none';
 }
 
 /* ===== 기능 카드 클릭 ===== */
 function handleClick(route) {
-    // 무료 횟수 체크
-    if (!canUseService()) {
-        showPaywall();
-        return;
-    }
-
-    let promptMsg = '';
-    let title = 'AI 목사님 상담';
+    var promptMsg = '';
+    var title = 'AI 목사님 상담';
 
     switch (route) {
         case '/search':
@@ -135,16 +114,16 @@ function handleClick(route) {
             break;
     }
 
-    const titleEl = document.getElementById('chatTitle');
+    var titleEl = document.getElementById('chatTitle');
     if (titleEl) titleEl.textContent = title;
 
     // 채팅 모달 열기
-    const overlay = document.getElementById('chatOverlay');
+    var overlay = document.getElementById('chatOverlay');
     if (overlay) overlay.style.display = 'flex';
 
     // 자동으로 메시지 전송
     if (promptMsg) {
-        const chatInput = document.getElementById('chatInput');
+        var chatInput = document.getElementById('chatInput');
         if (chatInput) chatInput.value = promptMsg;
         sendMessage();
     }
@@ -157,18 +136,18 @@ function startVoice(btn) {
         return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var recognition = new SpeechRecognition();
     recognition.lang = 'ko-KR';
-    recognition.continuous = false;  // 반복 버그 수정
+    recognition.continuous = false;
     recognition.interimResults = false;
 
     btn.style.background = 'rgba(231,76,60,0.3)';
     btn.textContent = '🔴';
 
     recognition.onresult = function (event) {
-        const text = event.results[0][0].transcript;
-        const input = document.getElementById('chatInput');
+        var text = event.results[0][0].transcript;
+        var input = document.getElementById('chatInput');
         if (input) input.value = text;
         btn.style.background = '';
         btn.textContent = '🎙️';
@@ -188,22 +167,27 @@ function startVoice(btn) {
 }
 
 /* ===== 찬양 모달 ===== */
-let hymnData = [];
-let currentAudio = null;
-let currentHymnId = null;
+var hymnData = [];
+var currentAudio = null;
+var currentHymnId = null;
 
-async function openHymnModal() {
+function openHymnModal() {
     document.getElementById('hymnModal').style.display = 'flex';
     if (hymnData.length === 0) {
-        document.getElementById('hymnList').innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div><p style="margin-top:12px;color:rgba(255,255,255,0.5);font-size:14px;">찬양 목록 불러오는 중...</p></div>';
-        try {
-            const resp = await fetch('/api/hymns');
-            const data = await resp.json();
-            hymnData = data.hymns || [];
-            renderHymnList(hymnData);
-        } catch (e) {
-            document.getElementById('hymnList').innerHTML = '<p style="text-align:center;color:#e74c3c;padding:20px;">목록을 불러올 수 없습니다.</p>';
-        }
+        document.getElementById('hymnList').innerHTML =
+            '<div style="text-align:center;padding:40px;">' +
+            '<div class="spinner" style="margin:0 auto;width:28px;height:28px;border:2px solid rgba(201,168,76,0.15);border-top-color:#c9a84c;border-radius:50%;animation:spin 0.8s linear infinite;"></div>' +
+            '<p style="margin-top:12px;color:rgba(255,255,255,0.5);font-size:14px;">찬양 목록 불러오는 중...</p></div>';
+        fetch('/api/hymns')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                hymnData = data.hymns || [];
+                renderHymnList(hymnData);
+            })
+            .catch(function () {
+                document.getElementById('hymnList').innerHTML =
+                    '<p style="text-align:center;color:#e74c3c;padding:20px;">목록을 불러올 수 없습니다.</p>';
+            });
     }
 }
 
@@ -212,59 +196,48 @@ function closeHymnModal() {
 }
 
 function renderHymnList(list) {
-    const container = document.getElementById('hymnList');
+    var container = document.getElementById('hymnList');
     if (list.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;">검색 결과가 없습니다.</p>';
         return;
     }
-    container.innerHTML = list.map((h, i) => {
-        const name = h.name.replace(/\.(mp3|m4a|wav|ogg)$/i, '');
-        const isPlaying = currentHymnId === h.id;
-        return `
-            <div class="hymn-item ${isPlaying ? 'playing' : ''}" onclick="playHymn('${h.id}', '${name.replace(/'/g, "\\'")}')">
-                <div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;">
-                    ${isPlaying ? '⏸' : '▶'}
-                </div>
-                <div style="flex:1;overflow:hidden;">
-                    <div style="color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+        var h = list[i];
+        var name = h.name.replace(/\.(mp3|m4a|wav|ogg)$/i, '');
+        var isPlaying = currentHymnId === h.id;
+        html += '<div class="hymn-item ' + (isPlaying ? 'playing' : '') + '" onclick="playHymn(\'' + h.id + '\', \'' + name.replace(/'/g, "\\'") + '\')">';
+        html += '<div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;">';
+        html += isPlaying ? '⏸' : '▶';
+        html += '</div>';
+        html += '<div style="flex:1;overflow:hidden;">';
+        html += '<div style="color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>';
+        html += '</div></div>';
+    }
+    container.innerHTML = html;
 }
 
 function playHymn(fileId, title) {
     if (currentHymnId === fileId && currentAudio) {
-        if (currentAudio.paused) {
-            currentAudio.play();
-        } else {
-            currentAudio.pause();
-        }
+        if (currentAudio.paused) { currentAudio.play(); }
+        else { currentAudio.pause(); }
         return;
     }
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-    }
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     currentHymnId = fileId;
-    currentAudio = new Audio(`/api/hymn-play/${fileId}`);
+    currentAudio = new Audio('/api/hymn-play/' + fileId);
     currentAudio.play();
-
-    // Now Playing 표시
-    const npEl = document.getElementById('hymnNowPlaying');
-    const npTitle = document.getElementById('hymnNowTitle');
+    var npEl = document.getElementById('hymnNowPlaying');
+    var npTitle = document.getElementById('hymnNowTitle');
     if (npEl && npTitle) {
         npEl.style.display = 'block';
         npTitle.textContent = '🎵 ' + title;
     }
-
     currentAudio.onended = function () {
-        currentHymnId = null;
-        currentAudio = null;
+        currentHymnId = null; currentAudio = null;
         if (npEl) npEl.style.display = 'none';
         renderHymnList(hymnData);
     };
-
     renderHymnList(hymnData);
 }
 
@@ -276,7 +249,7 @@ function toggleCurrentHymn() {
 }
 
 function filterHymns() {
-    const query = document.getElementById('hymnSearch').value.toLowerCase();
-    const filtered = hymnData.filter(h => h.name.toLowerCase().includes(query));
+    var query = document.getElementById('hymnSearch').value.toLowerCase();
+    var filtered = hymnData.filter(function (h) { return h.name.toLowerCase().indexOf(query) >= 0; });
     renderHymnList(filtered);
 }
