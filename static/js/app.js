@@ -8,12 +8,7 @@ async function sendMessage(source) {
     const msg = inputEl.value.trim();
     if (!msg) return;
 
-    // 무료 횟수 체크 (클라이언트)
-    if (!canUseService()) {
-        showPaywall();
-        return;
-    }
-
+    // ★ 구독 체크 제거됨 - 바로 진행
     inputEl.value = '';
 
     // 채팅 모달 열기
@@ -44,23 +39,9 @@ async function sendMessage(source) {
 
         if (loadEl) loadEl.style.display = 'none';
 
-        // 서버에서 한도 초과 응답
-        if (data.limit_reached) {
-            localStorage.setItem('askCount', String(data.used_count));
-            updateRemainingBadge();
-            showPaywall();
-            return;
-        }
-
         // 정상 응답
         if (data.response) {
             appendMessageToUI('ai', data.response);
-        }
-
-        // 사용량 업데이트
-        if (data.used_count !== undefined) {
-            localStorage.setItem('askCount', String(data.used_count));
-            incrementUsage();
         }
 
     } catch (err) {

@@ -33,31 +33,26 @@ def ask():
         user_msg = data.get('message', '')
         profile = data.get('profile', {})
         user_name = profile.get('name', '성도')
-        age_group = profile.get('ageGroup', '')
-        gender = profile.get('gender', '')
 
-        # 사용자 식별
-        user_hash = get_user_hash(user_name, age_group, gender)
-
-        # 사용량 체크
-        if user_hash not in user_usage:
-            user_usage[user_hash] = {
-                "count": 0,
-                "first_use": datetime.now().isoformat(),
-                "is_paid": False
-            }
-
-        usage = user_usage[user_hash]
-
-        # 무료 한도 초과 체크
-        if not usage["is_paid"] and usage["count"] >= FREE_LIMIT:
-            return jsonify({
-                "response": None,
-                "limit_reached": True,
-                "used_count": usage["count"],
-                "remaining": 0,
-                "message": "무료 상담 3회가 모두 사용되었습니다."
-            })
+        # ★ 구독 시스템 일시 정지 - 무료 횟수 체크 없음
+        # age_group = profile.get('ageGroup', '')
+        # gender = profile.get('gender', '')
+        # user_hash = get_user_hash(user_name, age_group, gender)
+        # if user_hash not in user_usage:
+        #     user_usage[user_hash] = {
+        #         "count": 0,
+        #         "first_use": datetime.now().isoformat(),
+        #         "is_paid": False
+        #     }
+        # usage = user_usage[user_hash]
+        # if not usage["is_paid"] and usage["count"] >= FREE_LIMIT:
+        #     return jsonify({
+        #         "response": None,
+        #         "limit_reached": True,
+        #         "used_count": usage["count"],
+        #         "remaining": 0,
+        #         "message": "무료 상담 3회가 모두 사용되었습니다."
+        #     })
 
         client = get_openai_client()
 
@@ -82,15 +77,10 @@ def ask():
 
         reply = completion.choices[0].message.content
 
-        # 사용량 증가
-        usage["count"] += 1
-        remaining = max(0, FREE_LIMIT - usage["count"])
-
+        # ★ 구독 시스템 일시 정지 - 사용량 추적 없음
         return jsonify({
             "response": reply,
-            "limit_reached": False,
-            "used_count": usage["count"],
-            "remaining": remaining
+            "limit_reached": False
         })
 
     except Exception as e:
