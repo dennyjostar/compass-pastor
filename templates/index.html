@@ -4,236 +4,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>나침반(Compass)</title>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=41.2">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/compass.css') }}?v=41.2">
+    <title>나침반 - 교회 AI 영적 상담</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
-        /* ===== 사이드 메뉴 ===== */
-        .side-menu-overlay {
+        /* ===== 리셋 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(160deg, #060a14 0%, #0f1526 40%, #111a30 70%, #060a14 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        /* ── 헤더 ── */
+        .header {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(201, 168, 76, 0.08);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-icon:hover {
+            background: rgba(201, 168, 76, 0.15);
+            border-color: rgba(201, 168, 76, 0.4);
+        }
+
+        .header-center .title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #c9a84c;
+            letter-spacing: 4px;
+        }
+
+        /* ── 오늘의 말씀 카드 ── */
+        .daily-verse-card {
+            margin: 20px 20px 8px;
+            padding: 28px 24px 24px;
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.08) 0%, rgba(201, 168, 76, 0.02) 100%);
+            border: 1px solid rgba(201, 168, 76, 0.18);
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .daily-verse-card::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(201, 168, 76, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .daily-verse-card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(201, 168, 76, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .verse-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .verse-label {
+            font-size: 12px;
+            color: rgba(201, 168, 76, 0.6);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .verse-text {
+            font-size: 16px;
+            color: #e8d48b;
+            line-height: 1.8;
+            font-weight: 500;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+            word-break: keep-all;
+        }
+
+        .verse-ref {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── 인사 섹션 ── */
+        .greeting-section {
+            text-align: center;
+            padding: 16px 20px 8px;
+        }
+
+        .greeting-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .greeting-text .highlight {
+            color: #c9a84c;
+        }
+
+        .greeting-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.5;
+        }
+
+        /* ── 기능 카드 그리드 ── */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 20px;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .feature-card {
+            background: rgba(201, 168, 76, 0.04);
+            border: 1px solid rgba(201, 168, 76, 0.1);
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            background: rgba(201, 168, 76, 0.08);
+            border-color: rgba(201, 168, 76, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .feature-card:active {
+            transform: translateY(0);
+        }
+
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #c9a84c;
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.4;
+        }
+
+        /* ── 하단 입력바 ── */
+        .bottom-input {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 420px;
+            padding: 12px 16px 24px;
+            background: linear-gradient(transparent, #0a0f1e 30%);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(201, 168, 76, 0.06);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 25px;
+            padding: 6px 6px 6px 16px;
+        }
+
+        .input-row input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .input-row input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .voice-btn,
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .voice-btn {
+            background: rgba(201, 168, 76, 0.1);
+            color: #c9a84c;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #c9a84c, #b8943f);
+            color: #0a0f1e;
+        }
+
+        .send-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* ===== 채팅 모달 (상담창) ===== */
+        .modal-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9998;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .chat-modal {
+            width: 100%;
+            max-width: 420px;
+            height: 92vh;
+            background: linear-gradient(160deg, #0d1220 0%, #111a30 50%, #0d1220 100%);
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+            background: rgba(201, 168, 76, 0.03);
+            flex-shrink: 0;
+        }
+
+        .modal-header .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #c9a84c;
+        }
+
+        .modal-header .modal-close {
+            width: 32px;
+            height: 32px;
+            background: rgba(201, 168, 76, 0.1);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #c9a84c;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-header .modal-close:hover {
+            background: rgba(201, 168, 76, 0.2);
+        }
+
+        /* 채팅 메시지 영역 */
+        #chatMessages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 16px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+
+        #chatMessages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #chatMessages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chatMessages::-webkit-scrollbar-thumb {
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 4px;
+        }
+
+        /* 메시지 스타일 */
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            word-break: keep-all;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.2), rgba(201, 168, 76, 0.1));
+            border: 1px solid rgba(201, 168, 76, 0.25);
+            color: #e8d48b;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d0d0d0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.ai .ai-label {
+            display: block;
+            font-size: 11px;
+            color: rgba(201, 168, 76, 0.5);
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        /* 심층 분석 */
+        .deep-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 14px;
+            background: rgba(201, 168, 76, 0.1);
+            border: 1px solid rgba(201, 168, 76, 0.25);
+            border-radius: 20px;
+            color: #c9a84c;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .deep-btn:hover {
+            background: rgba(201, 168, 76, 0.2);
+        }
+
+        .deep-content {
+            display: none;
+            margin-top: 10px;
+            padding: 12px 14px;
+            background: rgba(201, 168, 76, 0.04);
+            border-left: 2px solid rgba(201, 168, 76, 0.3);
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #c0b880;
+        }
+
+        .deep-content.show {
+            display: block;
+        }
+
+        /* 모달 입력 */
+        .modal-input-area {
+            padding: 12px 16px 24px;
+            border-top: 1px solid rgba(201, 168, 76, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .modal-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(201, 168, 76, 0.06);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 25px;
+            padding: 6px 6px 6px 16px;
+        }
+
+        .modal-input-row input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .modal-input-row input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #c9a84c, #b8943f);
+            color: #0a0f1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-send-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* 로딩 */
+        .typing-indicator {
+            align-self: flex-start;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(201, 168, 76, 0.5);
+            border-radius: 50%;
+            animation: typingBounce 1.2s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* ===== 사이드 메뉴 ===== */
+        .side-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
         }
 
         .side-menu-overlay.active {
-            opacity: 1;
-            visibility: visible;
+            display: block;
         }
 
         .side-menu {
             position: fixed;
             top: 0;
-            left: -300px;
-            width: 280px;
+            left: -280px;
+            width: 270px;
             height: 100%;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f23 100%);
-            z-index: 9999;
+            background: linear-gradient(180deg, #0d1220, #111a30);
+            border-right: 1px solid rgba(201, 168, 76, 0.15);
+            z-index: 2001;
             transition: left 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+            padding: 20px 0;
+            overflow-y: auto;
         }
 
-        .side-menu.active {
+        .side-menu.open {
             left: 0;
         }
 
         .side-menu-header {
-            padding: 24px 20px 20px;
-            background: linear-gradient(135deg, rgba(201, 168, 76, 0.15) 0%, transparent 100%);
-            border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+            padding: 16px 20px 20px;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+            margin-bottom: 8px;
         }
 
-        .side-menu-profile {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .side-menu-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #c9a84c, #8b6914);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: #fff;
-        }
-
-        .side-menu-name {
-            font-size: 17px;
+        .side-menu-header .menu-title {
+            font-size: 18px;
             font-weight: 700;
-            color: #e8d48b;
+            color: #c9a84c;
+            letter-spacing: 2px;
         }
 
-        .side-menu-plan {
+        .side-menu-header .menu-sub {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 3px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 4px;
         }
 
-        .side-menu-plan .free-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: rgba(201, 168, 76, 0.15);
-            color: #e8d48b;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .side-menu-items {
-            flex: 1;
-            padding: 12px 0;
-            overflow-y: auto;
-        }
-
-        .side-menu-item {
+        .menu-item {
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 14px 22px;
+            padding: 14px 20px;
             cursor: pointer;
-            transition: background 0.15s;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 15px;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
+            transition: background 0.2s;
+            color: #d0d0d0;
+            font-size: 14px;
         }
 
-        .side-menu-item:hover {
-            background: rgba(201, 168, 76, 0.08);
+        .menu-item:hover {
+            background: rgba(201, 168, 76, 0.06);
         }
 
-        .side-menu-item .menu-icon {
-            font-size: 20px;
-            width: 28px;
+        .menu-item .menu-icon {
+            font-size: 18px;
+            width: 24px;
             text-align: center;
         }
 
-        .side-menu-item .menu-label {
-            flex: 1;
+        .menu-item .menu-label {
+            font-weight: 500;
         }
 
-        .side-menu-item .menu-badge {
-            background: #e74c3c;
-            color: #fff;
-            font-size: 11px;
-            padding: 2px 7px;
-            border-radius: 10px;
-            font-weight: 700;
-        }
-
-        .side-menu-divider {
+        .menu-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.06);
-            margin: 6px 20px;
-        }
-
-        .side-menu-footer {
-            padding: 16px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            text-align: center;
-        }
-
-        .side-menu-footer span {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.25);
+            background: rgba(201, 168, 76, 0.08);
+            margin: 8px 20px;
         }
 
         /* ===== 찬양 모달 ===== */
+        .hymn-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .hymn-overlay.active {
+            display: flex;
+        }
+
         .hymn-modal {
+            width: 100%;
             max-width: 420px;
-            width: 92%;
-            max-height: 88vh;
+            height: 85vh;
+            background: linear-gradient(160deg, #0d1220 0%, #111a30 50%, #0d1220 100%);
+            border-radius: 20px 20px 0 0;
             display: flex;
             flex-direction: column;
-            border-radius: 20px;
             overflow: hidden;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            padding: 0;
-        }
-
-        .hymn-header {
-            padding: 20px 20px 16px;
-            background: linear-gradient(180deg, rgba(201, 168, 76, 0.1) 0%, transparent 100%);
-            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
-        }
-
-        .hymn-header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .hymn-header-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #e8d48b;
-        }
-
-        .hymn-close-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hymn-search-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 14px;
-            padding: 10px 14px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(201, 168, 76, 0.12);
-        }
-
-        .hymn-search-wrap input {
-            flex: 1;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .hymn-now-playing {
-            margin: 0 16px 8px;
-            padding: 12px 14px;
-            background: rgba(201, 168, 76, 0.12);
-            border-radius: 14px;
-            border: 1px solid rgba(201, 168, 76, 0.25);
+            animation: slideUp 0.3s ease;
         }
 
         .hymn-list {
             flex: 1;
             overflow-y: auto;
-            padding: 0 16px 16px;
-            max-height: 50vh;
+            padding: 12px 16px;
         }
 
         .hymn-item {
@@ -241,666 +672,941 @@
             align-items: center;
             gap: 12px;
             padding: 12px 14px;
+            background: rgba(201, 168, 76, 0.04);
+            border: 1px solid rgba(201, 168, 76, 0.08);
             border-radius: 12px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: all 0.2s;
+        }
+
+        .hymn-item:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: rgba(201, 168, 76, 0.2);
         }
 
         .hymn-item.playing {
-            background: rgba(201, 168, 76, 0.08);
-            border: 1px solid rgba(201, 168, 76, 0.2);
+            background: rgba(201, 168, 76, 0.12);
+            border-color: rgba(201, 168, 76, 0.3);
         }
 
-        /* ===== 이용 안내 / 공지사항 / 내 정보 모달 ===== */
-        .info-modal,
-        .notice-modal,
-        .profile-modal {
-            max-width: 420px;
-            width: 92%;
-            max-height: 85vh;
-            overflow-y: auto;
-            border-radius: 20px;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            padding: 28px 24px;
-        }
-
-        .info-modal h2,
-        .notice-modal h2,
-        .profile-modal h2 {
+        .hymn-icon {
             font-size: 20px;
-            color: #e8d48b;
-            text-align: center;
-            margin-bottom: 20px;
         }
 
-        .info-section {
-            margin-bottom: 22px;
-        }
-
-        .info-section h3 {
-            font-size: 15px;
-            color: #e8d48b;
-            margin-bottom: 8px;
-        }
-
-        .info-section p {
+        .hymn-name {
+            flex: 1;
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .hymn-player {
+            padding: 16px;
+            border-top: 1px solid rgba(201, 168, 76, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .hymn-player .now-playing {
+            font-size: 13px;
+            color: #c9a84c;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .hymn-player audio {
+            width: 100%;
+            height: 36px;
+        }
+
+        /* ===== 정보 모달 ===== */
+        .info-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-modal-overlay.active {
+            display: flex;
+        }
+
+        .info-modal {
+            width: 90%;
+            max-width: 380px;
+            max-height: 80vh;
+            background: linear-gradient(160deg, #0d1220, #111a30);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 20px;
+            padding: 24px 20px;
+            overflow-y: auto;
+            color: #d0d0d0;
+            font-size: 14px;
             line-height: 1.7;
         }
 
-        .info-close-btn {
-            display: block;
-            margin: 0 auto;
-            padding: 12px 40px;
-            background: linear-gradient(135deg, #c9a84c, #8b6914);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .notice-item {
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .notice-item .notice-date {
-            font-size: 12px;
-            color: rgba(201, 168, 76, 0.6);
-            margin-bottom: 6px;
-        }
-
-        .notice-item .notice-title {
-            font-size: 15px;
-            color: #fff;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .notice-item .notice-body {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.6;
-        }
-
-        .profile-field {
+        .info-modal h3 {
+            color: #c9a84c;
+            font-size: 18px;
             margin-bottom: 16px;
-        }
-
-        .profile-field label {
-            display: block;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 6px;
-        }
-
-        .profile-field input,
-        .profile-field select {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(201, 168, 76, 0.15);
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .profile-field select option {
-            background: #1a1a2e;
-            color: #fff;
-        }
-
-        .profile-save-btn {
-            width: 100%;
-            padding: 14px;
-            margin-top: 8px;
-            background: linear-gradient(135deg, #c9a84c, #8b6914);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* ===== 구독 관리 모달 (이용권 안내) ===== */
-        .subscription-modal {
-            max-width: 420px;
-            width: 92%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-radius: 20px;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            padding: 0;
-        }
-
-        .sub-header {
             text-align: center;
-            padding: 28px 24px 20px;
-            background: linear-gradient(180deg, rgba(201, 168, 76, 0.1) 0%, transparent 100%);
         }
 
-        .sub-header-icon {
-            font-size: 44px;
-            margin-bottom: 10px;
+        .info-modal p {
+            margin-bottom: 12px;
         }
 
-        .sub-header h2 {
+        .info-modal .close-info {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 32px;
+            background: rgba(201, 168, 76, 0.15);
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            border-radius: 25px;
+            color: #c9a84c;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .info-modal .close-info:hover {
+            background: rgba(201, 168, 76, 0.25);
+        }
+
+        /* ===== 온보딩 모달 ===== */
+        .onboarding-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .onboarding-overlay.active {
+            display: flex;
+        }
+
+        .onboarding-card {
+            width: 90%;
+            max-width: 360px;
+            background: linear-gradient(160deg, #0d1220, #141e38);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .onboarding-card h2 {
+            color: #c9a84c;
             font-size: 20px;
-            color: #e8d48b;
-            margin-bottom: 6px;
-        }
-
-        .sub-header p {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.6;
-        }
-
-        .sub-plans {
-            padding: 20px;
-        }
-
-        .sub-plan-card {
-            border: 2px solid rgba(201, 168, 76, 0.15);
-            border-radius: 16px;
-            padding: 22px;
-            margin-bottom: 14px;
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .sub-plan-card.recommended {
-            border-color: rgba(201, 168, 76, 0.5);
-            background: linear-gradient(135deg, rgba(201, 168, 76, 0.08) 0%, transparent 100%);
-        }
-
-        .sub-plan-badge {
-            position: absolute;
-            top: -10px;
-            right: 16px;
-            background: linear-gradient(135deg, #c9a84c, #8b6914);
-            color: #fff;
-            padding: 3px 14px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .sub-plan-name {
-            font-size: 17px;
-            font-weight: 700;
-            color: #fff;
             margin-bottom: 8px;
         }
 
-        .sub-plan-price {
-            margin-bottom: 16px;
+        .onboarding-card p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            margin-bottom: 24px;
         }
 
-        .sub-plan-price .amount {
-            font-size: 34px;
-            font-weight: 800;
-            color: #e8d48b;
-        }
-
-        .sub-plan-price .unit {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .sub-plan-price .annual-note {
+        .onboarding-card label {
             display: block;
+            text-align: left;
+            color: rgba(201, 168, 76, 0.6);
             font-size: 12px;
-            color: rgba(201, 168, 76, 0.7);
-            margin-top: 4px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            margin-top: 14px;
         }
 
-        .sub-plan-features {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 18px;
-        }
-
-        .sub-plan-features li {
-            padding: 5px 0;
+        .onboarding-card input,
+        .onboarding-card select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(201, 168, 76, 0.06);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 12px;
+            color: #e0e0e0;
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
+            outline: none;
         }
 
-        .sub-plan-btn {
+        .onboarding-card input:focus,
+        .onboarding-card select:focus {
+            border-color: rgba(201, 168, 76, 0.4);
+        }
+
+        .onboarding-card select option {
+            background: #111a30;
+            color: #e0e0e0;
+        }
+
+        .onboarding-btn {
+            margin-top: 24px;
             width: 100%;
             padding: 14px;
+            background: linear-gradient(135deg, #c9a84c, #b8943f);
             border: none;
-            border-radius: 12px;
+            border-radius: 25px;
+            color: #0a0f1e;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        .sub-plan-btn.primary {
-            background: linear-gradient(135deg, #c9a84c, #8b6914);
-            color: #fff;
-        }
-
-        .sub-plan-btn.outline {
-            background: transparent;
-            color: #e8d48b;
-            border: 1.5px solid rgba(201, 168, 76, 0.4);
-        }
-
-        .sub-close-area {
-            padding: 12px 20px 24px;
-            text-align: center;
-        }
-
-        .sub-close-btn {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.35);
-            font-size: 14px;
-            cursor: pointer;
-            padding: 8px 20px;
+        .onboarding-btn:hover {
+            opacity: 0.85;
         }
     </style>
 </head>
 
 <body>
-    <div class="app-wrap" id="homeScreen">
-        <header class="header">
-            <div class="header-icon" onclick="openSideMenu()" title="메뉴">☰</div>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="header-icon" id="menuBtn" onclick="toggleSideMenu()">☰</div>
             <div class="header-center">
-                <div class="sub">당신의 영혼을 위한 나침반</div>
-                <div class="title">COMPASS</div>
+                <div class="title">나침반</div>
             </div>
-            <div class="header-icon" onclick="newChat()" title="새 대화">🔄</div>
-        </header>
-        <div class="main-content" style="padding-bottom: 120px;">
-            <div class="compass-section">
-                <div class="compass-wrapper">
-                    <div class="compass-body" id="compassBody">
-                        <svg class="compass-svg" viewBox="0 0 300 300">
-                            <circle cx="150" cy="150" r="145" fill="none" stroke="rgba(201,168,76,0.3)"
-                                stroke-width="1" />
-                            <text x="150" y="30" text-anchor="middle" fill="#c9a84c" font-size="16"
-                                font-weight="bold">N</text>
-                            <text x="280" y="155" text-anchor="middle" fill="rgba(201,168,76,0.6)"
-                                font-size="14">E</text>
-                            <text x="150" y="285" text-anchor="middle" fill="rgba(201,168,76,0.6)"
-                                font-size="14">S</text>
-                            <text x="20" y="155" text-anchor="middle" fill="rgba(201,168,76,0.6)"
-                                font-size="14">W</text>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            <div class="header-icon" id="resetBtn" onclick="resetConversation()">🔄</div>
+        </div>
 
-            <div class="greeting-area">
-                <div class="hello">평안하십니까, <strong id="greetingName">반갑습니다</strong></div>
-                <div class="sub-msg">나침반이 당신의 영적 여정을 함께합니다</div>
+        <!-- 오늘의 말씀 카드 -->
+        <div class="daily-verse-card" id="dailyVerseCard">
+            <div class="verse-icon">✝️</div>
+            <div class="verse-label">오늘의 말씀</div>
+            <div class="verse-text" id="dailyVerseText">"여호와는 나의 목자시니 내게 부족함이 없으리로다"</div>
+            <div class="verse-ref" id="dailyVerseRef">— 시편 23:1</div>
+        </div>
+
+        <!-- 인사 -->
+        <div class="greeting-section">
+            <div class="greeting-text">평안하십니까, <span class="highlight" id="greetingName">반갑습니다</span></div>
+            <div class="greeting-sub">나침반이 당신의 영적 여정을 함께합니다</div>
+        </div>
+
+        <!-- 기능 카드 -->
+        <div class="feature-grid">
+            <div class="feature-card" onclick="handleClick('bible')">
+                <div class="card-icon">📖</div>
+                <div class="card-title">말씀 찾기</div>
+                <div class="card-desc">설교·성경 구절 검색</div>
             </div>
-            <div class="feature-grid">
-                <div class="feature-card" onclick="handleClick('/search')">
-                    <div class="icon">📖</div>
-                    <div class="label">말씀 찾기</div>
-                    <div class="desc">설교·성경 구절 검색</div>
-                </div>
-                <div class="feature-card" onclick="handleClick('/prayer')">
-                    <div class="icon">🙏</div>
-                    <div class="label">기도문</div>
-                    <div class="desc">상황에 맞는 기도문 생성</div>
-                </div>
-                <div class="feature-card" onclick="handleClick('/devotion')">
-                    <div class="icon">✨</div>
-                    <div class="label">오늘의 묵상</div>
-                    <div class="desc">오늘의 말씀과 묵상 가이드</div>
-                </div>
-                <div class="feature-card" onclick="openHymnModal()">
-                    <div class="icon">🎵</div>
-                    <div class="label">목사님 찬양</div>
-                    <div class="desc">목사님의 찬양을 들어보세요</div>
-                </div>
+            <div class="feature-card" onclick="handleClick('prayer')">
+                <div class="card-icon">🙏</div>
+                <div class="card-title">기도문</div>
+                <div class="card-desc">상황에 맞는 기도문 생성</div>
             </div>
-            <div class="bottom-bar">
-                <div class="input-wrap">
-                    <button class="mic-btn" onclick="startVoice(this)">🎙️</button>
-                    <input type="text" id="chatInput" placeholder="고민이나 상황을 말씀해주세요..."
-                        onkeypress="if(event.keyCode==13) sendMessage()">
-                    <button class="send-btn" onclick="sendMessage()">➤</button>
-                </div>
+            <div class="feature-card" onclick="handleClick('meditation')">
+                <div class="card-icon">✨</div>
+                <div class="card-title">오늘의 묵상</div>
+                <div class="card-desc">오늘의 말씀과 묵상 가이드</div>
+            </div>
+            <div class="feature-card" onclick="openHymnModal()">
+                <div class="card-icon">🎵</div>
+                <div class="card-title">목사님 찬양</div>
+                <div class="card-desc">목사님의 찬양을 들어보세요</div>
+            </div>
+        </div>
+
+        <!-- 하단 입력바 -->
+        <div class="bottom-input">
+            <div class="input-row">
+                <input type="text" id="homeInput" placeholder="무엇이든 물어보세요..."
+                    onkeypress="if(event.key==='Enter') sendFromHome()">
+                <button class="voice-btn" onclick="startVoice()">🎤</button>
+                <button class="send-btn" onclick="sendFromHome()">➤</button>
             </div>
         </div>
     </div>
 
-    <!-- 사이드 메뉴 -->
-    <div class="side-menu-overlay" id="sideMenuOverlay" onclick="closeSideMenu()"></div>
-    <div class="side-menu" id="sideMenu">
-        <div class="side-menu-header">
-            <div class="side-menu-profile">
-                <div class="side-menu-avatar">🧭</div>
-                <div>
-                    <div class="side-menu-name" id="sideMenuName">성도님</div>
-                    <div class="side-menu-plan"><span class="free-badge">이용 중</span></div>
-                </div>
-            </div>
-        </div>
-        <div class="side-menu-items">
-            <button class="side-menu-item" onclick="openProfileModal()">
-                <span class="menu-icon">👤</span><span class="menu-label">내 정보</span>
-            </button>
-            <button class="side-menu-item" onclick="openSubscriptionModal()">
-                <span class="menu-icon">💎</span><span class="menu-label">이용권 안내</span>
-            </button>
-            <div class="side-menu-divider"></div>
-            <button class="side-menu-item" onclick="openInfoModal()">
-                <span class="menu-icon">📖</span><span class="menu-label">이용 안내</span>
-            </button>
-            <button class="side-menu-item" onclick="openNoticeModal()">
-                <span class="menu-icon">📢</span><span class="menu-label">공지사항</span>
-                <span class="menu-badge">N</span>
-            </button>
-            <button class="side-menu-item" onclick="openContact()">
-                <span class="menu-icon">💬</span><span class="menu-label">문의하기</span>
-            </button>
-            <div class="side-menu-divider"></div>
-            <button class="side-menu-item" onclick="resetSystem()">
-                <span class="menu-icon">🔄</span><span class="menu-label">전체 초기화</span>
-            </button>
-        </div>
-        <div class="side-menu-footer">
-            <span>나침반(Compass) v1.0 · 서울서머나교회</span>
-        </div>
-    </div>
-
-    <!-- 채팅 오버레이 (style.css의 디자인을 그대로 사용) -->
-    <div class="modal-overlay" id="chatOverlay">
-        <div class="modal-content chat-modal">
+    <!-- 채팅 모달 -->
+    <div class="modal-overlay" id="chatModal">
+        <div class="chat-modal">
             <div class="modal-header">
-                <h3>💬 <span id="chatTitle">AI 목사님 상담</span></h3>
-                <button onclick="closeModal('chatOverlay')">✕</button>
+                <div class="modal-title" id="modalTitle">💬 AI 상담</div>
+                <div class="modal-close" onclick="closeChatModal()">✕</div>
             </div>
             <div id="chatMessages"></div>
-            <div id="meditating" style="display:none;">
-                <div class="spinner"></div> 묵상 중...
-            </div>
             <div class="modal-input-area">
-                <input type="text" id="modalChatInput" placeholder="말씀해주세요..."
-                    onkeypress="if(event.keyCode==13) sendMessage('modal')">
-                <button onclick="sendMessage('modal')">➤</button>
+                <div class="modal-input-row">
+                    <input type="text" id="modalInput" placeholder="메시지를 입력하세요..."
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="modal-send-btn" onclick="sendMessage()">➤</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- 찬양 모달 -->
-    <div class="modal-overlay" id="hymnModal" style="display:none;" onclick="if(event.target===this)closeHymnModal()">
-        <div class="modal-content hymn-modal">
-            <div class="hymn-header">
-                <div class="hymn-header-top">
-                    <span class="hymn-header-title">🎵 목사님 찬양</span>
-                    <button class="hymn-close-btn" onclick="closeHymnModal()">✕</button>
-                </div>
-                <div class="hymn-search-wrap">
-                    <input type="text" id="hymnSearch" placeholder="찬양 제목 검색..." oninput="filterHymns()">
-                </div>
+    <div class="hymn-overlay" id="hymnModal">
+        <div class="hymn-modal">
+            <div class="modal-header">
+                <div class="modal-title">🎵 목사님 찬양</div>
+                <div class="modal-close" onclick="closeHymnModal()">✕</div>
             </div>
-            <div class="hymn-now-playing" id="hymnNowPlaying" style="display:none;">
-                <div id="hymnNowTitle"></div>
-                <button onclick="toggleCurrentHymn()">⏸</button>
+            <div class="hymn-list" id="hymnList">
+                <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양 목록을 불러오는 중...</div>
             </div>
-            <div class="hymn-list" id="hymnList"></div>
-        </div>
-    </div>
-
-    <!-- 이용권 안내 모달 -->
-    <div class="modal-overlay" id="subscriptionModal" style="display:none;"
-        onclick="if(event.target===this)closeSubscriptionModal()">
-        <div class="modal-content subscription-modal">
-            <div class="sub-header">
-                <div class="sub-header-icon">💎</div>
-                <h2>이용권 안내</h2>
-                <p>나침반과 함께하는 영적 여정</p>
-            </div>
-            <div class="sub-plans">
-                <div class="sub-plan-card recommended">
-                    <div class="sub-plan-badge">추천</div>
-                    <div class="sub-plan-name">월간 구독</div>
-                    <div class="sub-plan-price">
-                        <span class="amount">4,900</span><span class="unit">원/월</span>
-                        <span class="annual-note">☕ 커피 한 잔 값으로 24시간 영적 상담</span>
-                    </div>
-                    <ul class="sub-plan-features">
-                        <li>✅ 무제한 말씀 상담</li>
-                        <li>✅ 기도문 생성</li>
-                        <li>✅ 오늘의 묵상 가이드</li>
-                        <li>✅ 목사님 찬양 듣기</li>
-                    </ul>
-                    <button class="sub-plan-btn primary" onclick="requestSubscription('monthly')">
-                        월간 구독 시작하기
-                    </button>
-                </div>
-                <div class="sub-plan-card">
-                    <div class="sub-plan-name">연간 구독</div>
-                    <div class="sub-plan-price">
-                        <span class="amount">49,000</span><span class="unit">원/년</span>
-                        <span class="annual-note">월 4,083원 · 2개월 무료 혜택</span>
-                    </div>
-                    <button class="sub-plan-btn outline" onclick="requestSubscription('yearly')">
-                        연간 구독 시작하기
-                    </button>
-                </div>
-                <div class="sub-plan-card">
-                    <div class="sub-plan-name">⛪ 교회 단체 구독</div>
-                    <div class="sub-plan-price">
-                        <span class="amount">별도 문의</span>
-                        <span class="annual-note">성도 수 기반 할인 · 50명 이상 단체</span>
-                    </div>
-                    <button class="sub-plan-btn outline" onclick="requestChurchPlan()">
-                        단체 문의하기
-                    </button>
-                </div>
-            </div>
-            <div class="sub-close-area">
-                <button class="sub-close-btn" onclick="closeSubscriptionModal()">닫기</button>
+            <div class="hymn-player" id="hymnPlayer" style="display:none;">
+                <div class="now-playing" id="nowPlaying">재생 중: -</div>
+                <audio id="hymnAudio" controls></audio>
             </div>
         </div>
     </div>
 
-    <!-- 내 정보 모달 -->
-    <div class="modal-overlay" id="profileModal" style="display:none;"
-        onclick="if(event.target===this)closeProfileModal()">
-        <div class="modal-content profile-modal">
-            <h2>👤 내 정보</h2>
-            <div class="profile-field">
-                <label>성함 (닉네임)</label>
-                <input type="text" id="profileName" placeholder="성함을 입력하세요">
-            </div>
-            <div class="profile-field">
-                <label>연령대</label>
-                <select id="profileAge">
-                    <option value="">선택</option>
-                    <option value="10대">10대</option>
-                    <option value="20대">20대</option>
-                    <option value="30대">30대</option>
-                    <option value="40대">40대</option>
-                    <option value="50대">50대</option>
-                    <option value="60대 이상">60대 이상</option>
-                </select>
-            </div>
-            <div class="profile-field">
-                <label>성별</label>
-                <select id="profileGender">
-                    <option value="">선택</option>
-                    <option value="남성">남성</option>
-                    <option value="여성">여성</option>
-                </select>
-            </div>
-            <div class="profile-field">
-                <label>거주 지역 (선택)</label>
-                <input type="text" id="profileRegion" placeholder="예: 서울">
-            </div>
-            <div class="profile-field">
-                <label>직업 (선택)</label>
-                <input type="text" id="profileJob" placeholder="예: 회사원">
-            </div>
-            <button class="profile-save-btn" onclick="saveProfile()">저장하기</button>
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleSideMenu()"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <div class="menu-title">나침반</div>
+            <div class="menu-sub">교회 AI 영적 상담</div>
+        </div>
+        <div class="menu-item" onclick="openProfileModal()">
+            <span class="menu-icon">👤</span>
+            <span class="menu-label">내 정보</span>
+        </div>
+        <div class="menu-item" onclick="openInfoModal('guide')">
+            <span class="menu-icon">📋</span>
+            <span class="menu-label">이용 안내</span>
+        </div>
+        <div class="menu-item" onclick="openInfoModal('notice')">
+            <span class="menu-icon">📢</span>
+            <span class="menu-label">공지사항</span>
+        </div>
+        <div class="menu-item" onclick="openInfoModal('contact')">
+            <span class="menu-icon">💬</span>
+            <span class="menu-label">문의하기</span>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="menu-item" onclick="fullReset()">
+            <span class="menu-icon">🗑️</span>
+            <span class="menu-label">전체 초기화</span>
         </div>
     </div>
 
-    <!-- 이용 안내 모달 -->
-    <div class="modal-overlay" id="infoModal" style="display:none;" onclick="if(event.target===this)closeInfoModal()">
-        <div class="modal-content info-modal">
-            <h2>📖 이용 안내</h2>
-            <div class="info-section">
-                <h3>🧭 나침반이란?</h3>
-                <p>나침반(Compass)은 故 김성수 목사님의 설교 말씀을 기반으로 한 AI 영적 상담 서비스입니다. 24시간 언제든 신앙의 고민을 나눌 수 있습니다.</p>
-            </div>
-            <div class="info-section">
-                <h3>🤖 AI 안내</h3>
-                <p>본 서비스는 AI(인공지능)가 응답합니다. 실제 목사님이 직접 답변하시는 것이 아니며, 목사님의 설교 자료를 학습한 AI가 그 정신을 이어 답변합니다.</p>
-            </div>
-            <div class="info-section">
-                <h3>💬 사용 방법</h3>
-                <p>하단 입력창에 고민이나 질문을 입력하세요. 음성 입력도 가능합니다. 말씀 찾기, 기도문, 오늘의 묵상, 목사님 찬양 기능도 활용해보세요.</p>
-            </div>
-            <div class="info-section">
-                <h3>🔒 개인정보</h3>
-                <p>모든 대화는 귀하의 기기에만 저장되며, 외부 서버에 보관되지 않습니다. 안심하고 이용하세요.</p>
-            </div>
-            <div class="info-section">
-                <h3>⚠️ 위기 상황 안내</h3>
-                <p>극심한 고통이나 위기 상황에서는 전문 기관에 연락해주세요.<br>
-                    자살예방상담전화 1393 · 정신건강위기상담전화 1577-0199</p>
-            </div>
-            <button class="info-close-btn" onclick="closeInfoModal()">확인</button>
+    <!-- 정보 모달 -->
+    <div class="info-modal-overlay" id="infoModalOverlay">
+        <div class="info-modal" id="infoModalContent"></div>
+    </div>
+
+    <!-- 프로필 모달 -->
+    <div class="info-modal-overlay" id="profileModalOverlay">
+        <div class="info-modal" id="profileModalContent">
+            <h3>👤 내 정보</h3>
+            <label>이름(닉네임)</label>
+            <input type="text" id="profileName" placeholder="이름">
+            <label style="margin-top:12px;">연령대</label>
+            <select id="profileAge">
+                <option value="">선택</option>
+                <option value="10대">10대</option>
+                <option value="20대">20대</option>
+                <option value="30대">30대</option>
+                <option value="40대">40대</option>
+                <option value="50대">50대</option>
+                <option value="60대 이상">60대 이상</option>
+            </select>
+            <label style="margin-top:12px;">성별</label>
+            <select id="profileGender">
+                <option value="">선택</option>
+                <option value="남성">남성</option>
+                <option value="여성">여성</option>
+            </select>
+            <button class="close-info" onclick="saveProfile()">저장</button>
+            <button class="close-info"
+                style="margin-top:8px;background:transparent;border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);"
+                onclick="closeProfileModal()">닫기</button>
         </div>
     </div>
 
-    <!-- 공지사항 모달 -->
-    <div class="modal-overlay" id="noticeModal" style="display:none;"
-        onclick="if(event.target===this)closeNoticeModal()">
-        <div class="modal-content notice-modal">
-            <h2>📢 공지사항</h2>
-            <div class="notice-item">
-                <div class="notice-date">2026.02.16</div>
-                <div class="notice-title">나침반(Compass) 서비스 오픈</div>
-                <div class="notice-body">서울서머나교회 성도님들을 위한 AI 영적 상담 서비스 나침반이 오픈되었습니다. 편하게 이용해보세요.</div>
-            </div>
-            <div class="notice-item">
-                <div class="notice-date">2026.02.16</div>
-                <div class="notice-title">김성수 목사님을 기억하며</div>
-                <div class="notice-body">故 김성수 목사님의 말씀과 찬양이 이 서비스를 통해 계속됩니다. 목사님의 은혜로운 설교가 여러분의 삶에 빛이 되기를 기도합니다.</div>
-            </div>
-            <button class="info-close-btn" onclick="closeNoticeModal()" style="margin-top:16px;">닫기</button>
+    <!-- 온보딩 -->
+    <div class="onboarding-overlay" id="onboardingOverlay">
+        <div class="onboarding-card">
+            <h2>✝️ 나침반</h2>
+            <p>김성수 목사님의 말씀이 여기, 계속됩니다</p>
+            <label>이름(닉네임)</label>
+            <input type="text" id="onboardName" placeholder="이름을 입력해주세요">
+            <label>연령대</label>
+            <select id="onboardAge">
+                <option value="">선택해주세요</option>
+                <option value="10대">10대</option>
+                <option value="20대">20대</option>
+                <option value="30대">30대</option>
+                <option value="40대">40대</option>
+                <option value="50대">50대</option>
+                <option value="60대 이상">60대 이상</option>
+            </select>
+            <label>성별</label>
+            <select id="onboardGender">
+                <option value="">선택해주세요</option>
+                <option value="남성">남성</option>
+                <option value="여성">여성</option>
+            </select>
+            <button class="onboarding-btn" onclick="completeOnboarding()">시작하기</button>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/compass.js') }}?v=41.2"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}?v=41.2"></script>
     <script>
-        /* ===== 사이드 메뉴 ===== */
-        function openSideMenu() {
-            document.getElementById('sideMenu').classList.add('active');
-            document.getElementById('sideMenuOverlay').classList.add('active');
-            var name = localStorage.getItem('userName') || '성도님';
-            document.getElementById('sideMenuName').textContent = name + '님';
-        }
-        function closeSideMenu() {
-            document.getElementById('sideMenu').classList.remove('active');
-            document.getElementById('sideMenuOverlay').classList.remove('active');
+        /* ========================================
+           나침반 v42.0 — JavaScript 전체
+           ======================================== */
+
+        /* ── 365 오늘의 말씀 데이터 (1~120) ── */
+        var dailyVerses = [
+            { t: "여호와는 나의 목자시니 내게 부족함이 없으리로다", r: "시편 23:1" },
+            { t: "너는 마음을 다하여 여호와를 신뢰하고 네 명철을 의지하지 말라", r: "잠언 3:5" },
+            { t: "두려워하지 말라 내가 너와 함께 함이라 놀라지 말라 나는 네 하나님이 됨이라", r: "이사야 41:10" },
+            { t: "항상 기뻐하라 쉬지 말고 기도하라 범사에 감사하라", r: "데살로니가전서 5:16-18" },
+            { t: "내가 산을 향하여 눈을 들리라 나의 도움이 어디서 올까 나의 도움은 천지를 지으신 여호와에게서로다", r: "시편 121:1-2" },
+            { t: "내가 너희에게 평안을 끼치노니 곧 나의 평안을 너희에게 주노라", r: "요한복음 14:27" },
+            { t: "여호와를 기뻐하라 그가 네 마음의 소원을 네게 이루어 주시리로다", r: "시편 37:4" },
+            { t: "범사에 네가 형통하며 강건하기를 내가 바라노라", r: "요한3서 1:2" },
+            { t: "수고하고 무거운 짐 진 자들아 다 내게로 오라 내가 너희를 쉬게 하리라", r: "마태복음 11:28" },
+            { t: "하나님을 사랑하는 자에게는 모든 것이 합력하여 선을 이루느니라", r: "로마서 8:28" },
+            { t: "강하고 담대하라 네가 어디로 가든지 네 하나님 여호와가 너와 함께 하느니라", r: "여호수아 1:9" },
+            { t: "여호와는 나의 빛이요 나의 구원이시니 내가 누구를 두려워하리요", r: "시편 27:1" },
+            { t: "하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니", r: "요한복음 3:16" },
+            { t: "내 말을 듣고 나 보내신 이를 믿는 자는 영생을 얻었고", r: "요한복음 5:24" },
+            { t: "여호와는 나의 반석이시요 나의 요새시요 나를 건지시는 이시요", r: "시편 18:2" },
+            { t: "내 영혼이 잠잠히 하나님만 바람이여 나의 구원이 그에게서 나오는도다", r: "시편 62:1" },
+            { t: "네 길을 여호와께 맡기라 그를 의지하면 그가 이루시고", r: "시편 37:5" },
+            { t: "사랑하는 자들아 우리가 서로 사랑하자 사랑은 하나님께 속한 것이니", r: "요한1서 4:7" },
+            { t: "평강의 하나님이 친히 너희를 온전히 거룩하게 하시고", r: "데살로니가전서 5:23" },
+            { t: "하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시로다", r: "시편 46:1" },
+            { t: "여호와의 이름은 견고한 망대라 의인은 그리로 달려가서 안전함을 얻느니라", r: "잠언 18:10" },
+            { t: "오직 나는 여호와를 우러러보며 나를 구원하시는 하나님을 바라보나니", r: "미가 7:7" },
+            { t: "너희 마음에 그리스도의 평강이 넘치게 하라", r: "골로새서 3:15" },
+            { t: "나의 하나님이 그리스도 예수 안에서 너희 모든 쓸 것을 채우시리라", r: "빌립보서 4:19" },
+            { t: "너희는 먼저 그의 나라와 그의 의를 구하라 그리하면 이 모든 것을 너희에게 더하시리라", r: "마태복음 6:33" },
+            { t: "여호와께 감사하라 그는 선하시며 그 인자하심이 영원함이로다", r: "시편 107:1" },
+            { t: "주 예수를 믿으라 그리하면 너와 네 집이 구원을 받으리라", r: "사도행전 16:31" },
+            { t: "만군의 여호와께서 말씀하시되 나를 시험하여 보라 내가 하늘 문을 열고 너희에게 복을 쌓을 곳이 없도록 붓지 아니하나 보라", r: "말라기 3:10" },
+            { t: "내가 가는 길을 그가 아시나니 그가 나를 단련하신 후에는 내가 순금 같이 되어 나오리라", r: "욥기 23:10" },
+            { t: "너는 내 것이라 내가 너를 지명하여 불렀나니 두려워하지 말라", r: "이사야 43:1" },
+            { t: "모든 성경은 하나님의 감동으로 된 것으로 교훈과 책망과 바르게 함과 의로 교육하기에 유익하니", r: "디모데후서 3:16" },
+            { t: "주는 나의 등불이시니이다 여호와께서 나의 흑암을 밝히시리이다", r: "사무엘하 22:29" },
+            { t: "구하라 그리하면 받으리니 너희 기쁨이 충만하리라", r: "요한복음 16:24" },
+            { t: "내가 여호와의 은혜를 영원히 노래하며", r: "시편 89:1" },
+            { t: "네가 물 가운데로 지날 때에 내가 너와 함께 할 것이라", r: "이사야 43:2" },
+            { t: "하나님의 말씀은 살아 있고 활력이 있어 좌우에 날선 어떤 검보다도 예리하여", r: "히브리서 4:12" },
+            { t: "참고 견디는 자에게 복이 있나니", r: "야고보서 5:11" },
+            { t: "여호와를 경외하는 것이 지혜의 근본이요", r: "잠언 9:10" },
+            { t: "누구든지 그리스도 안에 있으면 새로운 피조물이라 이전 것은 지나갔으니 보라 새 것이 되었도다", r: "고린도후서 5:17" },
+            { t: "사람이 마음으로 자기의 길을 계획할지라도 그의 걸음을 인도하시는 이는 여호와시니라", r: "잠언 16:9" },
+            { t: "여호와의 자비와 긍휼하심이 무궁하시도다 아침마다 새로우니", r: "예레미야애가 3:22-23" },
+            { t: "내가 선한 싸움을 싸우고 나의 달려갈 길을 마치고 믿음을 지켰으니", r: "디모데후서 4:7" },
+            { t: "내 은혜가 네게 족하도다 이는 내 능력이 약한 데서 온전하여짐이라", r: "고린도후서 12:9" },
+            { t: "믿음 소망 사랑 이 세 가지는 항상 있을 것인데 그 중의 제일은 사랑이라", r: "고린도전서 13:13" },
+            { t: "나를 강하게 하신 이 안에서 내가 모든 것을 할 수 있느니라", r: "빌립보서 4:13" },
+            { t: "의인의 많은 고난이 있으나 여호와께서 그 모든 것에서 건지시는도다", r: "시편 34:19" },
+            { t: "환난은 인내를 인내는 연단을 연단은 소망을 이루는 줄 앎이로다", r: "로마서 5:3-4" },
+            { t: "내 마음이 낙심될 때에 나보다 높은 바위 위에 나를 인도하소서", r: "시편 61:2" },
+            { t: "눈물을 흘리며 씨를 뿌리는 자는 기쁨으로 거두리로다", r: "시편 126:5" },
+            { t: "너희는 세상의 빛이라 산 위에 있는 동네가 숨겨지지 못할 것이요", r: "마태복음 5:14" },
+            { t: "감사함으로 그의 문에 들어가며 찬송함으로 그의 궁정에 들어가서", r: "시편 100:4" },
+            { t: "사랑 안에 두려움이 없고 온전한 사랑이 두려움을 내쫓나니", r: "요한1서 4:18" },
+            { t: "하늘과 땅은 없어지겠으나 내 말은 없어지지 아니하리라", r: "마태복음 24:35" },
+            { t: "우리는 진흙이요 주는 토기장이시니 우리는 다 주의 손으로 지으신 것이니이다", r: "이사야 64:8" },
+            { t: "만일 우리가 우리 죄를 자백하면 그는 미쁘시고 의로우사 우리 죄를 사하시며", r: "요한1서 1:9" },
+            { t: "여호와께서 네 출입을 지금부터 영원까지 지키시리로다", r: "시편 121:8" },
+            { t: "새 노래로 여호와께 노래하라 온 땅이여 여호와께 노래할지어다", r: "시편 96:1" },
+            { t: "나의 영혼아 네가 어찌하여 낙심하며 너는 하나님께 소망을 두라", r: "시편 42:5" },
+            { t: "사랑은 오래 참고 사랑은 온유하며", r: "고린도전서 13:4" },
+            { t: "여호와를 앙망하는 자는 새 힘을 얻으리니 독수리가 날개치며 올라감 같을 것이요", r: "이사야 40:31" },
+            { t: "주의 말씀은 내 발에 등이요 내 길에 빛이니이다", r: "시편 119:105" },
+            { t: "어떤 환난이나 어떤 곤고나 우리를 그리스도의 사랑에서 끊을 수 있으리요", r: "로마서 8:35" },
+            { t: "화평하게 하는 자는 복이 있나니 그들이 하나님의 아들이라 일컬음을 받을 것임이요", r: "마태복음 5:9" },
+            { t: "사망이나 생명이나 다른 어떤 피조물이라도 우리를 하나님의 사랑에서 끊을 수 없으리라", r: "로마서 8:38-39" },
+            { t: "범사에 기도와 간구로 너희 구할 것을 감사함으로 하나님께 아뢰라", r: "빌립보서 4:6-7" },
+            { t: "태초에 말씀이 계시니라 이 말씀이 하나님과 함께 계셨으니", r: "요한복음 1:1" },
+            { t: "그가 찔림은 우리의 허물 때문이요 그가 징계를 받으므로 우리는 평화를 누리고", r: "이사야 53:5" },
+            { t: "보라 내가 새 일을 행하리니 이제 나타낼 것이라", r: "이사야 43:19" },
+            { t: "아버지께서 나를 사랑하신 것 같이 나도 너희를 사랑하였으니 나의 사랑 안에 거하라", r: "요한복음 15:9" },
+            { t: "이같이 네 빛이 사람 앞에 비치게 하여 하늘에 계신 너희 아버지께 영광을 돌리게 하라", r: "마태복음 5:16" },
+            { t: "너희가 내 안에 거하고 내 말이 너희 안에 거하면 무엇이든지 원하는 대로 구하라", r: "요한복음 15:7" },
+            { t: "선을 행하되 낙심하지 말지니 포기하지 아니하면 때가 이르매 거두리라", r: "갈라디아서 6:9" },
+            { t: "여호와께서 좋으시니 고난 날에 산성이시라", r: "나훔 1:7" },
+            { t: "돌이켜 조용히 있으면 구원을 얻을 것이요 잠잠하고 신뢰하면 힘을 얻으리라", r: "이사야 30:15" },
+            { t: "그가 나를 부르리니 내가 그에게 응답하리라", r: "시편 91:15" },
+            { t: "믿는 자에게는 능히 하지 못할 일이 없느니라", r: "마가복음 9:23" },
+            { t: "하나님이 모든 눈물을 그 눈에서 닦아 주시니 다시는 사망이 없고", r: "요한계시록 21:4" },
+            { t: "여호와는 진실하게 가까이 하는 모든 자에게 가까이 하시는도다", r: "시편 145:18" },
+            { t: "서로 친절하게 하며 불쌍히 여기며 서로 용서하기를 하나님이 너희를 용서하심과 같이 하라", r: "에베소서 4:32" },
+            { t: "나의 평안을 너희에게 주노라 내가 너희에게 주는 것은 세상이 주는 것과 같지 아니하니라", r: "요한복음 14:27" },
+            { t: "여호와의 눈은 의인을 향하시고 그의 귀는 그들의 부르짖음에 기울이시는도다", r: "시편 34:15" },
+            { t: "네 젊은 때에 네 창조주를 기억하라", r: "전도서 12:1" },
+            { t: "무엇이든지 참된 것과 경건한 것과 옳은 것과 사랑할 만한 것을 생각하라", r: "빌립보서 4:8" },
+            { t: "내가 세상 끝날까지 너희와 항상 함께 있으리라", r: "마태복음 28:20" },
+            { t: "보라 형제가 연합하여 동거함이 어찌 그리 선하고 아름다운고", r: "시편 133:1" },
+            { t: "오직 성령의 열매는 사랑과 희락과 화평과 오래 참음과 자비와 양선과 충성과 온유와 절제니", r: "갈라디아서 5:22-23" },
+            { t: "새벽부터 주의 인자하심으로 우리를 만족하게 하사", r: "시편 90:14" },
+            { t: "피곤한 자에게는 능력을 주시며 무능한 자에게는 힘을 더하시나니", r: "이사야 40:29" },
+            { t: "나는 포도나무요 너희는 가지라 그가 내 안에 내가 그 안에 거하면 사람이 열매를 많이 맺나니", r: "요한복음 15:5" },
+            { t: "여호와는 내 힘과 내 방패시니 내 마음이 그를 의지하여 도움을 얻었도다", r: "시편 28:7" },
+            { t: "선한 목자는 양들을 위하여 목숨을 버리거니와", r: "요한복음 10:11" },
+            { t: "말씀이 육신이 되어 우리 가운데 거하시매 은혜와 진리가 충만하더라", r: "요한복음 1:14" },
+            { t: "진리를 알지니 진리가 너희를 자유롭게 하리라", r: "요한복음 8:32" },
+            { t: "하나님이 사랑이심이라 사랑 안에 거하는 자는 하나님 안에 거하고", r: "요한1서 4:16" },
+            { t: "우리가 아직 죄인 되었을 때에 그리스도께서 우리를 위하여 죽으심으로 하나님께서 우리에 대한 사랑을 확증하셨느니라", r: "로마서 5:8" },
+            { t: "여호와를 경외하는 것이 지식의 근본이거늘", r: "잠언 1:7" },
+            { t: "내가 곧 길이요 진리요 생명이니 나로 말미암지 않고는 아버지께로 올 자가 없느니라", r: "요한복음 14:6" },
+            { t: "마땅히 행할 길을 네게 가르쳐 보이리라 내가 너를 주목하여 훈계하리로다", r: "시편 32:8" },
+            { t: "하늘이 하나님의 영광을 선포하고 궁창이 그의 손으로 하신 일을 나타내는도다", r: "시편 19:1" },
+            { t: "여호와를 찬양할지어다 그의 성소에서 하나님을 찬양하며", r: "시편 150:1" },
+            { t: "온유한 자는 복이 있나니 그들이 땅을 기업으로 받을 것임이요", r: "마태복음 5:5" },
+            { t: "여호와여 아침에 주께서 나의 소리를 들으시리니", r: "시편 5:3" },
+            { t: "먹든지 마시든지 무엇을 하든지 다 하나님의 영광을 위하여 하라", r: "고린도전서 10:31" },
+            { t: "의에 주리고 목마른 자는 복이 있나니 그들이 배부를 것임이요", r: "마태복음 5:6" },
+            { t: "네 시작은 미약하였으나 네 나중은 심히 창대하리라", r: "욥기 8:7" },
+            { t: "이 모든 것 위에 사랑을 더하라 이는 온전하게 매는 띠니라", r: "골로새서 3:14" },
+            { t: "인자가 온 것은 섬김을 받으려 함이 아니라 도리어 섬기려 하고", r: "마태복음 20:28" },
+            { t: "심히 두려워하지 말라 주 여호와가 네 손을 굳세게 잡고 너를 도우리라", r: "이사야 41:13" },
+            { t: "여호와의 선함을 맛보아 알지어다 그에게 피하는 자는 복이 있도다", r: "시편 34:8" },
+            { t: "보라 내가 문 밖에 서서 두드리노니 누구든지 내 음성을 듣고 문을 열면 내가 그에게로 들어가", r: "요한계시록 3:20" },
+            { t: "하나님은 영이시니 예배하는 자가 영과 진리로 예배할지니라", r: "요한복음 4:24" },
+            { t: "나는 부활이요 생명이니 나를 믿는 자는 죽어도 살겠고", r: "요한복음 11:25" },
+            { t: "그의 진노는 잠깐이요 그의 은총은 평생이로다 저녁에는 울음이 기숙할지라도 아침에는 기쁨이 오리로다", r: "시편 30:5" },
+            { t: "의인은 믿음으로 말미암아 살리라", r: "로마서 1:17" },
+            { t: "여호와의 이름을 부르는 자는 다 구원을 받으리라", r: "요엘 2:32" },
+            { t: "여호와여 주의 인자하심이 하늘에 있고 주의 진실하심이 공중에 사무치며", r: "시편 36:5" },
+            { t: "하나님은 우리가 당할 수 있는 것 이상으로 시험 당함을 허락하지 아니하시고 피할 길을 내사 능히 감당하게 하시느니라", r: "고린도전서 10:13" },
+            { t: "우리 주 예수 그리스도의 은혜와 하나님의 사랑과 성령의 교통하심이 너희 무리와 함께 있을지어다", r: "고린도후서 13:13" },
+            { t: "내 안에 거하라 나도 너희 안에 거하리라", r: "요한복음 15:4" },
+            { t: "선하시며 인자하심이 내 평생에 나를 따리리니 내가 여호와의 집에 영원히 살리로다", r: "시편 23:6" },
+            { t: "여호와를 영원히 신뢰하라 주 여호와는 영원한 반석이심이로다", r: "이사야 26:4" },
+            { t: "이는 내가 너희를 향하여 가지는 생각을 내가 아나니 평안이요 재앙이 아니니라 너희에게 미래와 희망을 주는 것이니라", r: "예레미야 29:11" },
+            { t: "모든 육체는 풀과 같고 오직 주의 말씀은 세세에 있도다", r: "베드로전서 1:24-25" },
+            { t: "여호와께서 너를 지키시리로다 여호와께서 네 오른쪽에서 네 그늘이 되시나니", r: "시편 121:5" },
+            { t: "주 여호와여 주에게는 할 수 없는 일이 없으시니이다", r: "예레미야 32:17" },
+            { t: "구하라 그리하면 너희에게 주실 것이요 찾으라 그리하면 찾아낼 것이요", r: "마태복음 7:7" },
+            { t: "여호와의 율법은 완전하여 영혼을 소생시키며", r: "시편 19:7" },
+            { t: "하나님께로부터 난 자마다 세상을 이기느니라 우리의 믿음이니라", r: "요한1서 5:4" },
+            { t: "내 양은 내 음성을 들으며 나는 그들을 알며 그들은 나를 따르느니라", r: "요한복음 10:27" },
+            { t: "여호와의 사자가 주를 경외하는 자를 둘러 진 치고 그들을 건지시는도다", r: "시편 34:7" },
+            { t: "주 앞에서 낮추라 그리하면 주께서 너희를 높이시리라", r: "야고보서 4:10" },
+            { t: "그러므로 형제들아 너희 몸을 하나님이 기뻐하시는 거룩한 산 제물로 드리라", r: "로마서 12:1" },
+            { t: "너희가 내 이름으로 무엇이든지 내게 구하면 내가 행하리라", r: "요한복음 14:14" },
+            { t: "마음이 청결한 자는 복이 있나니 그들이 하나님을 볼 것임이요", r: "마태복음 5:8" },
+            { t: "주의 말씀을 따라 내 발걸음을 바르게 하시고", r: "시편 119:133" },
+            { t: "날마다 자기 십자가를 지고 나를 따를 것이니라", r: "누가복음 9:23" },
+            { t: "지혜가 부족한 자가 있거든 하나님께 구하라 그리하면 주시리라", r: "야고보서 1:5" },
+            { t: "네 이웃을 네 자신과 같이 사랑하라", r: "마태복음 22:39" },
+            { t: "너희는 가서 모든 민족을 제자로 삼아", r: "마태복음 28:19" },
+            { t: "의를 위하여 박해를 받은 자는 복이 있나니 천국이 그들의 것임이라", r: "마태복음 5:10" },
+            { t: "아들이 너희를 자유롭게 하면 너희가 참으로 자유로운 자가 되리라", r: "요한복음 8:36" },
+            { t: "너희가 나를 온전히 구하면 나를 만나리라", r: "예레미야 29:13" },
+            { t: "누구든지 주의 이름을 부르는 자는 구원을 받으리라", r: "로마서 10:13" },
+            { t: "하나님이여 사슴이 시냇물을 찾기에 갈급함 같이 내 영혼이 주를 찾기에 갈급하니이다", r: "시편 42:1" },
+            { t: "죄의 삯은 사망이요 하나님의 은사는 그리스도 예수 우리 주 안에 있는 영생이니라", r: "로마서 6:23" },
+            { t: "우리 많은 사람이 그리스도 안에서 한 몸이 되어 서로 지체가 되었느니라", r: "로마서 12:5" },
+            { t: "일용할 양식을 오늘 우리에게 주시옵고", r: "마태복음 6:11" },
+            { t: "너희 짐을 서로 지라 그리하여 그리스도의 법을 성취하라", r: "갈라디아서 6:2" },
+            { t: "복 있는 사람은 오직 여호와의 율법을 즐거워하여 주야로 묵상하는도다", r: "시편 1:1-2" },
+            { t: "빛이 있으라 하시니 빛이 있었고", r: "창세기 1:3" },
+            { t: "항상 기뻐하라", r: "데살로니가전서 5:16" },
+            { t: "쉬지 말고 기도하라", r: "데살로니가전서 5:17" },
+            { t: "범사에 감사하라 이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라", r: "데살로니가전서 5:18" },
+            { t: "여호와는 나의 힘이요 나의 노래시며 나의 구원이시로다", r: "출애굽기 15:2" },
+            { t: "주의 나라가 임하시오며 주의 뜻이 하늘에서 이루어진 것 같이 땅에서도 이루어지이다", r: "마태복음 6:10" },
+            { t: "여호와께서 착한 것이 무엇임을 네게 보이셨나니 공의를 행하며 인자를 사랑하며 겸손하게 네 하나님과 함께 행하는 것이니라", r: "미가 6:8" },
+            { t: "지혜가 제일이니 지혜를 얻으라", r: "잠언 4:7" },
+            { t: "기뻐하는 자들과 함께 기뻐하고 우는 자들과 함께 울라", r: "로마서 12:15" },
+            { t: "회개하라 천국이 가까이 왔느니라", r: "마태복음 4:17" },
+            { t: "내가 거룩하니 너희도 거룩할지어다", r: "레위기 11:45" },
+            { t: "하나님의 나라는 오직 성령 안에 있는 의와 평강과 희락이라", r: "로마서 14:17" },
+            { t: "여호와여 주의 길을 내게 보이시고 주의 도를 내게 가르치소서", r: "시편 25:4" },
+            { t: "이 세상도 그 정욕도 지나가되 오직 하나님의 뜻을 행하는 자는 영원히 거하느니라", r: "요한1서 2:17" },
+            { t: "여호와는 은혜로우시며 의로우시도다 우리 하나님은 긍휼이 많으시도다", r: "시편 116:5" },
+            { t: "낮에는 여호와께서 그의 인자함을 베푸시고 밤에는 그의 찬송이 내게 있어", r: "시편 42:8" },
+            { t: "어두운 데에서 빛이 비치라 말씀하셨던 그 하나님께서 우리 마음에 비추셨느니라", r: "고린도후서 4:6" },
+            { t: "여호와여 내가 주를 높이리니 주께서 나를 끌어올리시고", r: "시편 30:1" },
+            { t: "내가 너를 잠시 동안 버렸으나 큰 긍휼로 너를 모을 것이며", r: "이사야 54:7" },
+            { t: "주께서 내 기도를 들으시고 내 눈물을 보셨나이다", r: "이사야 38:5" },
+            { t: "저녁 때에 빛이 있으리라", r: "스가랴 14:7" },
+            { t: "여호와 하나님이여 주는 나의 하나님이시니이다 내가 주를 높이고 주의 이름을 찬양하오리니", r: "이사야 25:1" },
+            { t: "웃을 때가 있고 슬퍼할 때가 있으며", r: "전도서 3:4" },
+            { t: "물댄 동산 같겠고 물이 끊어지지 아니하는 샘 같을 것이라", r: "이사야 58:11" },
+            { t: "여호와여 주의 세밀한 은혜를 기억하소서 그것은 영원부터 있었나이다", r: "시편 25:6" },
+            { t: "지혜롭게 행하기를 힘쓰라 세월을 아끼라", r: "에베소서 5:15-16" },
+            { t: "그는 네 생명이시요 네 장수시니", r: "신명기 30:20" },
+            { t: "만물이 다 그로 말미암아 그를 위하여 창조되었고", r: "골로새서 1:16" },
+            { t: "여호와여 주께서 나를 찾으시고 나를 아시나이다", r: "시편 139:1" },
+            { t: "주의 말씀의 강령은 진리이온데 주의 의로운 모든 규례는 영원하리이다", r: "시편 119:160" },
+            { t: "이 백성은 내가 나를 위하여 지었나니 나를 찬송하게 하려 함이니라", r: "이사야 43:21" },
+            { t: "대저 사람이 마음에 생각하는 그대로 그 사람의 됨됨이니라", r: "잠언 23:7" },
+            { t: "너는 여호와 네 하나님이 명령한 대로 행하여 좌로나 우로나 치우치지 말라", r: "신명기 5:32" },
+            { t: "형제를 사랑하는 자는 빛 가운데 거하여", r: "요한1서 2:10" },
+            { t: "주는 변함이 없고 주의 연대는 무궁하리이다", r: "시편 102:27" },
+            { t: "믿음도 행함이 없으면 그 자체가 죽은 것이라", r: "야고보서 2:17" },
+            { t: "여호와여 구하오니 주의 길을 내게 보이시고", r: "시편 25:4" },
+            { t: "하나님이 미리 아신 자들을 그 아들의 형상을 본받게 하기 위하여 미리 정하셨으니", r: "로마서 8:29" },
+            { t: "주 하나님이 이르시되 여호와의 말씀을 듣지 못한 기갈이라", r: "아모스 8:11" },
+            { t: "믿음의 주요 또 온전하게 하시는 이인 예수를 바라보자", r: "히브리서 12:2" },
+            { t: "여호와를 가까이하라 그리하면 너희를 가까이하시리라", r: "야고보서 4:8" },
+            { t: "주님은 미쁘사 너희를 굳건하게 하시고 악한 자에게서 지키시리라", r: "데살로니가후서 3:3" },
+            { t: "여호와여 주의 인자하심으로 나를 인도하소서", r: "시편 5:8" },
+            { t: "여호와께서 너를 위하여 그의 천사들을 명령하사 네 모든 길에서 너를 지키게 하심이라", r: "시편 91:11" },
+            { t: "하나님이 우리를 구원하사 거룩하신 소명으로 부르심은", r: "디모데후서 1:9" },
+            { t: "일어나라 빛을 발하라 이는 네 빛이 이르렀고 여호와의 영광이 네 위에 임하였음이니라", r: "이사야 60:1" },
+            { t: "나의 도움은 천지를 지으신 여호와에게서로다", r: "시편 121:2" }
+        ];
+
+        /* ── 오늘의 말씀 표시 ── */
+        function showDailyVerse() {
+            if (dailyVerses.length === 0) return;
+            var today = new Date();
+            var start = new Date(today.getFullYear(), 0, 0);
+            var diff = today - start;
+            var dayOfYear = Math.floor(diff / 86400000);
+            var index = dayOfYear % dailyVerses.length;
+            var v = dailyVerses[index];
+            var textEl = document.getElementById('dailyVerseText');
+            var refEl = document.getElementById('dailyVerseRef');
+            if (textEl) textEl.textContent = '"' + v.t + '"';
+            if (refEl) refEl.textContent = '— ' + v.r;
         }
 
-        /* ===== 새 대화 ===== */
-        function newChat() {
-            if (confirm('대화 내역을 초기화하시겠습니까?\n(등록 정보는 유지됩니다)')) {
-                var el = document.getElementById('chatMessages');
-                if (el) el.innerHTML = '';
-                closeModal('chatOverlay');
+        /* ── 구독 시스템 비활성화 ── */
+        function canUseService() { return true; }
+        function incrementUsage() { }
+        function updateRemainingBadge() {
+            var b = document.getElementById('remainingBadge');
+            if (b) b.style.display = 'none';
+        }
+        function showPaywall() { }
+
+        /* ── 사이드 메뉴 ── */
+        function toggleSideMenu() {
+            var overlay = document.getElementById('sideMenuOverlay');
+            var menu = document.getElementById('sideMenu');
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                overlay.classList.remove('active');
+            } else {
+                menu.classList.add('open');
+                overlay.classList.add('active');
             }
         }
 
-        /* ===== 구독 시스템 일시 정지 ===== */
-        function canUseService() { return true; }
-        function incrementUsage() { }
-        function updateRemainingBadge() { }
-        function showPaywall() { }
+        /* ── 정보 모달 ── */
+        function openInfoModal(type) {
+            toggleSideMenu();
+            var overlay = document.getElementById('infoModalOverlay');
+            var content = document.getElementById('infoModalContent');
+            var html = '';
+            if (type === 'guide') {
+                html = '<h3>📋 이용 안내</h3>' +
+                    '<p><strong>나침반</strong>은 김성수 목사님의 말씀을 기반으로 한 AI 영적 상담 서비스입니다.</p>' +
+                    '<p><strong>주요 기능</strong></p>' +
+                    '<p>• 말씀 찾기: 성경 구절과 설교 내용 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 목사님 찬양: 찬양 듣기</p>' +
+                    '<p><strong>안내 사항</strong></p>' +
+                    '<p>• 모든 대화는 기기 내 암호화 저장됩니다<br>• AI가 생성하는 답변이므로 참고용으로 활용해주세요<br>• 심각한 위기 상황 시 전문 상담을 이용해주세요<br>&nbsp;&nbsp;- 자살예방상담 1393<br>&nbsp;&nbsp;- 정신건강위기상담 1577-0199</p>' +
+                    '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
+            } else if (type === 'notice') {
+                html = '<h3>📢 공지사항</h3>' +
+                    '<p><strong>[2025.02] 서비스 오픈</strong></p>' +
+                    '<p>나침반 AI 영적 상담 서비스가 오픈되었습니다.</p>' +
+                    '<p><strong>[안내]</strong></p>' +
+                    '<p>현재 베타 서비스 운영 중이며 지속적으로 개선하고 있습니다.</p>' +
+                    '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
+            } else if (type === 'contact') {
+                html = '<h3>💬 문의하기</h3>' +
+                    '<p>서비스 이용 중 문의사항이 있으시면 아래로 연락해주세요.</p>' +
+                    '<p><strong>카카오톡 채널</strong>: 나침반 상담</p>' +
+                    '<p><strong>이메일</strong>: compass@church.com</p>' +
+                    '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
+            }
+            content.innerHTML = html;
+            overlay.classList.add('active');
+        }
 
-        /* ===== 구독 안내 ===== */
-        function openSubscriptionModal() {
-            closeSideMenu();
-            document.getElementById('subscriptionModal').style.display = 'flex';
-        }
-        function closeSubscriptionModal() {
-            document.getElementById('subscriptionModal').style.display = 'none';
-        }
-        function requestSubscription(plan) {
-            var planName = plan === 'monthly' ? '월간 구독 (4,900원/월)' : '연간 구독 (49,000원/년)';
-            alert('[ ' + planName + ' 신청 안내 ]\n\n현재 결제 시스템 준비 중입니다.\n\n📱 카카오톡 문의: (채널 준비 중)\n📞 전화 문의: (번호 준비 중)\n🏦 계좌이체: (계좌 준비 중)');
-        }
-        function requestChurchPlan() {
-            alert('[ ⛪ 교회 단체 구독 문의 ]\n\n• 50명 이상: 1인당 월 3,000원\n• 100명 이상: 1인당 월 2,500원\n• 200명 이상: 별도 협의\n\n📞 문의: (번호 준비 중)');
+        function closeInfoModal() {
+            document.getElementById('infoModalOverlay').classList.remove('active');
         }
 
-        /* ===== 내 정보 ===== */
+        /* ── 프로필 모달 ── */
         function openProfileModal() {
-            closeSideMenu();
+            toggleSideMenu();
             document.getElementById('profileName').value = localStorage.getItem('userName') || '';
-            document.getElementById('profileAge').value = localStorage.getItem('ageGroup') || '';
-            document.getElementById('profileGender').value = localStorage.getItem('gender') || '';
-            document.getElementById('profileRegion').value = localStorage.getItem('region') || '';
-            document.getElementById('profileJob').value = localStorage.getItem('job') || '';
-            document.getElementById('profileModal').style.display = 'flex';
+            document.getElementById('profileAge').value = localStorage.getItem('userAge') || '';
+            document.getElementById('profileGender').value = localStorage.getItem('userGender') || '';
+            document.getElementById('profileModalOverlay').classList.add('active');
         }
-        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+
         function saveProfile() {
             var name = document.getElementById('profileName').value.trim();
-            if (name) localStorage.setItem('userName', name);
             var age = document.getElementById('profileAge').value;
-            if (age) localStorage.setItem('ageGroup', age);
             var gender = document.getElementById('profileGender').value;
-            if (gender) localStorage.setItem('gender', gender);
-            localStorage.setItem('region', document.getElementById('profileRegion').value.trim());
-            localStorage.setItem('job', document.getElementById('profileJob').value.trim());
-            var greetEl = document.getElementById('greetingName');
-            if (greetEl && name) greetEl.textContent = name + '님';
+            if (name) {
+                localStorage.setItem('userName', name);
+                localStorage.setItem('userAge', age);
+                localStorage.setItem('userGender', gender);
+                var greet = document.getElementById('greetingName');
+                if (greet) greet.textContent = name + '님';
+            }
             closeProfileModal();
-            alert('정보가 저장되었습니다.');
         }
 
-        /* ===== 이용 안내 / 공지사항 / 문의 ===== */
-        function openInfoModal() { closeSideMenu(); document.getElementById('infoModal').style.display = 'flex'; }
-        function closeInfoModal() { document.getElementById('infoModal').style.display = 'none'; }
-        function openNoticeModal() { closeSideMenu(); document.getElementById('noticeModal').style.display = 'flex'; }
-        function closeNoticeModal() { document.getElementById('noticeModal').style.display = 'none'; }
-        function openContact() {
-            closeSideMenu();
-            alert('💬 문의하기\n\n📱 카카오톡 채널: (준비 중)\n📧 이메일: compass@seoulsomona.org\n📞 전화: (준비 중)\n\n운영 시간: 평일 10:00 ~ 18:00');
+        function closeProfileModal() {
+            document.getElementById('profileModalOverlay').classList.remove('active');
         }
 
-        /* ===== 전체 초기화 ===== */
-        function resetSystem() {
-            if (confirm('모든 데이터(대화 내역, 등록 정보)를\n초기화하시겠습니까?')) {
+        /* ── 대화 초기화 (우측 버튼) ── */
+        function resetConversation() {
+            if (confirm('대화 내용을 초기화하시겠습니까?\n(등록 정보는 유지됩니다)')) {
+                var cm = document.getElementById('chatMessages');
+                if (cm) cm.innerHTML = '';
+                localStorage.removeItem('chatHistory');
+            }
+        }
+
+        /* ── 전체 초기화 (사이드 메뉴) ── */
+        function fullReset() {
+            if (confirm('모든 데이터를 초기화하시겠습니까?\n(대화, 등록 정보 모두 삭제됩니다)')) {
                 localStorage.clear();
                 location.reload();
             }
         }
 
-        /* ===== 페이지 로드 ===== */
-        document.addEventListener('DOMContentLoaded', function () {
+        /* ── 온보딩 ── */
+        function checkOnboarding() {
             var name = localStorage.getItem('userName');
-            if (name) {
-                var greetEl = document.getElementById('greetingName');
-                if (greetEl) greetEl.textContent = name + '님';
+            if (!name) {
+                document.getElementById('onboardingOverlay').classList.add('active');
+            } else {
+                var greet = document.getElementById('greetingName');
+                if (greet) greet.textContent = name + '님';
             }
+        }
+
+        function completeOnboarding() {
+            var name = document.getElementById('onboardName').value.trim();
+            if (!name) { alert('이름을 입력해주세요.'); return; }
+            localStorage.setItem('userName', name);
+            localStorage.setItem('userAge', document.getElementById('onboardAge').value);
+            localStorage.setItem('userGender', document.getElementById('onboardGender').value);
+            document.getElementById('onboardingOverlay').classList.remove('active');
+            var greet = document.getElementById('greetingName');
+            if (greet) greet.textContent = name + '님';
+        }
+
+        /* ── 찬양 모달 ── */
+        function openHymnModal() {
+            document.getElementById('hymnModal').classList.add('active');
+            loadHymns();
+        }
+        function closeHymnModal() {
+            document.getElementById('hymnModal').classList.remove('active');
+            var audio = document.getElementById('hymnAudio');
+            if (audio) audio.pause();
+        }
+
+        function loadHymns() {
+            var list = document.getElementById('hymnList');
+            list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">불러오는 중...</div>';
+            fetch('/api/hymns')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.files || data.files.length === 0) {
+                        list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양이 없습니다</div>';
+                        return;
+                    }
+                    var html = '';
+                    data.files.forEach(function (f) {
+                        var name = f.name.replace(/\.(mp3|wav|m4a|ogg)$/i, '');
+                        html += '<div class="hymn-item" onclick="playHymn(\'' + f.id + '\',\'' + name.replace(/'/g, "\\'") + '\')">' +
+                            '<span class="hymn-icon">🎵</span>' +
+                            '<span class="hymn-name">' + name + '</span></div>';
+                    });
+                    list.innerHTML = html;
+                })
+                .catch(function () {
+                    list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">불러오기 실패</div>';
+                });
+        }
+
+        function playHymn(fileId, name) {
+            var player = document.getElementById('hymnPlayer');
+            var audio = document.getElementById('hymnAudio');
+            var nowPlaying = document.getElementById('nowPlaying');
+            player.style.display = 'block';
+            nowPlaying.textContent = '재생 중: ' + name;
+            audio.src = '/api/hymn-play/' + fileId;
+            audio.play();
+        }
+
+        /* ── 채팅 모달 ── */
+        var currentRoute = '';
+
+        function handleClick(route) {
+            currentRoute = route;
+            var titles = {
+                'bible': '📖 말씀 찾기',
+                'prayer': '🙏 기도문',
+                'meditation': '✨ 오늘의 묵상'
+            };
+            document.getElementById('modalTitle').textContent = titles[route] || '💬 AI 상담';
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('chatModal').classList.add('active');
+
+            if (route === 'meditation') {
+                sendToAI('오늘의 묵상을 부탁합니다. 오늘 날짜에 맞는 성경 구절과 묵상 가이드를 제공해주세요.', true);
+            }
+        }
+
+        function sendFromHome() {
+            var input = document.getElementById('homeInput');
+            var msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            currentRoute = 'general';
+            document.getElementById('modalTitle').textContent = '💬 AI 상담';
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('chatModal').classList.add('active');
+            sendToAI(msg, false);
+        }
+
+        function closeChatModal() {
+            document.getElementById('chatModal').classList.remove('active');
+        }
+
+        function sendMessage() {
+            var input = document.getElementById('modalInput');
+            var msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            sendToAI(msg, false);
+        }
+
+        function sendToAI(msg, isAuto) {
+            if (!isAuto) {
+                appendMessage('user', msg);
+            }
+            showTyping();
+
+            var profile = {
+                name: localStorage.getItem('userName') || '',
+                age: localStorage.getItem('userAge') || '',
+                gender: localStorage.getItem('userGender') || ''
+            };
+
+            var prefix = '';
+            if (currentRoute === 'bible') prefix = '[말씀찾기] ';
+            else if (currentRoute === 'prayer') prefix = '[기도문] ';
+            else if (currentRoute === 'meditation') prefix = '[묵상] ';
+
+            fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: prefix + msg, profile: profile })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    hideTyping();
+                    if (data.response) {
+                        var parsed = parseAIResponse(data.response);
+                        appendAIMessage(parsed);
+                    }
+                })
+                .catch(function (err) {
+                    hideTyping();
+                    appendMessage('ai', '죄송합니다. 오류가 발생했습니다. 다시 시도해주세요.');
+                });
+        }
+
+        function parseAIResponse(text) {
+            var result = { main: '', deep: '' };
+            var deepStart = text.indexOf('[심층 분석 시작]');
+            var deepEnd = text.indexOf('[심층 분석 끝]');
+            if (deepStart !== -1 && deepEnd !== -1) {
+                result.main = text.substring(0, deepStart).replace('[일반 답변 시작]', '').replace('[일반 답변 끝]', '').trim();
+                result.deep = text.substring(deepStart + '[심층 분석 시작]'.length, deepEnd).trim();
+            } else {
+                result.main = text.replace('[일반 답변 시작]', '').replace('[일반 답변 끝]', '').trim();
+            }
+            return result;
+        }
+
+        function appendMessage(type, text) {
+            var container = document.getElementById('chatMessages');
+            var div = document.createElement('div');
+            div.className = 'message ' + type;
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendAIMessage(parsed) {
+            var container = document.getElementById('chatMessages');
+            var div = document.createElement('div');
+            div.className = 'message ai';
+            var html = '<span class="ai-label">✝️ 나침반</span>';
+            html += '<div>' + parsed.main.replace(/\n/g, '<br>') + '</div>';
+            if (parsed.deep) {
+                var id = 'deep_' + Date.now();
+                html += '<div class="deep-btn" onclick="toggleDeep(\'' + id + '\')">📖 심층 분석 보기</div>';
+                html += '<div class="deep-content" id="' + id + '">' + parsed.deep.replace(/\n/g, '<br>') + '</div>';
+            }
+            div.innerHTML = html;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleDeep(id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.toggle('show');
+        }
+
+        function showTyping() {
+            var container = document.getElementById('chatMessages');
+            var div = document.createElement('div');
+            div.className = 'typing-indicator';
+            div.id = 'typingIndicator';
+            div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTyping() {
+            var el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        /* ── 음성 입력 ── */
+        function startVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('이 브라우저는 음성 인식을 지원하지 않습니다.');
+                return;
+            }
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var recognition = new SpeechRecognition();
+            recognition.lang = 'ko-KR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.onresult = function (event) {
+                var text = event.results[0][0].transcript;
+                document.getElementById('homeInput').value = text;
+            };
+            recognition.onerror = function () { };
+            recognition.start();
+        }
+
+        /* ── 페이지 초기화 ── */
+        document.addEventListener('DOMContentLoaded', function () {
+            checkOnboarding();
+            showDailyVerse();
         });
     </script>
 </body>
