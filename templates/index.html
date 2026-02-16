@@ -1456,12 +1456,13 @@
             fetch('/api/hymns')
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    if (!data.files || data.files.length === 0) {
+                    var files = data.files || data.hymns || [];
+                    if (files.length === 0) {
                         list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양이 없습니다</div>';
                         return;
                     }
                     var html = '';
-                    data.files.forEach(function (f) {
+                    files.forEach(function (f) {
                         var name = f.name.replace(/\.(mp3|wav|m4a|ogg)$/i, '');
                         html += '<div class="hymn-item" onclick="playHymn(\'' + f.id + '\',\'' + name.replace(/'/g, "\\'") + '\')">' +
                             '<span class="hymn-icon">🎵</span>' +
