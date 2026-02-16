@@ -252,9 +252,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
             cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         .voice-btn {
@@ -265,10 +265,6 @@
         .send-btn {
             background: linear-gradient(135deg, #c9a84c, #b8943f);
             color: #0a0f1e;
-        }
-
-        .send-btn:hover {
-            opacity: 0.85;
         }
 
         /* ===== 채팅 모달 (상담창) ===== */
@@ -926,8 +922,22 @@
             <div class="input-row">
                 <input type="text" id="homeInput" placeholder="무엇이든 물어보세요..."
                     onkeypress="if(event.key==='Enter') sendFromHome()">
-                <button class="voice-btn" id="voiceBtn" onclick="startVoice()">🎤</button>
-                <button class="send-btn" onclick="sendFromHome()">➤</button>
+                <button class="voice-btn" id="voiceBtn" onclick="startVoice()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        <line x1="12" y1="19" x2="12" y2="23" />
+                        <line x1="8" y1="23" x2="16" y2="23" />
+                    </svg>
+                </button>
+                <button class="send-btn" onclick="sendFromHome()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a0f1e" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -1635,24 +1645,26 @@
             recognition.lang = 'ko-KR';
             recognition.continuous = false;
             recognition.interimResults = false;
+
             var voiceBtn = document.getElementById('voiceBtn');
             voiceBtn.style.background = 'rgba(255,80,80,0.3)';
-            voiceBtn.textContent = '⏺';
+            voiceBtn.style.borderColor = 'rgba(255,80,80,0.5)';
+            voiceBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#ff5050" stroke="#ff5050" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>';
+
             recognition.onresult = function (event) {
                 var text = event.results[0][0].transcript;
                 document.getElementById('homeInput').value = text;
-                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
-                voiceBtn.textContent = '🎤';
+                resetVoiceBtn();
             };
-            recognition.onerror = function () {
-                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
-                voiceBtn.textContent = '🎤';
-            };
-            recognition.onend = function () {
-                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
-                voiceBtn.textContent = '🎤';
-            };
+            recognition.onerror = function () { resetVoiceBtn(); };
+            recognition.onend = function () { resetVoiceBtn(); };
             recognition.start();
+
+            function resetVoiceBtn() {
+                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
+                voiceBtn.style.borderColor = '';
+                voiceBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+            }
         }
 
         /* ── 페이지 초기화 ── */
