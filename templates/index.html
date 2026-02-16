@@ -105,8 +105,16 @@
         }
 
         .verse-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .verse-icon img {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.3));
         }
 
         .verse-label {
@@ -902,7 +910,9 @@
 
         <!-- 오늘의 말씀 카드 -->
         <div class="daily-verse-card" id="dailyVerseCard" onclick="openDailyMeditation()" style="cursor:pointer;">
-            <div class="verse-icon">✝️</div>
+            <div class="verse-icon">
+                <img src="/static/images/compass_main.png" alt="나침반 아이콘">
+            </div>
             <div class="verse-label">오늘의 말씀</div>
             <div class="verse-text" id="dailyVerseText">"여호와는 나의 목자시니 내게 부족함이 없으리로다"</div>
             <div class="verse-ref" id="dailyVerseRef">— 시편 23:1</div>
