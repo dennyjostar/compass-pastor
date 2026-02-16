@@ -1055,6 +1055,8 @@
                 <option value="여성">여성</option>
             </select>
             <button class="onboarding-btn" onclick="completeOnboarding()">시작하기</button>
+            <div style="margin-top:12px; color:rgba(255,255,255,0.3); font-size:13px; cursor:pointer; text-decoration:underline;"
+                onclick="skipOnboarding()">건너뛰기</div>
         </div>
     </div>
 
@@ -1384,11 +1386,16 @@
         function checkOnboarding() {
             var name = localStorage.getItem('userName');
             if (!name) {
+                // 온보딩을 3초 후 자동으로 닫을 수 있는 "건너뛰기" 버튼 추가
                 document.getElementById('onboardingOverlay').classList.add('active');
             } else {
                 var greet = document.getElementById('greetingName');
                 if (greet) greet.textContent = name + '님';
             }
+        }
+
+        function skipOnboarding() {
+            document.getElementById('onboardingOverlay').classList.remove('active');
         }
 
         function completeOnboarding() {
