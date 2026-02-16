@@ -501,25 +501,44 @@
             opacity: 0.85;
         }
 
-        /* 로딩 */
+        /* 로딩 (답변 대기) */
         .typing-indicator {
             align-self: flex-start;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
             border-bottom-left-radius: 4px;
+            margin: 10px 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .typing-content {
             display: flex;
-            gap: 6px;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .typing-text {
+            font-size: 13px;
+            color: rgba(201, 168, 76, 0.8);
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            padding-left: 2px;
         }
 
         .typing-dot {
-            width: 6px;
-            height: 6px;
-            background: rgba(201, 168, 76, 0.5);
+            width: 5px;
+            height: 5px;
+            background: #c9a84c;
             border-radius: 50%;
-            animation: typingBounce 1.2s infinite;
+            animation: typingBounce 1.4s infinite ease-in-out;
+            opacity: 0.6;
         }
 
         .typing-dot:nth-child(2) {
@@ -535,11 +554,13 @@
             0%,
             80%,
             100% {
-                transform: translateY(0);
+                transform: scale(1);
+                opacity: 0.4;
             }
 
             40% {
-                transform: translateY(-6px);
+                transform: scale(1.4);
+                opacity: 1;
             }
         }
 
@@ -1675,7 +1696,16 @@
             var div = document.createElement('div');
             div.className = 'typing-indicator';
             div.id = 'typingIndicator';
-            div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            div.innerHTML = `
+                <div class="typing-content">
+                    <span class="typing-text">목사님께서 기도하며 말씀을 준비하고 계십니다...</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
