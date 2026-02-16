@@ -1082,6 +1082,26 @@
         </div>
     </div>
 
+    <!-- 공지사항 팝업 -->
+    <div class="info-modal-overlay" id="noticePopupOverlay">
+        <div class="info-modal" id="noticePopupContent">
+            <h3>📢 공지사항</h3>
+            <div style="margin-bottom:20px;">
+                <p style="color:#c9a84c; font-weight:600; margin-bottom:8px;">[2025.02] 나침반 서비스 오픈</p>
+                <p>김성수 목사님의 말씀을 기반으로 한 AI 영적 상담 서비스 '나침반'이 오픈되었습니다.</p>
+                <p style="margin-top:12px; color:#c9a84c; font-weight:600; margin-bottom:8px;">[안내] 베타 서비스 운영 중</p>
+                <p>현재 베타 서비스로 운영 중이며, 지속적으로 개선하고 있습니다. 이용 중 불편사항은 문의하기를 통해 알려주세요.</p>
+            </div>
+            <button class="close-info" onclick="closeNoticePopup(false)">닫기</button>
+            <div style="margin-top:12px; text-align:center;">
+                <span onclick="closeNoticePopup(true)"
+                    style="color:rgba(255,255,255,0.3); font-size:12px; cursor:pointer; text-decoration:underline;">오늘
+                    하루 보지
+                    않기</span>
+            </div>
+        </div>
+    </div>
+
     <script>
         /* ========================================
            나침반 v42.0 — JavaScript 전체
@@ -1679,10 +1699,27 @@
             }
         }
 
+        /* ── 공지사항 팝업 ── */
+        function checkNoticePopup() {
+            var today = new Date().toDateString();
+            var hideDate = localStorage.getItem('noticeHideDate');
+            if (hideDate === today) return;
+            document.getElementById('noticePopupOverlay').classList.add('active');
+        }
+
+        function closeNoticePopup(hideToday) {
+            document.getElementById('noticePopupOverlay').classList.remove('active');
+            if (hideToday) {
+                var today = new Date().toDateString();
+                localStorage.setItem('noticeHideDate', today);
+            }
+        }
+
         /* ── 페이지 초기화 ── */
         document.addEventListener('DOMContentLoaded', function () {
             checkOnboarding();
             showDailyVerse();
+            checkNoticePopup();
         });
     </script>
 </body>
