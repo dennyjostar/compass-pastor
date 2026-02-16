@@ -1577,14 +1577,26 @@
 
         function parseAIResponse(text) {
             var result = { main: '', deep: '' };
+
+            var mainStart = text.indexOf('[일반 답변 시작]');
+            var mainEnd = text.indexOf('[일반 답변 끝]');
             var deepStart = text.indexOf('[심층 분석 시작]');
             var deepEnd = text.indexOf('[심층 분석 끝]');
-            if (deepStart !== -1 && deepEnd !== -1) {
+
+            if (mainStart !== -1 && mainEnd !== -1) {
+                result.main = text.substring(mainStart + '[일반 답변 시작]'.length, mainEnd).trim();
+            } else if (deepStart !== -1) {
                 result.main = text.substring(0, deepStart).replace('[일반 답변 시작]', '').replace('[일반 답변 끝]', '').trim();
-                result.deep = text.substring(deepStart + '[심층 분석 시작]'.length, deepEnd).trim();
             } else {
                 result.main = text.replace('[일반 답변 시작]', '').replace('[일반 답변 끝]', '').trim();
             }
+
+            if (deepStart !== -1 && deepEnd !== -1) {
+                result.deep = text.substring(deepStart + '[심층 분석 시작]'.length, deepEnd).trim();
+            } else if (deepStart !== -1) {
+                result.deep = text.substring(deepStart + '[심층 분석 시작]'.length).replace('[심층 분석 끝]', '').trim();
+            }
+
             return result;
         }
 
@@ -1603,7 +1615,7 @@
             div.className = 'message ai';
             var html = '<span class="ai-label">✝️ 나침반</span>';
             html += '<div>' + parsed.main.replace(/\n/g, '<br>') + '</div>';
-            if (parsed.deep) {
+            if (parsed.deep && parsed.deep.length > 0) {
                 var id = 'deep_' + Date.now();
                 html += '<div class="deep-btn" onclick="toggleDeep(\'' + id + '\')">📖 심층 분석 보기</div>';
                 html += '<div class="deep-content" id="' + id + '">' + parsed.deep.replace(/\n/g, '<br>') + '</div>';
