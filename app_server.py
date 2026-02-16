@@ -1,163 +1,30 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import os
 import openai
-import json
 from datetime import datetime
-import difflib
-import requests
+import hashlib
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "compass-secret-key-2026")
 
-# ══ Google Drive 찬양 설정 ══
-GOOGLE_API_KEY = 'AIzaSyBUvxZTwsN60wyC9YZJjidR6VfhWjFazB8'
-DRIVE_FOLDER_ID = '1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9'
-
-# API Key 설정 (환경변수 필수)
+# OpenAI 설정
 def get_openai_client():
     key = os.getenv("OPENAI_API_KEY")
-    project_name = os.getenv("RAILWAY_PROJECT_NAME", "알 수 없는 프로젝트")
-    
     if not key:
-        raise ValueError(f"OPENAI_API_KEY 환경 변수가 없습니다. (현재 프로젝트명: {project_name}) Railway 설정(Variables)에서 키를 넣었는지 다시 확인해주세요.")
-    
-    key = key.strip()
-    
-    if len(key) < 20:
-        raise ValueError(f"입력된 API 키가 지나치게 짧습니다. (현재 프로젝트명: {project_name}) 키 전체를 정확히 복사했는지 확인해주세요.")
-        
-    print(f"[DEBUG] API Key valid. Starts with: {key[:7]}...")
+        raise ValueError("OPENAI_API_KEY가 없습니다.")
     return openai.OpenAI(api_key=key)
 
-# 경로 설정 (배포 환경 호환)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGS_DIR = os.path.join(BASE_DIR, 'logs')
-SERMON_DATA_PATH = os.path.join(BASE_DIR, 'total_sermon_db.json')
+# 서버 사이드 사용량 추적 (메모리 기반 → 추후 DB 교체)
+user_usage = {}
+FREE_LIMIT = 3
 
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-# 설교 데이터 로드
-sermon_db = []
-if os.path.exists(SERMON_DATA_PATH):
-    try:
-        with open(SERMON_DATA_PATH, 'r', encoding='utf-8') as f:
-            sermon_db = json.load(f)
-            print(f"[OK] {len(sermon_db)} sermons loaded.")
-    except Exception as e:
-        print(f"[ERROR] DB load failed: {e}")
-
-def get_user_data(user_id):
-    file_path = os.path.join(LOGS_DIR, f"{user_id}.json")
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except: pass
-    return {"profile": {}, "history": []}
-
-def save_user_data(user_id, data):
-    file_path = os.path.join(LOGS_DIR, f"{user_id}.json")
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-def find_best_sermon(query):
-    if not sermon_db: return None
-    titles = [s['title'] for s in sermon_db]
-    matches = difflib.get_close_matches(query, titles, n=1, cutoff=0.3)
-    if matches:
-        for s in sermon_db:
-            if s['title'] == matches[0]: return s
-    return None
+def get_user_hash(name, age_group="", gender=""):
+    raw = f"{name}_{age_group}_{gender}"
+    return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 @app.route('/')
 def home():
     return render_template('index.html')
-
-@app.route('/terms')
-def terms():
-    return render_template('terms.html')
-
-@app.route('/privacy')
-def privacy():
-    return render_template('privacy.html')
-
-@app.route('/ai-notice')
-def ai_notice():
-    return render_template('ai-notice.html')
-
-@app.route('/compass-test')
-def compass_test():
-    return render_template('compass-test.html')
-
-# ══ 목사님 찬양 API ══
-@app.route('/api/hymns')
-def get_hymns():
-    """Google Drive 폴더에서 찬양 목록 자동 조회"""
-    url = 'https://www.googleapis.com/drive/v3/files'
-    params = {
-        'q': f"'{DRIVE_FOLDER_ID}' in parents and mimeType='audio/mpeg'",
-        'key': GOOGLE_API_KEY,
-        'fields': 'files(id,name,size)',
-        'orderBy': 'name',
-        'pageSize': 100
-    }
-    
-    try:
-        res = requests.get(url, params=params)
-        data = res.json()
-        
-        hymns = []
-        for f in data.get('files', []):
-            title = f['name'].replace('.mp3', '')
-            hymns.append({
-                'title': title,
-                'fileId': f['id'],
-                'size': f.get('size', '0')
-            })
-        
-        return jsonify({'hymns': hymns})
-    
-    except Exception as e:
-        print(f"[ERROR] Hymn API failed: {e}")
-        return jsonify({'hymns': [], 'error': str(e)}), 500
-
-# ══ 찬양 오디오 프록시 (Google Drive API 직접 다운로드) ══
-@app.route('/api/hymn-play/<file_id>')
-def hymn_play(file_id):
-    """Google Drive API로 파일을 직접 다운로드하여 스트리밍"""
-    from flask import Response
-    
-    try:
-        # Google Drive API v3 미디어 다운로드 엔드포인트
-        drive_url = f'https://www.googleapis.com/drive/v3/files/{file_id}'
-        params = {
-            'alt': 'media',
-            'key': GOOGLE_API_KEY
-        }
-        
-        resp = requests.get(drive_url, params=params, stream=True, timeout=30)
-        
-        if resp.status_code != 200:
-            print(f"[ERROR] Drive API returned {resp.status_code}: {resp.text[:200]}")
-            return 'File not found', 404
-        
-        def generate():
-            for chunk in resp.iter_content(chunk_size=8192):
-                if chunk:
-                    yield chunk
-        
-        return Response(
-            generate(),
-            content_type='audio/mpeg',
-            headers={
-                'Accept-Ranges': 'bytes',
-                'Cache-Control': 'public, max-age=86400',
-                'Content-Type': 'audio/mpeg'
-            }
-        )
-    except Exception as e:
-        print(f"[ERROR] Hymn play failed: {e}")
-        return 'Error', 500
 
 @app.route('/ask', methods=['POST'])
 def ask():
@@ -165,70 +32,103 @@ def ask():
         data = request.json
         user_msg = data.get('message', '')
         profile = data.get('profile', {})
-        user_name = profile.get('name', '익명')
-        user_id = user_name
+        user_name = profile.get('name', '성도')
+        age_group = profile.get('ageGroup', '')
+        gender = profile.get('gender', '')
 
-        user_data = get_user_data(user_id)
-        user_data['profile'] = profile
+        # 사용자 식별
+        user_hash = get_user_hash(user_name, age_group, gender)
 
-        # ══ 관련 설교 미리 검색 (Top 5) ══
-        related_sermons = []
-        if sermon_db:
-            # 단순 키워드 매칭으로 5개 추출
-            words = user_msg.split()
-            matches = []
-            for s in sermon_db:
-                score = 0
-                for w in words:
-                    if len(w) > 1 and w in s['title']: score += 1
-                if score > 0:
-                    matches.append((score, s))
-            matches.sort(key=lambda x: x[0], reverse=True)
-            related_sermons = [m[1] for m in matches[:5]]
+        # 사용량 체크
+        if user_hash not in user_usage:
+            user_usage[user_hash] = {
+                "count": 0,
+                "first_use": datetime.now().isoformat(),
+                "is_paid": False
+            }
 
-        sermon_hint = ""
-        if related_sermons:
-            sermon_hint = "\n### [참고 가능한 실제 설교 목록]\n"
-            for rs in related_sermons:
-                sermon_hint += f"- {rs['title']} ({rs['url']})\n"
+        usage = user_usage[user_hash]
+
+        # 무료 한도 초과 체크
+        if not usage["is_paid"] and usage["count"] >= FREE_LIMIT:
+            return jsonify({
+                "response": None,
+                "limit_reached": True,
+                "used_count": usage["count"],
+                "remaining": 0,
+                "message": "무료 상담 3회가 모두 사용되었습니다."
+            })
 
         client = get_openai_client()
-        
+
+        # 시스템 프롬프트 (심층 분석 보장)
+        system_prompt = (
+            f"당신은 서머나 교회의 '김성수 목사'입니다. 사용자는 '{user_name} 님'입니다.\n"
+            "사용자의 고민에 대해 반드시 다음 형식을 지켜 답변하십시오.\n\n"
+            "1. [일반 답변 시작] 섹션: 따뜻한 위로와 성경적 권면 (짧게)\n"
+            "2. [심층 분석 시작] 섹션: 인간의 불가능함, 자기 부인, 오직 은혜의 신학을 바탕으로 한 깊이 있는 분석 (500자 이상)\n\n"
+            "반드시 위 태그([일반 답변 시작], [심층 분석 시작])를 정확히 포함해야 합니다.\n\n"
+            "위기 상황(자해, 자살 언급 등)이 감지되면 반드시 다음을 안내하세요:\n"
+            "자살예방상담전화 1393 | 정신건강위기상담전화 1577-0199"
+        )
+
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        f"당신은 서머나 교회의 '김성수 목사'입니다. 사용자는 '{user_name} 님'입니다.\n"
-                        f"사용자 정보 - 연령대: {profile.get('age')}, 성별: {profile.get('gender')}, 직업: {profile.get('job', '알 수 없음')}\n\n"
-                        
-                        "### [대화 지침: 풍성하고 깊이 있는 답변]\n"
-                        "1. 모든 답변은 반드시 아래 2가지 섹션으로 나누어 작성하십시오.\n"
-                        "   - [일반 답변 시작] 섹션: 따뜻한 위로와 공감, 일상적인 복음적 권면 (2~3문장)\n"
-                        "   - [심층 분석 시작] 섹션: 김성수 목사의 핵심 신학(자기 부인, 은혜의 필연성, 인간의 불가능함 등)을 바탕으로 매우 깊고 상세하게 작성하십시오. (최소 500자 이상 권장)\n"
-                        "2. [심층 분석 시작] 섹션 안에는 반드시 다음 내용을 포함하십시오:\n"
-                        "   - **관련 성경 구절**: 상황에 맞는 성경 구절 2-3개를 인용하고 그 영적 의미를 풀이하십시오.\n"
-                        "   - **설교 추천**: 아래 제공된 설교 목록 중 문맥에 맞는 것을 추천하거나, 제목을 언급하며 보라고 권면하십시오.\n"
-                        "3. 섹션 구분 태그([일반 답변 시작], [심층 분석 시작])는 한 글자도 틀리지 말고 정확히 포함하십시오.\n"
-                        "4. '성도님' 금지. 무조건 '{user_name} 님'으로 호칭.\n\n"
-                        f"{sermon_hint}"
-                    )
-                },
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_msg}
             ]
         )
-        
-        reply = completion.choices[0].message.content
-        
-        user_data['history'].append({"t": datetime.now().isoformat(), "q": user_msg, "a": reply})
-        save_user_data(user_id, user_data)
 
-        return jsonify({"response": reply})
+        reply = completion.choices[0].message.content
+
+        # 사용량 증가
+        usage["count"] += 1
+        remaining = max(0, FREE_LIMIT - usage["count"])
+
+        return jsonify({
+            "response": reply,
+            "limit_reached": False,
+            "used_count": usage["count"],
+            "remaining": remaining
+        })
 
     except Exception as e:
         print(f"[ERROR] {e}")
-        return jsonify({"response": f"오류가 발생했습니다: {str(e)}"}), 500
+        return jsonify({"response": f"오류 발생: {str(e)}"}), 500
+
+# Google Drive 찬양 API (기존 유지)
+import requests as http_requests
+
+DRIVE_API_KEY = "AIzaSyBUvxZTwsN60wyC9YZJjidR6VfhWjFazB8"
+DRIVE_FOLDER_ID = "1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9"
+
+@app.route('/api/hymns')
+def get_hymns():
+    try:
+        url = f"https://www.googleapis.com/drive/v3/files?q='{DRIVE_FOLDER_ID}'+in+parents&key={DRIVE_API_KEY}&fields=files(id,name,mimeType)&pageSize=100"
+        resp = http_requests.get(url)
+        data = resp.json()
+        files = data.get('files', [])
+        audio_files = [f for f in files if f.get('mimeType', '').startswith('audio/')]
+        audio_files.sort(key=lambda x: x.get('name', ''))
+        return jsonify({"hymns": audio_files})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/hymn-play/<file_id>')
+def play_hymn(file_id):
+    try:
+        url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media&key={DRIVE_API_KEY}"
+        resp = http_requests.get(url, stream=True)
+        from flask import Response
+        return Response(
+            resp.iter_content(chunk_size=8192),
+            content_type=resp.headers.get('Content-Type', 'audio/mpeg'),
+            headers={'Accept-Ranges': 'bytes'}
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
