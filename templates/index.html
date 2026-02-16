@@ -926,7 +926,7 @@
             <div class="input-row">
                 <input type="text" id="homeInput" placeholder="무엇이든 물어보세요..."
                     onkeypress="if(event.key==='Enter') sendFromHome()">
-                <button class="voice-btn" onclick="startVoice()">🎤</button>
+                <button class="voice-btn" id="voiceBtn" onclick="startVoice()">🎤</button>
                 <button class="send-btn" onclick="sendFromHome()">➤</button>
             </div>
         </div>
@@ -1006,27 +1006,39 @@
     <div class="info-modal-overlay" id="profileModalOverlay">
         <div class="info-modal" id="profileModalContent">
             <h3>👤 내 정보</h3>
-            <label>이름(닉네임)</label>
-            <input type="text" id="profileName" placeholder="이름">
-            <label style="margin-top:12px;">연령대</label>
-            <select id="profileAge">
-                <option value="">선택</option>
-                <option value="10대">10대</option>
-                <option value="20대">20대</option>
-                <option value="30대">30대</option>
-                <option value="40대">40대</option>
-                <option value="50대">50대</option>
-                <option value="60대 이상">60대 이상</option>
-            </select>
-            <label style="margin-top:12px;">성별</label>
-            <select id="profileGender">
-                <option value="">선택</option>
-                <option value="남성">남성</option>
-                <option value="여성">여성</option>
-            </select>
+            <div style="margin-bottom:16px;">
+                <label
+                    style="display:block; color:rgba(201,168,76,0.6); font-size:12px; font-weight:600; margin-bottom:6px;">이름(닉네임)</label>
+                <input type="text" id="profileName" placeholder="이름"
+                    style="width:100%; padding:10px 14px; background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.15); border-radius:12px; color:#e0e0e0; font-size:14px; outline:none;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label
+                    style="display:block; color:rgba(201,168,76,0.6); font-size:12px; font-weight:600; margin-bottom:6px;">연령대</label>
+                <select id="profileAge"
+                    style="width:100%; padding:10px 14px; background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.15); border-radius:12px; color:#e0e0e0; font-size:14px; outline:none;">
+                    <option value="">선택</option>
+                    <option value="10대">10대</option>
+                    <option value="20대">20대</option>
+                    <option value="30대">30대</option>
+                    <option value="40대">40대</option>
+                    <option value="50대">50대</option>
+                    <option value="60대 이상">60대 이상</option>
+                </select>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label
+                    style="display:block; color:rgba(201,168,76,0.6); font-size:12px; font-weight:600; margin-bottom:6px;">성별</label>
+                <select id="profileGender"
+                    style="width:100%; padding:10px 14px; background:rgba(201,168,76,0.06); border:1px solid rgba(201,168,76,0.15); border-radius:12px; color:#e0e0e0; font-size:14px; outline:none;">
+                    <option value="">선택</option>
+                    <option value="남성">남성</option>
+                    <option value="여성">여성</option>
+                </select>
+            </div>
             <button class="close-info" onclick="saveProfile()">저장</button>
             <button class="close-info"
-                style="margin-top:8px;background:transparent;border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);"
+                style="margin-top:8px; background:transparent; border-color:rgba(255,255,255,0.1); color:rgba(255,255,255,0.4);"
                 onclick="closeProfileModal()">닫기</button>
         </div>
     </div>
@@ -1594,7 +1606,7 @@
         /* ── 음성 입력 ── */
         function startVoice() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('이 브라우저는 음성 인식을 지원하지 않습니다.');
+                alert('이 브라우저는 음성 인식을 지원하지 않습니다. 크롬 브라우저를 이용해주세요.');
                 return;
             }
             var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1602,11 +1614,25 @@
             recognition.lang = 'ko-KR';
             recognition.continuous = false;
             recognition.interimResults = false;
+
+            var voiceBtn = document.getElementById('voiceBtn');
+            voiceBtn.style.background = 'rgba(255,80,80,0.3)';
+            voiceBtn.textContent = '⏺';
+
             recognition.onresult = function (event) {
                 var text = event.results[0][0].transcript;
                 document.getElementById('homeInput').value = text;
+                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
+                voiceBtn.textContent = '🎤';
             };
-            recognition.onerror = function () { };
+            recognition.onerror = function () {
+                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
+                voiceBtn.textContent = '🎤';
+            };
+            recognition.onend = function () {
+                voiceBtn.style.background = 'rgba(201,168,76,0.1)';
+                voiceBtn.textContent = '🎤';
+            };
             recognition.start();
         }
 
