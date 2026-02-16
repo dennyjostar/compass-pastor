@@ -1399,14 +1399,23 @@
         /* ── 온보딩 ── */
         function checkOnboarding() {
             var name = localStorage.getItem('userName');
-            if (!name) {
-                // 온보딩을 3초 후 자동으로 닫을 수 있는 "건너뛰기" 버튼 추가
-                document.getElementById('onboardingOverlay').classList.add('active');
-            } else {
+            if (name) {
                 var greet = document.getElementById('greetingName');
                 if (greet) greet.textContent = name + '님';
             }
         }
+
+        function requireProfile(callback) {
+            var name = localStorage.getItem('userName');
+            if (!name) {
+                pendingAction = callback;
+                document.getElementById('onboardingOverlay').classList.add('active');
+                return false;
+            }
+            return true;
+        }
+
+        var pendingAction = null;
 
         function skipOnboarding() {
             document.getElementById('onboardingOverlay').classList.remove('active');
@@ -1421,10 +1430,17 @@
             document.getElementById('onboardingOverlay').classList.remove('active');
             var greet = document.getElementById('greetingName');
             if (greet) greet.textContent = name + '님';
+
+            if (pendingAction) {
+                var action = pendingAction;
+                pendingAction = null;
+                action();
+            }
         }
 
         /* ── 찬양 모달 ── */
         function openHymnModal() {
+            if (!requireProfile(function () { openHymnModal(); })) return;
             document.getElementById('hymnModal').classList.add('active');
             loadHymns();
         }
@@ -1472,6 +1488,7 @@
         var currentRoute = '';
 
         function handleClick(route) {
+            if (!requireProfile(function () { handleClick(route); })) return;
             currentRoute = route;
             var titles = {
                 'bible': '📖 말씀 찾기',
@@ -1481,13 +1498,13 @@
             document.getElementById('modalTitle').textContent = titles[route] || '💬 AI 상담';
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('chatModal').classList.add('active');
-
             if (route === 'meditation') {
                 sendToAI('오늘의 묵상을 부탁합니다. 오늘 날짜에 맞는 성경 구절과 묵상 가이드를 제공해주세요.', true);
             }
         }
 
         function sendFromHome() {
+            if (!requireProfile(function () { sendFromHome(); })) return;
             var input = document.getElementById('homeInput');
             var msg = input.value.trim();
             if (!msg) return;
@@ -1607,6 +1624,7 @@
 
         /* ── 음성 입력 ── */
         function startVoice() {
+            if (!requireProfile(function () { startVoice(); })) return;
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                 alert('이 브라우저는 음성 인식을 지원하지 않습니다. 크롬 브라우저를 이용해주세요.');
                 return;
@@ -1616,11 +1634,9 @@
             recognition.lang = 'ko-KR';
             recognition.continuous = false;
             recognition.interimResults = false;
-
             var voiceBtn = document.getElementById('voiceBtn');
             voiceBtn.style.background = 'rgba(255,80,80,0.3)';
             voiceBtn.textContent = '⏺';
-
             recognition.onresult = function (event) {
                 var text = event.results[0][0].transcript;
                 document.getElementById('homeInput').value = text;
