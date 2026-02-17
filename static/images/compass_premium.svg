@@ -1,0 +1,71 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="ring_grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F9F1D0"/>
+      <stop offset="90%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#8A7030"/>
+    </radialGradient>
+    <linearGradient id="needle_top" x1="256" y1="80" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9E0"/>
+      <stop offset="1" stop-color="#FFD700"/>
+    </linearGradient>
+    <linearGradient id="needle_bottom" x1="256" y1="256" x2="256" y2="432" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9C7B2C"/>
+      <stop offset="1" stop-color="#4A3B14"/>
+    </linearGradient>
+    <filter id="premium_glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="15" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Glass Frame -->
+  <circle cx="256" cy="256" r="240" stroke="white" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="256" cy="256" r="235" stroke="url(#ring_grad)" stroke-width="1.5" stroke-opacity="0.2"/>
+  <circle cx="256" cy="256" r="220" fill="url(#ring_grad)" fill-opacity="0.03" stroke="url(#ring_grad)" stroke-width="6" stroke-opacity="0.5"/>
+  
+  <!-- Main Ring Marks -->
+  <g stroke="#C9A84C" stroke-width="3" stroke-opacity="0.7">
+    <path d="M256 30 V65" />
+    <path d="M256 447 V482" />
+    <path d="M30 256 H65" />
+    <path d="M447 256 H482" />
+  </g>
+  
+  <!-- Sub Marks -->
+  <g opacity="0.4" stroke="#C9A84C" stroke-width="1">
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(30 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(60 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(120 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(150 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(210 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(240 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(300 256 256)" />
+     <line x1="256" y1="40" x2="256" y2="60" transform="rotate(330 256 256)" />
+  </g>
+
+  <!-- Central Starburst Decorative -->
+  <path d="M256 140 L270 240 L372 256 L270 272 L256 372 L242 272 L140 256 L242 240 Z" fill="url(#ring_grad)" fill-opacity="0.08" stroke="url(#ring_grad)" stroke-width="1" stroke-opacity="0.2"/>
+
+  <!-- Compass Needle (Luxury 3D Look) -->
+  <g filter="url(#shadow)">
+    <g filter="url(#premium_glow)">
+      <!-- North Point (Glowing Gold) -->
+      <path d="M256 80 L296 256 L256 235 L216 256 Z" fill="url(#needle_top)"/>
+      <!-- South Point (Muted Dark Gold) -->
+      <path d="M256 432 L216 256 L256 277 L296 256 Z" fill="url(#needle_bottom)"/>
+      <!-- Subtle Center Line for depth -->
+      <path d="M256 80 L256 235" stroke="white" stroke-opacity="0.3" stroke-width="1"/>
+      <path d="M256 432 L256 277" stroke="black" stroke-opacity="0.3" stroke-width="1"/>
+    </g>
+  </g>
+
+  <!-- Center Pivot Cap -->
+  <circle cx="256" cy="256" r="20" fill="#0A0F1E" stroke="#C9A84C" stroke-width="2"/>
+  <circle cx="256" cy="256" r="8" fill="#FFD700" opacity="0.9">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite" />
+  </circle>
+</svg>

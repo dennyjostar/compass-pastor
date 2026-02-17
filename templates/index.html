@@ -63,14 +63,27 @@
             border-color: rgba(201, 168, 76, 0.4);
         }
 
-        .header-center .title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #c9a84c;
-            letter-spacing: 4px;
+        .header-center {
+            text-align: center;
         }
 
-        /* ── 오늘의 말씀 카드 ── */
+        .header-center .sub-title {
+            font-size: 11px;
+            color: #c9a84c;
+            opacity: 0.7;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        .header-center .title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #c9a84c;
+            letter-spacing: 2px;
+            font-family: 'Georgia', serif;
+        }
+
         .daily-verse-card {
             margin: 20px 20px 8px;
             padding: 28px 24px 24px;
@@ -903,15 +916,18 @@
         <div class="header">
             <div class="header-icon" id="menuBtn" onclick="toggleSideMenu()">☰</div>
             <div class="header-center">
-                <div class="title">나침반</div>
+                <div class="sub-title">당신의 영혼을 위한 나침반</div>
+                <div class="title">COMPASS</div>
             </div>
             <div class="header-icon" id="resetBtn" onclick="resetConversation()">🔄</div>
         </div>
 
+
+
         <!-- 오늘의 말씀 카드 -->
         <div class="daily-verse-card" id="dailyVerseCard" onclick="openDailyMeditation()" style="cursor:pointer;">
             <div class="verse-icon">
-                <img src="/static/images/compass_main.png?v=1" alt="나침반 아이콘">
+                <img src="/static/images/compass_premium.svg" alt="나침반 아이콘">
             </div>
             <div class="verse-label">오늘의 말씀</div>
             <div class="verse-text" id="dailyVerseText">"여호와는 나의 목자시니 내게 부족함이 없으리로다"</div>
