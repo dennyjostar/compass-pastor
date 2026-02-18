@@ -1550,9 +1550,8 @@
         /* ── 찬양 모달 ── */
         function openHymnModal() {
             if (!requireProfile(function () { openHymnModal(); })) return;
-            alert('현재 일반 성도님들을 위한 새로운 찬양 목록을 준비 중입니다. 잠시만 기다려주세요!');
-            // document.getElementById('hymnModal').classList.add('active');
-            // loadHymns();
+            document.getElementById('hymnModal').classList.add('active');
+            loadHymns();
         }
         function closeHymnModal() {
             document.getElementById('hymnModal').classList.remove('active');
