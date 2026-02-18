@@ -83,7 +83,7 @@ async def run_qa_test(target_url):
                     print(f"   - ❌ 제목 불일치! 기대: {feat['title']}, 실제: {chat_title}")
 
                 # AI 응답 확인
-                print("   - AI 목사님 답변 대기 중...")
+                print("   - AI 영적 가이드 답변 대기 중...")
                 try:
                     await page.wait_for_selector(".message.ai", timeout=40000)
                     last_msg = await page.locator(".message.ai").last.inner_text()

@@ -916,7 +916,7 @@
         <div class="header">
             <div class="header-icon" id="menuBtn" onclick="toggleSideMenu()">☰</div>
             <div class="header-center">
-                <div class="sub-title">당신의 영혼을 위한 나침반</div>
+                <div class="sub-title">모두를 위한 영적 길잡이</div>
                 <div class="title">COMPASS</div>
             </div>
             <div class="header-icon" id="resetBtn" onclick="resetConversation()">🔄</div>
@@ -960,15 +960,15 @@
             </div>
             <div class="feature-card" onclick="openHymnModal()">
                 <div class="card-icon">🎵</div>
-                <div class="card-title">목사님 찬양</div>
-                <div class="card-desc">목사님의 찬양을 들어보세요</div>
+                <div class="card-title">찬양 듣기</div>
+                <div class="card-desc">은혜로운 찬양을 들어보세요</div>
             </div>
         </div>
 
         <!-- 하단 입력바 -->
         <div class="bottom-input">
             <div class="input-row">
-                <button class="voice-btn" id="voiceBtn" onclick="startVoice()">
+                <button class="voice-btn" id="voiceBtn" onclick="startVoice('homeInput', 'voiceBtn')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
@@ -994,12 +994,21 @@
     <div class="modal-overlay" id="chatModal">
         <div class="chat-modal">
             <div class="modal-header">
-                <div class="modal-title" id="modalTitle">💬 AI 상담</div>
+                <div class="modal-title" id="modalTitle">💬 영적인 대화</div>
                 <div class="modal-close" onclick="closeChatModal()">✕</div>
             </div>
             <div id="chatMessages"></div>
             <div class="modal-input-area">
                 <div class="modal-input-row">
+                    <button class="voice-btn" id="modalVoiceBtn" onclick="startVoice('modalInput', 'modalVoiceBtn')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                            <line x1="12" y1="19" x2="12" y2="23" />
+                            <line x1="8" y1="23" x2="16" y2="23" />
+                        </svg>
+                    </button>
                     <input type="text" id="modalInput" placeholder="메시지를 입력하세요..."
                         onkeypress="if(event.key==='Enter') sendMessage()">
                     <button class="modal-send-btn" onclick="sendMessage()">➤</button>
@@ -1012,7 +1021,7 @@
     <div class="hymn-overlay" id="hymnModal">
         <div class="hymn-modal">
             <div class="modal-header">
-                <div class="modal-title">🎵 목사님 찬양</div>
+                <div class="modal-title">🎵 찬양 듣기</div>
                 <div class="modal-close" onclick="closeHymnModal()">✕</div>
             </div>
             <div class="hymn-list" id="hymnList">
@@ -1030,7 +1039,7 @@
     <div class="side-menu" id="sideMenu">
         <div class="side-menu-header">
             <div class="menu-title">나침반</div>
-            <div class="menu-sub">교회 AI 영적 상담</div>
+            <div class="menu-sub">모두를 위한 영적 상담</div>
         </div>
         <div class="menu-item" onclick="openProfileModal()">
             <span class="menu-icon">👤</span>
@@ -1105,7 +1114,7 @@
     <div class="onboarding-overlay" id="onboardingOverlay">
         <div class="onboarding-card">
             <h2>✝️ 나침반</h2>
-            <p>김성수 목사님의 말씀이 여기, 계속됩니다</p>
+            <p>모두를 위한 영적 여정, 여기서 시작합니다</p>
             <label>이름(닉네임)</label>
             <input type="text" id="onboardName" placeholder="이름을 입력해주세요">
             <label>연령대</label>
@@ -1136,9 +1145,9 @@
             <h3>📢 공지사항</h3>
             <div style="margin-bottom:20px;">
                 <p style="color:#c9a84c; font-weight:600; margin-bottom:8px;">[2025.02] 나침반 서비스 오픈</p>
-                <p>김성수 목사님의 말씀을 기반으로 한 AI 영적 상담 서비스 '나침반'이 오픈되었습니다.</p>
+                <p>보편적인 기독교 지식을 기반으로 한 AI 영적 상담 서비스 '나침반'이 오픈되었습니다.</p>
                 <p style="margin-top:12px; color:#c9a84c; font-weight:600; margin-bottom:8px;">[안내] 베타 서비스 운영 중</p>
-                <p>현재 베타 서비스로 운영 중이며, 지속적으로 개선하고 있습니다. 이용 중 불편사항은 문의하기를 통해 알려주세요.</p>
+                <p>현재 베타 서비스로 운영 중이며, 더 나은 상담 경험을 위해 지속적으로 개선하고 있습니다.</p>
             </div>
             <button class="close-info" onclick="closeNoticePopup(false)">닫기</button>
             <div style="margin-top:12px; text-align:center;">
@@ -1400,9 +1409,9 @@
             var html = '';
             if (type === 'guide') {
                 html = '<h3>📋 이용 안내</h3>' +
-                    '<p><strong>나침반</strong>은 김성수 목사님의 말씀을 기반으로 한 AI 영적 상담 서비스입니다.</p>' +
+                    '<p><strong>나침반</strong>은 보편적인 기독교 가르침을 바탕으로 한 AI 영적 상담 서비스입니다.</p>' +
                     '<p><strong>주요 기능</strong></p>' +
-                    '<p>• 말씀 찾기: 성경 구절과 설교 내용 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 목사님 찬양: 찬양 듣기</p>' +
+                    '<p>• 말씀 찾기: 성경 구절과 신앙 지식 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 찬양 듣기: 은혜로운 찬양 모음(준비 중)</p>' +
                     '<p><strong>안내 사항</strong></p>' +
                     '<p>• 모든 대화는 기기 내 암호화 저장됩니다<br>• AI가 생성하는 답변이므로 참고용으로 활용해주세요<br>• 심각한 위기 상황 시 전문 상담을 이용해주세요<br>&nbsp;&nbsp;- 자살예방상담 1393<br>&nbsp;&nbsp;- 정신건강위기상담 1577-0199</p>' +
                     '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
@@ -1469,8 +1478,11 @@
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('chatModal').classList.add('active');
 
+            // Placeholder reset
+            document.getElementById('modalInput').placeholder = "메시지를 입력하세요...";
+
             var prompt = '오늘의 말씀은 ' + verseRef + ' ' + verseText + ' 입니다. ' +
-                '이 말씀을 바탕으로 김성수 목사님의 따뜻한 시선으로 묵상을 이끌어주세요. ' +
+                '이 말씀을 바탕으로 따뜻하고 지혜로운 영적 가이드의 시선으로 묵상을 이끌어주세요. ' +
                 '말씀의 의미, 오늘 하루에 적용할 수 있는 실천 방안, 그리고 짧은 기도문을 포함해주세요.';
 
             sendToAI(prompt, true);
@@ -1538,8 +1550,9 @@
         /* ── 찬양 모달 ── */
         function openHymnModal() {
             if (!requireProfile(function () { openHymnModal(); })) return;
-            document.getElementById('hymnModal').classList.add('active');
-            loadHymns();
+            alert('현재 일반 성도님들을 위한 새로운 찬양 목록을 준비 중입니다. 잠시만 기다려주세요!');
+            // document.getElementById('hymnModal').classList.add('active');
+            // loadHymns();
         }
         function closeHymnModal() {
             document.getElementById('hymnModal').classList.remove('active');
@@ -1596,9 +1609,28 @@
             document.getElementById('modalTitle').textContent = titles[route] || '💬 AI 상담';
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('chatModal').classList.add('active');
+
+            var input = document.getElementById('modalInput');
+            var welcomeMsg = "";
+
             if (route === 'meditation') {
-                sendToAI('오늘의 묵상을 부탁합니다. 오늘 날짜에 맞는 성경 구절과 묵상 가이드를 제공해주세요.', true);
+                welcomeMsg = "오늘 깊이 묵상하고 싶은 말씀이나 제목을 입력해 주세요. 함께 은혜를 나누고 묵상을 도와드리겠습니다.";
+                input.placeholder = "오늘의 말씀이나 묵상 제목을 입력하세요...";
+            } else if (route === 'bible') {
+                welcomeMsg = "찾고 싶은 성경 구절이나 신앙적인 궁금증을 말씀해 주세요.";
+                input.placeholder = "검색할 말씀을 입력하세요...";
+            } else if (route === 'prayer') {
+                welcomeMsg = "어떤 상황에서 기도가 필요하신가요? 마음을 담아 기도문을 작성해 드릴게요.";
+                input.placeholder = "기도 제목을 입력하세요...";
+            } else {
+                input.placeholder = "메시지를 입력하세요...";
             }
+
+            if (welcomeMsg) {
+                appendAIMessage({ main: welcomeMsg, deep: "" });
+            }
+
+            setTimeout(function () { input.focus(); }, 300);
         }
 
         function sendFromHome() {
@@ -1611,6 +1643,9 @@
             document.getElementById('modalTitle').textContent = '💬 AI 상담';
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('chatModal').classList.add('active');
+
+            // Placeholder reset
+            document.getElementById('modalInput').placeholder = "메시지를 입력하세요...";
             sendToAI(msg, false);
         }
 
@@ -1724,7 +1759,7 @@
             div.id = 'typingIndicator';
             div.innerHTML = `
                 <div class="typing-content">
-                    <span class="typing-text">목사님께서 기도하며 말씀을 준비하고 계십니다...</span>
+                    <span class="typing-text">따뜻한 위로와 지혜의 말씀을 준비하고 있습니다...</span>
                     <div class="typing-dots">
                         <div class="typing-dot"></div>
                         <div class="typing-dot"></div>
@@ -1742,8 +1777,11 @@
         }
 
         /* ── 음성 입력 ── */
-        function startVoice() {
-            if (!requireProfile(function () { startVoice(); })) return;
+        function startVoice(inputId, btnId) {
+            inputId = inputId || 'homeInput';
+            btnId = btnId || 'voiceBtn';
+
+            if (!requireProfile(function () { startVoice(inputId, btnId); })) return;
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                 alert('이 브라우저는 음성 인식을 지원하지 않습니다. 크롬 브라우저를 이용해주세요.');
                 return;
@@ -1754,14 +1792,15 @@
             recognition.continuous = false;
             recognition.interimResults = false;
 
-            var voiceBtn = document.getElementById('voiceBtn');
+            var voiceBtn = document.getElementById(btnId);
             voiceBtn.style.background = 'rgba(255,80,80,0.3)';
             voiceBtn.style.borderColor = 'rgba(255,80,80,0.5)';
+            var originalContent = voiceBtn.innerHTML;
             voiceBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#ff5050" stroke="#ff5050" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>';
 
             recognition.onresult = function (event) {
                 var text = event.results[0][0].transcript;
-                document.getElementById('homeInput').value = text;
+                document.getElementById(inputId).value = text;
                 resetVoiceBtn();
             };
             recognition.onerror = function () { resetVoiceBtn(); };
@@ -1771,7 +1810,7 @@
             function resetVoiceBtn() {
                 voiceBtn.style.background = 'rgba(201,168,76,0.1)';
                 voiceBtn.style.borderColor = '';
-                voiceBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+                voiceBtn.innerHTML = originalContent;
             }
         }
 
@@ -1795,7 +1834,6 @@
         document.addEventListener('DOMContentLoaded', function () {
             checkOnboarding();
             showDailyVerse();
-            checkNoticePopup();
         });
     </script>
 </body>
