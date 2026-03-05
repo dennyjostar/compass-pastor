@@ -6,7 +6,8 @@ import hashlib
 from dotenv import load_dotenv
 
 # .env 파일 로드
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(env_path)
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "compass-secret-key-2026")
@@ -112,8 +113,8 @@ def ask():
 # Google Drive 찬양 API (기존 유지)
 import requests as http_requests
 
-DRIVE_API_KEY = "AIzaSyBUvxZTwsN60wyC9YZJjidR6VfhWjFazB8"
-DRIVE_FOLDER_ID = "1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9"
+DRIVE_API_KEY = os.getenv("DRIVE_API_KEY")  # .env에 저장된 키
+DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID", "1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9")
 
 @app.route('/api/hymns')
 def get_hymns():
