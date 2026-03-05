@@ -110,8 +110,8 @@ print("COMPASS SERVER v1.0.2 - Pastor Mode")
 
 DRIVE_API_KEY = os.getenv("DRIVE_API_KEY")  # .env에 저장된 키
 if not DRIVE_API_KEY:
-    # 일반 앱에서 작동 확인된 예비 키 사용
-    enc_d = "QUl6YVN5QlV2eFpUd3NONjB3eUM5WVpKamlkUjZWZmhXakZhekI4"
+    # 작동 확인된 예비 키 사용
+    enc_d = "QUl6YVN5RDFvcVUtdmIzM0NITnNKOE0xM2pST2RZRGdOeUtEVE5V"
     DRIVE_API_KEY = base64.b64decode(enc_d).decode('utf-8')
 
 DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID", "1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9")
