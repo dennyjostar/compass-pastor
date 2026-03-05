@@ -1113,8 +1113,8 @@
     <!-- 온보딩 -->
     <div class="onboarding-overlay" id="onboardingOverlay">
         <div class="onboarding-card">
-            <h2>✝️ 나침반</h2>
-            <p>모두를 위한 영적 여정, 여기서 시작합니다</p>
+            <h2>✝️ 서머나 나침반</h2>
+            <p>김성수 목사님의 설교와 함께하는 영적 여정, 시작합니다</p>
             <label>이름(닉네임)</label>
             <input type="text" id="onboardName" placeholder="이름을 입력해주세요">
             <label>연령대</label>
@@ -1144,10 +1144,10 @@
         <div class="info-modal" id="noticePopupContent">
             <h3>📢 공지사항</h3>
             <div style="margin-bottom:20px;">
-                <p style="color:#c9a84c; font-weight:600; margin-bottom:8px;">[2025.02] 나침반 서비스 오픈</p>
-                <p>보편적인 기독교 지식을 기반으로 한 AI 영적 상담 서비스 '나침반'이 오픈되었습니다.</p>
-                <p style="margin-top:12px; color:#c9a84c; font-weight:600; margin-bottom:8px;">[안내] 베타 서비스 운영 중</p>
-                <p>현재 베타 서비스로 운영 중이며, 더 나은 상담 경험을 위해 지속적으로 개선하고 있습니다.</p>
+                <p style="color:#c9a84c; font-weight:600; margin-bottom:8px;">[2025.03] 서머나 나침반 서비스 오픈</p>
+                <p>서머나 교회 김성수 목사님의 강해 데이터를 기반으로 한 AI 목회 상담 서비스 '나침반'이 오픈되었습니다.</p>
+                <p style="margin-top:12px; color:#c9a84c; font-weight:600; margin-bottom:8px;">[안내] 김성수 목사 강해 중심 상담</p>
+                <p>본 서비스는 인간의 자기 부인과 하나님의 절대 은혜를 강조한 김성수 목사님의 신학 노선을 따릅니다.</p>
             </div>
             <button class="close-info" onclick="closeNoticePopup(false)">닫기</button>
             <div style="margin-top:12px; text-align:center;">
@@ -1409,7 +1409,7 @@
             var html = '';
             if (type === 'guide') {
                 html = '<h3>📋 이용 안내</h3>' +
-                    '<p><strong>나침반</strong>은 보편적인 기독교 가르침을 바탕으로 한 AI 영적 상담 서비스입니다.</p>' +
+                    '<p><strong>서머나 나침반</strong>은 서머나 교회 김성수 목사님의 강해 데이터를 바탕으로 한 AI 목회 상담 서비스입니다.</p>' +
                     '<p><strong>주요 기능</strong></p>' +
                     '<p>• 말씀 찾기: 성경 구절과 신앙 지식 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 찬양 듣기: 은혜로운 찬양 모음(준비 중)</p>' +
                     '<p><strong>안내 사항</strong></p>' +
@@ -1417,10 +1417,10 @@
                     '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
             } else if (type === 'notice') {
                 html = '<h3>📢 공지사항</h3>' +
-                    '<p><strong>[2025.02] 서비스 오픈</strong></p>' +
-                    '<p>나침반 AI 영적 상담 서비스가 오픈되었습니다.</p>' +
-                    '<p><strong>[안내]</strong></p>' +
-                    '<p>현재 베타 서비스 운영 중이며 지속적으로 개선하고 있습니다.</p>' +
+                    '<p><strong>[2025.03] 서머나 나침반 오픈</strong></p>' +
+                    '<p>김성수 목사님의 설교 데이터를 기반으로 한 상담 서비스가 오픈되었습니다.</p>' +
+                    '<p><strong>[신학 노선 안내]</strong></p>' +
+                    '<p>본 서비스는 인간의 자기 부인과 오직 하나님의 은혜만을 강조하는 개혁주의 복음 신학을 지향합니다.</p>' +
                     '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
             } else if (type === 'contact') {
                 html = '<h3>💬 문의하기</h3>' +
@@ -1482,8 +1482,8 @@
             document.getElementById('modalInput').placeholder = "메시지를 입력하세요...";
 
             var prompt = '오늘의 말씀은 ' + verseRef + ' ' + verseText + ' 입니다. ' +
-                '이 말씀을 바탕으로 따뜻하고 지혜로운 영적 가이드의 시선으로 묵상을 이끌어주세요. ' +
-                '말씀의 의미, 오늘 하루에 적용할 수 있는 실천 방안, 그리고 짧은 기도문을 포함해주세요.';
+                '이 말씀을 바탕으로 김성수 목사님의 신학(자기 부인, 세상에서의 죽음, 오직 은혜)의 시선으로 묵상을 이끌어주세요. ' +
+                '인간의 불가능함과 십자가의 필연성, 그리고 오늘 하루 적용할 복음적 권면과 기도문을 포함해주세요.';
 
             sendToAI(prompt, true);
         }
@@ -1739,7 +1739,7 @@
             var container = document.getElementById('chatMessages');
             var div = document.createElement('div');
             div.className = 'message ai';
-            var html = '<span class="ai-label">✝️ 나침반</span>';
+            var html = '<span class="ai-label">✝️ 서머나 나침반</span>';
             html += '<div>' + parsed.main.replace(/\n/g, '<br>') + '</div>';
             if (parsed.deep && parsed.deep.length > 0) {
                 var id = 'deep_' + Date.now();
@@ -1763,7 +1763,7 @@
             div.id = 'typingIndicator';
             div.innerHTML = `
                 <div class="typing-content">
-                    <span class="typing-text">따뜻한 위로와 지혜의 말씀을 준비하고 있습니다...</span>
+                    <span class="typing-text">김성수 목사님의 강해 데이터를 분석하고 있습니다...</span>
                     <div class="typing-dots">
                         <div class="typing-dot"></div>
                         <div class="typing-dot"></div>

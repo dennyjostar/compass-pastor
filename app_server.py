@@ -12,8 +12,8 @@ load_dotenv(env_path)
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "compass-secret-key-2026")
 
-# 일반 성도용 NotebookLM 설정
-GENERAL_NOTEBOOK_ID = "b937848d-4238-4883-a4c6-2adf8e2ba71f"
+# 김성수 목사 강해용 NotebookLM 설정
+KIM_NOTEBOOK_ID = "c84ff2ee-ceb5-4a58-a863-680fa1ba21dc"
 
 import base64
 
@@ -38,6 +38,31 @@ def get_user_hash(name, age_group="", gender=""):
 def home():
     return render_template('index.html')
 
+import json
+
+def get_seron_context(query):
+    try:
+        db_path = os.path.join(os.path.dirname(__file__), 'total_sermon_db.json')
+        if not os.path.exists(db_path):
+            return ""
+        with open(db_path, 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        # 검색어 추출
+        search_query = query.replace('[말씀찾기]', '').replace('[묵상]', '').replace('[기도문]', '').strip()
+        if not search_query: return ""
+
+        results = [s for s in db if search_query in s['title'] or (s.get('series') and search_query in s['series'])]
+        if not results: return ""
+        
+        context = "\n[관련 김성수 목사 설교 목록]\n"
+        for s in results[:5]: # 최대 5개
+            context += f"- {s['title']} ({s['url']})\n"
+        return context
+    except Exception as e:
+        print(f"Search Error: {e}")
+        return ""
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:
@@ -46,41 +71,26 @@ def ask():
         profile = data.get('profile', {})
         user_name = profile.get('name', '성도')
 
-        # ★ 구독 시스템 일시 정지 - 무료 횟수 체크 없음
-        # age_group = profile.get('ageGroup', '')
-        # gender = profile.get('gender', '')
-        # user_hash = get_user_hash(user_name, age_group, gender)
-        # if user_hash not in user_usage:
-        #     user_usage[user_hash] = {
-        #         "count": 0,
-        #         "first_use": datetime.now().isoformat(),
-        #         "is_paid": False
-        #     }
-        # usage = user_usage[user_hash]
-        # if not usage["is_paid"] and usage["count"] >= FREE_LIMIT:
-        #     return jsonify({
-        #         "response": None,
-        #         "limit_reached": True,
-        #         "used_count": usage["count"],
-        #         "remaining": 0,
-        #         "message": "무료 상담 3회가 모두 사용되었습니다."
-        #     })
-
         client = get_openai_client()
+        
+        # 설교 DB 검색 컨텍스트 추가
+        sermon_context = get_seron_context(user_msg)
 
-        # 서머나 성도용 시스템 프롬프트 (김성수 목사님)
+        # 서머나 교회 김성수 목사 전용 시스템 프롬프트 (신학적 페르소나 극대화)
         system_prompt = (
             f"당신은 서머나 교회의 '김성수 목사'입니다. 사용자는 '{user_name} 님'입니다.\n"
-            "사용자의 고민에 대해 반드시 다음 형식을 지켜 답변하십시오.\n\n"
+            "당신의 신학은 '인간의 철저한 파산', '자기 부인', '오직 예수 그리스도의 은혜'입니다.\n"
+            "사용자에게 세상적인 위로나 도덕적인 훈계를 절대 하지 마십시오. 대신 인간이 얼마나 불가능한 존재인지를 폭로하고, 오직 십자가 붙들게 하십시오.\n"
+            "제공되는 [관련 설교 목록]이 있다면, 해당 설교의 주제를 언급하며 답변을 풍성하게 만드십시오.\n\n"
+            "반드시 다음 형식을 지켜 답변하십시오:\n"
             "[일반 답변 시작]\n"
-            "(여기에 따뜻한 위로와 성경적 권면을 작성)\n"
+            "(성도에 대한 목회적 안부와 간단한 복음적 권면)\n"
             "[일반 답변 끝]\n\n"
             "[심층 분석 시작]\n"
-            "(여기에 인간의 불가능함, 자기 부인, 오직 은혜의 신학을 바탕으로 한 깊이 있는 분석을 500자 이상 작성)\n"
+            "(김성수 목사님의 요한복음/로마서 강해 신학을 바탕으로 한 500자 이상의 심도 있는 복음 분석)\n"
+            f"{sermon_context}\n"
             "[심층 분석 끝]\n\n"
-            "반드시 위 태그([일반 답변 시작], [일반 답변 끝], [심층 분석 시작], [심층 분석 끝])를 정확히 포함해야 합니다.\n\n"
-            "위기 상황(자해, 자살 언급 등)이 감지되면 반드시 다음을 안내하세요:\n"
-            "자살예방상담전화 1393 | 정신건강위기상담전화 1577-0199"
+            "위 태그들을 정확히 사용해야 하며, 특히 [심층 분석 끝] 바로 앞에 제공된 설교 목록을 배치하십시오."
         )
 
         completion = client.chat.completions.create(
