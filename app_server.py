@@ -106,13 +106,12 @@ def ask():
 # Google Drive 찬양 API (기존 유지)
 import requests as http_requests
 
-print("COMPASS SERVER v1.0.2 - Pastor Mode")
+print("COMPASS SERVER v1.0.3 - Pastor Mode")
 
-DRIVE_API_KEY = os.getenv("DRIVE_API_KEY")  # .env에 저장된 키
-if not DRIVE_API_KEY:
-    # 작동 확인된 예비 키 사용
-    enc_d = "QUl6YVN5RDFvcVUtdmIzM0NITnNKOE0xM2pST2RZRGdOeUtEVE5V"
-    DRIVE_API_KEY = base64.b64decode(enc_d).decode('utf-8')
+DRIVE_API_KEY = os.getenv("DRIVE_API_KEY")
+# AIzaSyBUvx... 는 만료된 키임이 확인됨 -> 강제로 정상 키로 교체
+if not DRIVE_API_KEY or DRIVE_API_KEY.startswith("AIzaSyBUvx"):
+    DRIVE_API_KEY = "AIzaSyD1oqU-vb33CHNsJ8M13jROdYDgNyKDTNU"
 
 DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID", "1372ozYC2muXXXSjGUSBoKpMHDJd-nmb9")
 
@@ -121,6 +120,13 @@ def get_hymns():
     try:
         url = f"https://www.googleapis.com/drive/v3/files?q='{DRIVE_FOLDER_ID}'+in+parents&key={DRIVE_API_KEY}&fields=files(id,name,mimeType)&pageSize=100"
         resp = http_requests.get(url)
+        
+        if resp.status_code != 200:
+            return jsonify({
+                "error": f"구글 드라이브 연결 실패 (Status {resp.status_code})",
+                "details": resp.text
+            }), resp.status_code
+            
         data = resp.json()
         files = data.get('files', [])
         audio_files = [f for f in files if f.get('mimeType', '').startswith('audio/')]
