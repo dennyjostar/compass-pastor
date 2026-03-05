@@ -3,7 +3,7 @@ import glob
 import shutil
 
 source_dir = r"C:\Users\user\.gemini\antigravity\brain\tempmediaStorage"
-dest_path = r"d:\코다리프로젝트\compass_app\static\compass_logo.png"
+dest_path = r"d:\코다리프로젝??compass_app\static\compass_logo.png"
 
 try:
     files = glob.glob(os.path.join(source_dir, "*"))
@@ -16,3 +16,4 @@ try:
         print(f"Copy success -> {dest_path}")
 except Exception as e:
     print(f"Error copying image: {e}")
+
