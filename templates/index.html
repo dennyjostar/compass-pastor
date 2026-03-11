@@ -928,7 +928,16 @@
                 <div class="sub-title">당신의 영혼을 위한 나침반</div>
                 <div class="title">COMPASS</div>
             </div>
-            <div class="header-icon" id="resetBtn" onclick="resetConversation()">🔄</div>
+            <div class="header-icon" id="shareBtn" style="padding-top:2px;" onclick="shareApp()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+            </div>
         </div>
 
 
@@ -1497,12 +1506,24 @@
             sendToAI(prompt, true);
         }
 
-        /* ── 대화 초기화 (우측 버튼) ── */
-        function resetConversation() {
-            if (confirm('대화 내용을 초기화하시겠습니까?\n(등록 정보는 유지됩니다)')) {
-                var cm = document.getElementById('chatMessages');
-                if (cm) cm.innerHTML = '';
-                localStorage.removeItem('chatHistory');
+        /* ── 앱 공유하기 (우측 상단 버튼) ── */
+        function shareApp() {
+            var url = window.location.origin;
+            var shareData = {
+                title: '나침반',
+                text: '성경 말씀과 기도로 함께하는 영혼의 길잡이, 서머나 나침반',
+                url: url
+            };
+            if (navigator.share) {
+                navigator.share(shareData).catch(function (err) { });
+            } else {
+                var tempInput = document.createElement("input");
+                tempInput.value = url;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                alert("나침반 주소가 복사되었습니다. 카카오톡 창에 붙여넣기 해주세요!");
             }
         }
 
