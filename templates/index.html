@@ -1815,26 +1815,19 @@
             var textToShare = clone.innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
             textToShare = textToShare.replace(/<[^>]*>?/gm, '').trim();
 
-            var shareData = {
-                title: '나침반 - 심층 분석',
-                text: textToShare
-            };
-            
-            if (navigator.share) {
-                navigator.share(shareData).catch(function(err){});
-            } else {
-                var tempInput = document.createElement("textarea");
-                tempInput.value = textToShare;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                try {
-                    document.execCommand("copy");
-                    alert("심층 분석 말씀이 클립보드에 복사되었습니다.\\n카카오톡 등에 붙여넣기(공유) 해주세요!");
-                } catch(err) {
-                    alert("복사 기능이 지원되지 않는 환경입니다.");
-                }
-                document.body.removeChild(tempInput);
+            // 항상 클립보드에 명시적으로 복사하도록 구현 (PC 카카오톡 붙여넣기 오류 방지)
+            var tempInput = document.createElement("textarea");
+            tempInput.value = textToShare;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); // for mobile devices
+            try {
+                document.execCommand("copy");
+                alert("심층 분석 말씀이 클립보드에 복사되었습니다.\n카카오톡 대화창에 '붙여넣기' 하여 공유해 보세요!");
+            } catch(err) {
+                alert("복사를 지원하지 않는 환경입니다. 내용을 직접 드래그해서 복사해주세요.");
             }
+            document.body.removeChild(tempInput);
         }
 
         function toggleDeep(id) {
