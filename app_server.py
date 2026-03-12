@@ -22,7 +22,7 @@ def get_openai_client():
     key = os.getenv("OPENAI_API_KEY")
     if not key:
         # 환경변수가 없을 경우 하드코딩된 암호화 키를 임의 복호화해서 사용합니다 (배포편의)
-        enc = "c2stcHJvai1uaUlqckgweXVLMExXc0tydWlIbVVodTd2VDJXd1Zoc01vQnVYWFRRMWl6empEdjk1RWx4eTBJQm9abnJMbTZSNU01OTB1THRKLVQzQmxia0ZJVkg1dDd1anFBRGlTanZpUTlJdTJYaVV1V1FuWloybjFLMHZtUXpmZmU0MEIyTE9LWFZ3V0tCeUJJbV9oX3BoZzN0ZkNheW9fY0E="
+        enc = "c2stcHJvai14SU55aklycWJUaC1QQTVFU0NNVlJSOHE4eEN6MEwxSmhjSFRJNHFoVkZ1a1d2WHQ0UXpHa1FqUnlzVXlWQ0VpNDExenNsLVhyYVQzQmxia0ZKVkEzbFZpY0xuVFJNN2UzSDl6cFpRUWdxck5GeTdYRW11LWxWV3JqaTFvY0JmMHM1LXY1aVZOLXlTUWwweXMxdEhIWUROeHFyTUE="
         key = base64.b64decode(enc).decode('utf-8')
     return openai.OpenAI(api_key=key)
 
