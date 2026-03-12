@@ -1815,19 +1815,46 @@
             var textToShare = clone.innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
             textToShare = textToShare.replace(/<[^>]*>?/gm, '').trim();
 
-            // 항상 클립보드에 명시적으로 복사하도록 구현 (PC 카카오톡 붙여넣기 오류 방지)
-            var tempInput = document.createElement("textarea");
-            tempInput.value = textToShare;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            tempInput.setSelectionRange(0, 99999); // for mobile devices
-            try {
-                document.execCommand("copy");
-                alert("심층 분석 말씀이 클립보드에 복사되었습니다.\n카카오톡 대화창에 '붙여넣기' 하여 공유해 보세요!");
-            } catch(err) {
-                alert("복사를 지원하지 않는 환경입니다. 내용을 직접 드래그해서 복사해주세요.");
+            // 최신 클립보드 API 시도
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToShare).then(function() {
+                    alert("✨ [성공] 심층 묵상이 완벽하게 복사되었습니다!\n이제 카카오톡 입력창에 대고 마우스 우클릭 -> [붙여넣기]를 해보세요.");
+                }).catch(function() {
+                    fallbackCopy(textToShare);
+                });
+            } else {
+                fallbackCopy(textToShare);
             }
-            document.body.removeChild(tempInput);
+        }
+
+        function fallbackCopy(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            // 화면 밖으로 숨김 처리하여 스크롤 튀는 현상 방지
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                var successful = document.execCommand('copy');
+                if(successful) {
+                    alert("✨ [성공] 심층 묵상이 클립보드에 복사되었습니다!\n이제 카톡 입력창에 [붙여넣기]를 해보세요.");
+                } else {
+                    alert("복사 기능이 브라우저에 의해 차단되었습니다. 텍스트를 직접 드래그해서 복사해주세요.");
+                }
+            } catch (err) {
+                alert("이 브라우저에서는 복사를 지원하지 않습니다.");
+            }
+            document.body.removeChild(textArea);
         }
 
         function toggleDeep(id) {
