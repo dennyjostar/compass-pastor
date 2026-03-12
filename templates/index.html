@@ -1790,11 +1790,51 @@
             if (parsed.deep && parsed.deep.length > 0) {
                 var id = 'deep_' + Date.now();
                 html += '<div class="deep-btn" onclick="toggleDeep(\'' + id + '\')">📖 심층 분석 보기</div>';
-                html += '<div class="deep-content" id="' + id + '">' + parsed.deep.replace(/\n/g, '<br>') + '</div>';
+                
+                html += '<div class="deep-content" id="' + id + '">';
+                html += parsed.deep.replace(/\n/g, '<br>');
+                html += '<div style="margin-top: 20px; text-align: right; border-top: 1px solid rgba(195, 163, 112, 0.2); padding-top: 10px;">';
+                html += '<button onclick="shareDeepContent(\'' + id + '\')" style="background:none; border:none; color:#c3a370; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">';
+                html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>';
+                html += '말씀 공유하기</button>';
+                html += '</div></div>';
             }
             div.innerHTML = html;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
+        }
+
+        function shareDeepContent(id) {
+            var el = document.getElementById(id);
+            if(!el) return;
+            
+            var clone = el.cloneNode(true);
+            var btn = clone.querySelector('div[style*="text-align: right"]');
+            if(btn) btn.remove();
+            
+            var textToShare = clone.innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
+            textToShare = textToShare.replace(/<[^>]*>?/gm, '').trim();
+
+            var shareData = {
+                title: '나침반 - 심층 분석',
+                text: textToShare
+            };
+            
+            if (navigator.share) {
+                navigator.share(shareData).catch(function(err){});
+            } else {
+                var tempInput = document.createElement("textarea");
+                tempInput.value = textToShare;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                try {
+                    document.execCommand("copy");
+                    alert("심층 분석 말씀이 클립보드에 복사되었습니다.\\n카카오톡 등에 붙여넣기(공유) 해주세요!");
+                } catch(err) {
+                    alert("복사 기능이 지원되지 않는 환경입니다.");
+                }
+                document.body.removeChild(tempInput);
+            }
         }
 
         function toggleDeep(id) {
