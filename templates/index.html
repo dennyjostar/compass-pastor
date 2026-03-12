@@ -1147,7 +1147,7 @@
     <!-- 온보딩 -->
     <div class="onboarding-overlay" id="onboardingOverlay">
         <div class="onboarding-card">
-            <h2>✝️ 서머나 나침반</h2>
+            <h2>✝️ 영혼의 나침반</h2>
             <p>김성수 목사님의 설교와 함께하는 영적 여정, 시작합니다</p>
             <label>이름(닉네임)</label>
             <input type="text" id="onboardName" placeholder="이름을 입력해주세요">
@@ -1178,7 +1178,7 @@
         <div class="info-modal" id="noticePopupContent">
             <h3>📢 공지사항</h3>
             <div style="margin-bottom:20px;">
-                <p style="color:#c9a84c; font-weight:600; margin-bottom:8px;">[2025.03] 서머나 나침반 서비스 오픈</p>
+                <p style="color:#c9a84c; font-weight:600; margin-bottom:8px;">[2025.03] 영혼의 나침반 서비스 오픈</p>
                 <p>서머나 교회 김성수 목사님의 강해 데이터를 기반으로 한 AI 목회 상담 서비스 '나침반'이 오픈되었습니다.</p>
                 <p style="margin-top:12px; color:#c9a84c; font-weight:600; margin-bottom:8px;">[안내] 김성수 목사 강해 중심 상담</p>
                 <p>본 서비스는 인간의 자기 부인과 하나님의 절대 은혜를 강조한 김성수 목사님의 신학 노선을 따릅니다.</p>
@@ -1443,7 +1443,7 @@
             var html = '';
             if (type === 'guide') {
                 html = '<h3>📋 이용 안내</h3>' +
-                    '<p><strong>서머나 나침반</strong>은 서머나 교회 김성수 목사님의 강해 데이터를 바탕으로 한 AI 목회 상담 서비스입니다.</p>' +
+                    '<p><strong>영혼의 나침반</strong>은 서머나 교회 김성수 목사님의 강해 데이터를 바탕으로 한 AI 목회 상담 서비스입니다.</p>' +
                     '<p><strong>주요 기능</strong></p>' +
                     '<p>• 말씀 찾기: 성경 구절과 신앙 지식 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 찬양 듣기: 은혜로운 찬양 모음(준비 중)</p>' +
                     '<p><strong>안내 사항</strong></p>' +
@@ -1451,7 +1451,7 @@
                     '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
             } else if (type === 'notice') {
                 html = '<h3>📢 공지사항</h3>' +
-                    '<p><strong>[2025.03] 서머나 나침반 오픈</strong></p>' +
+                    '<p><strong>[2025.03] 영혼의 나침반 오픈</strong></p>' +
                     '<p>김성수 목사님의 설교 데이터를 기반으로 한 상담 서비스가 오픈되었습니다.</p>' +
                     '<p><strong>[신학 노선 안내]</strong></p>' +
                     '<p>본 서비스는 인간의 자기 부인과 오직 하나님의 은혜만을 강조하는 개혁주의 복음 신학을 지향합니다.</p>' +
@@ -1527,7 +1527,7 @@
             var url = window.location.origin;
             var shareData = {
                 title: '나침반',
-                text: '성경 말씀과 기도로 함께하는 영혼의 길잡이, 서머나 나침반',
+                text: '성경 말씀과 기도로 함께하는 영혼의 길잡이, 영혼의 나침반',
                 url: url
             };
             if (navigator.share) {
@@ -1785,7 +1785,7 @@
             var container = document.getElementById('chatMessages');
             var div = document.createElement('div');
             div.className = 'message ai';
-            var html = '<span class="ai-label">✝️ 서머나 나침반</span>';
+            var html = '<span class="ai-label">✝️ 영혼의 나침반</span>';
             html += '<div>' + parsed.main.replace(/\n/g, '<br>') + '</div>';
             if (parsed.deep && parsed.deep.length > 0) {
                 var id = 'deep_' + Date.now();
