@@ -4,7 +4,7 @@ import sys
 import os
 
 async def run_qa_test(target_url):
-    print(f"🚀 [나침반 QA 요원: 나실장 V4.8] 업무를 시작합니다! (대상: {target_url})")
+    print(f"[나침반 QA 요원: 나실장 V4.8] 업무를 시작합니다! (대상: {target_url})")
     
     async with async_playwright() as p:
         # 브라우저 실행 (headless=False로 하면 실제 동작을 눈으로 볼 수 있음)
@@ -17,7 +17,7 @@ async def run_qa_test(target_url):
             print("1. [나실장] 현장 잠입 중... (페이지 접속)")
             response = await page.goto(target_url)
             if response.status != 200:
-                print(f"❌ 접속 실패! 상태 코드: {response.status}")
+                print(f"[실패] 접속 실패! 상태 코드: {response.status}")
                 return
 
             await page.wait_for_timeout(2000)
@@ -55,9 +55,9 @@ async def run_qa_test(target_url):
                 if await start_btn.is_enabled():
                     print("   - 시작 버튼 활성화 확인됨")
                     await start_btn.click()
-                    print("   ✅ 등록 완료")
+                    print("   [성공] 등록 완료")
                 else:
-                    print("   ❌ 오류: 모든 약관에 동의했으나 시작 버튼이 비활성 상태입니다.")
+                    print("   [실패] 오류: 모든 약관에 동의했으나 시작 버튼이 비활성 상태입니다.")
                     return
                 
                 await page.wait_for_timeout(1500)
@@ -78,18 +78,18 @@ async def run_qa_test(target_url):
                 # 채팅창 열렸는지 및 제목 확인
                 chat_title = await page.inner_text("#chatOverlay h3")
                 if feat['title'] in chat_title:
-                    print(f"   - ✅ 대화창 전환 및 제목 일치: {chat_title}")
+                    print(f"   - [성공] 대화창 전환 및 제목 일치: {chat_title}")
                 else:
-                    print(f"   - ❌ 제목 불일치! 기대: {feat['title']}, 실제: {chat_title}")
+                    print(f"   - [실패] 제목 불일치! 기대: {feat['title']}, 실제: {chat_title}")
 
                 # AI 응답 확인
                 print("   - AI 영적 가이드 답변 대기 중...")
                 try:
                     await page.wait_for_selector(".message.ai", timeout=40000)
                     last_msg = await page.locator(".message.ai").last.inner_text()
-                    print(f"   ✅ 응답 수신: {last_msg[:40]}...")
+                    print(f"   [성공] 응답 수신: {last_msg[:40]}...")
                 except:
-                    print("   ❌ 응답 수신 실패 (타임아웃)")
+                    print("   [실패] 응답 수신 실패 (타임아웃)")
 
                 # 닫기
                 await page.click("button.modal-close")
@@ -98,11 +98,11 @@ async def run_qa_test(target_url):
             # 5. 나침반 확인
             print("4. [나침반] 렌더링 확인...")
             if await page.is_visible("#compassBody"):
-                print("   ✅ 나침반 SVG 엔진 로드 완료")
+                print("   [성공] 나침반 SVG 엔진 로드 완료")
             else:
-                print("   ❌ 나침반 엔진 실종됨")
+                print("   [실패] 나침반 엔진 실종됨")
 
-            print("\n🎊 [보고] 대표님, 나실장 V4.8 점검 완료! 모든 기능이 '완벽'하게 어우러져 있습니다.")
+            print("\n[보고] 대표님, 나실장 V4.8 점검 완료! 모든 기능이 '완벽'하게 어우러져 있습니다.")
 
         except Exception as e:
             print(f"\n💥 테스트 오류: {e}")

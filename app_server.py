@@ -15,20 +15,52 @@ app.secret_key = os.getenv("SECRET_KEY", "compass-secret-key-2026")
 # 김성수 목사 강해용 NotebookLM 설정
 KIM_NOTEBOOK_ID = "c84ff2ee-ceb5-4a58-a863-680fa1ba21dc"
 
-import base64
+import google.generativeai as genai
 
-# OpenAI 설정
-def get_openai_client():
-    key = os.getenv("OPENAI_API_KEY")
+# Gemini 설정
+def get_gemini_model(system_instruction):
+    key = os.getenv("GEMINI_API_KEY")
     if not key:
-        # 환경변수가 없을 경우 하드코딩된 암호화 키를 임의 복호화해서 사용합니다 (배포편의)
-        enc = "c2stcHJvai1sS3cyNFVfWHVLQV80UFd0eVBCbWI4RElUeVhudTNwOEh5Ui02c3hpeWJKdkx3R3ZMUVk3Vl96cFBxdUVHMG1taF9iVVZwdGxBZVQzQmxia0ZKd0I0UnBXS1ptaVhLbHYxdEJLZC1CaDUwNlhWWVlfS3dKZDU1TjZCeTVueDRTa29hM1VQZ0ZsWUhOOWtPWEtJY0NTaFBkWVhSc0E="
-        key = base64.b64decode(enc).decode('utf-8')
-    return openai.OpenAI(api_key=key)
+        raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
+    genai.configure(api_key=key)
+    return genai.GenerativeModel(
+        model_name='gemini-flash-latest',
+        system_instruction=system_instruction
+    )
 
-# 서버 사이드 사용량 추적 (메모리 기반 → 추후 DB 교체)
-user_usage = {}
+# 서버 사이드 사용량 추적 및 파일 저장
+USER_STATS_PATH = os.path.join(os.path.dirname(__file__), 'logs', 'user_stats.json')
+USAGE_LOG_PATH = os.path.join(os.path.dirname(__file__), 'logs', 'usage_history.jsonl')
 FREE_LIMIT = 3
+
+def load_user_stats():
+    # 로그 디렉토리 자동 생성
+    os.makedirs(os.path.dirname(USER_STATS_PATH), exist_ok=True)
+    if os.path.exists(USER_STATS_PATH):
+        try:
+            with open(USER_STATS_PATH, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                return json.loads(content) if content else {}
+        except Exception as e:
+            print(f"Stats Load Error: {e}")
+            return {}
+    return {}
+
+def save_user_stats(stats):
+    with open(USER_STATS_PATH, 'w', encoding='utf-8') as f:
+        json.dump(stats, f, ensure_ascii=False, indent=2)
+
+def log_usage(profile, message, reply):
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "ip": request.remote_addr, # 접속 IP 기록
+        "profile": profile,
+        "message": message,
+        "reply_length": len(reply),
+        "reply_preview": reply[:100]
+    }
+    with open(USAGE_LOG_PATH, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
 def get_user_hash(name, age_group="", gender=""):
     raw = f"{name}_{age_group}_{gender}"
@@ -70,9 +102,27 @@ def ask():
         user_msg = data.get('message', '')
         profile = data.get('profile', {})
         user_name = profile.get('name', '성도')
+        user_age = profile.get('age', '')
+        user_gender = profile.get('gender', '')
 
-        client = get_openai_client()
+        # 1. 사용량 체크 (Rate Limit)
+        user_id = get_user_hash(user_name, user_age, user_gender)
+        today = datetime.now().strftime('%Y-%m-%d')
         
+        stats = load_user_stats()
+        if user_id not in stats:
+            stats[user_id] = {"date": today, "count": 0}
+        
+        # 날짜가 바뀌었으면 초기화
+        if stats[user_id]["date"] != today:
+            stats[user_id] = {"date": today, "count": 0}
+            
+        if stats[user_id]["count"] >= FREE_LIMIT:
+            return jsonify({
+                "response": f"성도님, 오늘의 대화 한도({FREE_LIMIT}회)를 모두 사용하셨습니다. 내일 다시 찾아와 주세요. 진리의 말씀 안에서 평안한 하루 되시길 바랍니다.",
+                "limit_reached": True
+            })
+
         # 설교 DB 검색 컨텍스트 추가
         sermon_context = get_seron_context(user_msg)
 
@@ -92,29 +142,29 @@ def ask():
             "사용자에게 세상적인 위로나 도덕적인 훈계를 절대 하지 마십시오. 대신 인간이 얼마나 불가능한 존재인지를 폭로하고, 오직 십자가 붙들게 하십시오.\n"
             "★[특수 강해 지침] 사용자가 '일곱 번째 항아리'를 언급할 경우, 이는 요한계시록의 7대접이 절대 아닙니다! 이는 요한복음 2장 가나의 혼인 잔치에서 6개의 율법적 돌항아리를 완성하는 '참 성전이자 일곱 번째 항아리이신 예수 그리스도(새 포도주)'를 의미하는 김성수 목사님의 고유한 핵심 강해입니다. 무조건 이 방향으로 십자가의 복음을 강해하십시오.\n"
             "★[매우 중요 - 환각 방지 시스템] 당신이 확실히 아는 김성수 목사의 강해가 아니거나, 사용자의 질문(단어)만으로는 어떤 성경적 문맥인지 도저히 알 수 없다면 절대 아는 척하며 무관한 성경(계시록, 여호수아 등) 내용을 길게 지어내지 마십시오.\n"
-            "이 경우, 1000자 이상의 심층 분석 작성 규칙을 무시하고, 단순히 사용자에게 '구체적인 성경 구절이나 배경 설명을 더 해주시면 정확히 나누겠습니다'라고 짧게 질문만 하십시오.\n"
+            "이 경우, 단순히 사용자에게 '구체적인 성경 구절이나 배경 설명을 더 해주시면 정확히 나누겠습니다'라고 짧게 질문만 하십시오.\n"
             "사용자의 요청이 '일반 묵상', '말씀찾기', 또는 '기도문' 중 무엇이든 아래 형식을 준수하십시오.\n\n"
             "반드시 다음 형식을 지켜 답변하십시오:\n"
             "[일반 답변 시작]\n"
-            "(성도에 대한 목회적 안부와 진리의 복음적 권면. 지어내기 모호할 경우 추가 구절이나 문맥을 알려달라고 정중히 질문하십시오. 정상적인 질문이라면 최소 4~5문장 이상으로 길게 작성하십시오. 기도문이라면 길고 깊이 있게 작성하십시오.)\n"
+            "(성도에 대한 목회적 안부와 진리의 복음적 권면. 정상적인 질문이라면 최소 3~4문장 정도로 적절히 작성하십시오.)\n"
             "[일반 답변 끝]\n\n"
             "[심층 분석 시작]\n"
-            "(김성수 목사님의 요한복음/로마서 강해 신학을 바탕으로 한 심도 있는 복음 분석. 단, 질문의 문맥을 몰라서 위 '일반 답변'에서 추가 설명을 요구했을 경우에는 심층 분석을 1000자 이상 쓰지 말고, '성도님께서 구체적인 문맥을 더 알려주시면, 그 내용에 담긴 참된 복음을 깊게 강해해 드리겠습니다.'라고 한 문장만 쓰고 바로 끝내십시오. 아는 내용인 경우에만 1000자 이상 아주 길고 상세하게 강해하십시오.)\n"
+            "(김성수 목사님의 요한복음/로마서 강해 신학을 바탕으로 한 심도 있는 복음 분석. 질문의 문맥을 몰라서 추가 설명을 요구했을 경우에는 심층 분석을 쓰지 말고, '성도님께서 구체적인 문맥을 더 알려주시면 깊게 강해해 드리겠습니다.'라고 한 문장만 쓰십시오. 아는 내용인 경우에만 500~800자 정도로 핵심을 찔러 상세하게 강해하십시오. 무조건 1000자를 채울 필요는 없으나 깊이 있게 작성하십시오.)\n"
             f"{sermon_instruction}\n"
             "[심층 분석 끝]"
         )
 
-        completion = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_msg}
-            ]
-        )
+        model = get_gemini_model(system_prompt)
+        response = model.generate_content(user_msg)
+        reply = response.text
 
-        reply = completion.choices[0].message.content
+        # 사용량 증가 및 저장
+        stats[user_id]["count"] += 1
+        save_user_stats(stats)
+        
+        # 상세 로그 기록
+        log_usage(profile, user_msg, reply)
 
-        # ★ 구독 시스템 일시 정지 - 사용량 추적 없음
         return jsonify({
             "response": reply,
             "limit_reached": False
@@ -123,6 +173,7 @@ def ask():
     except Exception as e:
         print(f"[ERROR] {e}")
         return jsonify({"response": f"오류 발생: {str(e)}"}), 500
+
 
 # Google Drive 찬양 API (기존 유지)
 import requests as http_requests

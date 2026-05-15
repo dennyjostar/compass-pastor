@@ -1736,6 +1736,11 @@
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     hideTyping();
+                    if (data.limit_reached) {
+                        appendMessage('ai', data.response);
+                        // 입력창 잠시 비활성화 또는 안내
+                        return;
+                    }
                     if (data.response) {
                         var parsed = parseAIResponse(data.response);
                         appendAIMessage(parsed);
