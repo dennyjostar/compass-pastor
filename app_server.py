@@ -86,6 +86,21 @@ def get_user_hash(name, age_group="", gender=""):
 def home():
     return render_template('index.html')
 
+@app.route('/debug-env')
+def debug_env():
+    # 보안을 위해 키의 존재 여부와 길기만 확인 (값은 노출 안 함)
+    keys_to_check = ["GEMINI_API_KEY", "SECRET_KEY", "DRIVE_API_KEY"]
+    status = {}
+    for k in keys_to_check:
+        val = os.getenv(k)
+        status[k] = f"Found (Length: {len(val)})" if val else "Missing"
+    
+    return jsonify({
+        "environment": "Railway/Production" if not os.path.exists(env_path) else "Local/Dev",
+        "status": status,
+        "current_time": datetime.now().isoformat()
+    })
+
 
 def get_seron_context(query):
     try:
