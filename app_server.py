@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify, session
 import os
-import openai
+import json
 from datetime import datetime
 import hashlib
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 # .env 파일 로드
 env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -12,19 +13,34 @@ load_dotenv(env_path)
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "compass-secret-key-2026")
 
+# 환경 변수 로드 확인 로그
+print(f"--- Environment Setup ---")
+print(f"Current Directory: {os.getcwd()}")
+print(f"Env Path: {env_path}")
+if os.path.exists(env_path):
+    print(f".env file found.")
+else:
+    print(f".env file NOT found (Normal for Railway production).")
+
+# API 키 확인 (값은 숨김)
+gemini_key = os.getenv("GEMINI_API_KEY")
+if gemini_key:
+    print(f"GEMINI_API_KEY is set (Length: {len(gemini_key)})")
+else:
+    print(f"GEMINI_API_KEY is NOT set in environment.")
+print(f"--------------------------")
+
 # 김성수 목사 강해용 NotebookLM 설정
 KIM_NOTEBOOK_ID = "c84ff2ee-ceb5-4a58-a863-680fa1ba21dc"
-
-import google.generativeai as genai
 
 # Gemini 설정
 def get_gemini_model(system_instruction):
     key = os.getenv("GEMINI_API_KEY")
     if not key:
-        raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
+        raise ValueError("GEMINI_API_KEY가 시스템 환경변수(Railway Variables) 또는 .env에 설정되지 않았습니다. 대시보드 설정을 확인해주세요.")
     genai.configure(api_key=key)
     return genai.GenerativeModel(
-        model_name='gemini-flash-latest',
+        model_name='gemini-1.5-flash',
         system_instruction=system_instruction
     )
 
@@ -70,7 +86,6 @@ def get_user_hash(name, age_group="", gender=""):
 def home():
     return render_template('index.html')
 
-import json
 
 def get_seron_context(query):
     try:
