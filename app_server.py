@@ -35,9 +35,10 @@ KIM_NOTEBOOK_ID = "c84ff2ee-ceb5-4a58-a863-680fa1ba21dc"
 
 # Gemini 설정
 def get_gemini_model(system_instruction):
-    key = os.getenv("GEMINI_API_KEY")
+    # GEMINI_API_KEY 또는 사용자가 설정한 smna_api_key 둘 다 확인
+    key = os.getenv("GEMINI_API_KEY") or os.getenv("smna_api_key")
     if not key:
-        raise ValueError("GEMINI_API_KEY가 시스템 환경변수(Railway Variables) 또는 .env에 설정되지 않았습니다. 대시보드 설정을 확인해주세요.")
+        raise ValueError("API 키(GEMINI_API_KEY 또는 smna_api_key)가 설정되지 않았습니다. Railway 설정을 확인해주세요.")
     genai.configure(api_key=key)
     return genai.GenerativeModel(
         model_name='gemini-1.5-flash',
@@ -88,8 +89,8 @@ def home():
 
 @app.route('/debug-env')
 def debug_env():
-    # 보안을 위해 키의 존재 여부와 길기만 확인 (값은 노출 안 함)
-    keys_to_check = ["GEMINI_API_KEY", "SECRET_KEY", "DRIVE_API_KEY"]
+    # 보안을 위해 키의 존재 여부와 길기만 확인
+    keys_to_check = ["GEMINI_API_KEY", "smna_api_key", "SECRET_KEY", "DRIVE_API_KEY"]
     status = {}
     for k in keys_to_check:
         val = os.getenv(k)
