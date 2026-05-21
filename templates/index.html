@@ -3565,7 +3565,7 @@
             temp.innerHTML = htmlText;
             var textToShare = temp.textContent || temp.innerText || '';
             
-            textToShare += "\n\n나침반 - 당신의 영혼을 위한 AI 영적 동반자\nhttps://web-production-1ffb5.up.railway.app";
+            textToShare += "\n\n나침반 - 당신의 영혼을 위한 AI 영적 동반자\n" + window.location.origin;
             
             if (navigator.share) {
                 navigator.share({
