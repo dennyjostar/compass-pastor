@@ -176,6 +176,19 @@ def ask():
         else:
             sermon_instruction = "주의: 데이터베이스에서 검색된 관련 설교가 없습니다. 아는 척하며 요한계시록 등 다른 성경 구절을 억지로 끌어와서 길게 지어내지(환각) 마십시오. 문맥이 부족하다면 일반 답변에 '성도님, 어떤 성경 구절이나 배경인지 조금 더 구체적으로 말씀해 주시면 정확히 나누겠습니다'라고 반드시 되물으십시오."
 
+        # 말씀찾기 특별 지시사항 정의
+        bible_search_instruction = ""
+        if "[말씀찾기]" in user_msg:
+            bible_search_instruction = (
+                "★[말씀찾기 특수 지시사항]\n"
+                "성도님이 지금 성경 구절을 검색하고 계십니다. 사용자의 검색 키워드(예: '마음이 가난한 자' 등)에 해당하는 가장 적합하고 정확한 성경 구절(책명, 장, 절, 말씀 본문)을 찾아, "
+                "반드시 [일반 답변 시작] 바로 아랫줄 최상단에 마크다운 형태로 가장 먼저 출력해 주십시오. "
+                "그 아래에 비로소 안부 인사와 목회적 복음 권면을 적으십시오.\n"
+                "예시 형식:\n"
+                "📖 찾으신 말씀 구절:\n"
+                "- 마태복음 5:3 \"심령이 가난한 자는 복이 있나니 천국이 그들의 것임이요\"\n\n"
+            )
+
         # 서머나 교회 김성수 목사 전용 시스템 프롬프트 (신학적 페르소나 극대화)
         system_prompt = (
             f"당신은 서머나 교회의 '김성수 목사'입니다. 사용자는 '{user_name} 님'입니다.\n"
@@ -187,6 +200,7 @@ def ask():
             "사용자의 요청이 '일반 묵상', '말씀찾기', 또는 '기도문' 중 무엇이든 아래 형식을 준수하십시오.\n\n"
             "반드시 다음 형식을 지켜 답변하십시오:\n"
             "[일반 답변 시작]\n"
+            f"{bible_search_instruction}"
             "(성도에 대한 목회적 안부와 진리의 복음적 권면. 정상적인 질문이라면 최소 3~4문장 정도로 적절히 작성하십시오.)\n"
             "[일반 답변 끝]\n\n"
             "[심층 분석 시작]\n"
@@ -262,6 +276,57 @@ def play_hymn(file_id):
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/bible/read')
+def read_bible():
+    try:
+        book = request.args.get('book', '').strip()
+        chapter = request.args.get('chapter', '').strip()
+        
+        if not book or not chapter:
+            return jsonify({"error": "책 이름(book)과 장 번호(chapter)를 지정해주세요."}), 400
+            
+        # Gemini를 이용하여 특정 성경 책과 장의 개역개정 본문을 파싱하여 가져오기
+        prompt = (
+            f"성경 '{book}' {chapter}장의 전체 절과 본문을 한국어 개역개정(Revised Korean Version) 버전으로 정확하게 가져와서 JSON 형식으로 출력하세요.\n"
+            "오직 유효한 JSON 형식으로만 응답해야 하며, markdown 코드 블록(```json 등)이나 서론, 결론, 부연설명 없이 순수한 JSON 텍스트만 출력해야 합니다.\n"
+            "반드시 아래의 스키마를 엄격하게 지켜야 합니다:\n"
+            "{\n"
+            f"  \"book\": \"{book}\",\n"
+            f"  \"chapter\": {chapter},\n"
+            "  \"verses\": [\n"
+            "    {\"verse\": 1, \"text\": \"1절 본문...\"},\n"
+            "    {\"verse\": 2, \"text\": \"2절 본문...\"}\n"
+            "  ]\n"
+            "}\n"
+            "경고: 실제 존재하지 않는 절을 임의로 추가하거나 누락하지 말고 정확한 개역개정 한글 성경 텍스트를 출력하십시오."
+        )
+        
+        # 시스템 지침을 성경 파서 페르소나로 설정
+        system_instruction = (
+            "당신은 성경 텍스트 데이터베이스 API입니다. 사용자가 요청한 성경 책과 장의 모든 구절을 오차 없이 개역개정 본문으로 정확하게 JSON으로 인코딩하여 반환합니다. "
+            "JSON 형식 외에는 어떠한 텍스트나 설명도 출력해선 안 되며, JSON 문법 오류가 없도록 쉼표와 큰따옴표 처리를 완벽하게 하십시오."
+        )
+        
+        model = get_gemini_model(system_instruction)
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        
+        # markdown json 블록이 있는 경우 제거
+        if text.startswith("```"):
+            lines = text.split("\n")
+            if lines[0].startswith("```json") or lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines[-1].startswith("```"):
+                lines = lines[:-1]
+            text = "\n".join(lines).strip()
+            
+        bible_data = json.loads(text)
+        return jsonify(bible_data)
+        
+    except Exception as e:
+        print(f"[BIBLE READ ERROR] {e}")
+        return jsonify({"error": f"성경을 불러오는 데 실패했습니다: {str(e)}"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

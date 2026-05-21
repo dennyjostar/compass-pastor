@@ -916,6 +916,286 @@
         .onboarding-btn:hover {
             opacity: 0.85;
         }
+
+        /* ===== 듀얼 탭 및 성경 브라우저 스타일 ===== */
+        .modal-tabs {
+            display: none; /* 기본적으로 숨김 */
+            background: rgba(13, 18, 32, 0.95);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .modal-tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.25s ease;
+        }
+        .modal-tab:hover {
+            color: rgba(201, 168, 76, 0.8);
+        }
+        .modal-tab.active {
+            color: #c9a84c;
+            border-bottom: 2px solid #c9a84c;
+            font-weight: 600;
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        #bibleBrowser {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            background: #090d1a;
+        }
+
+        .bible-book-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .bible-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #c9a84c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            padding-left: 6px;
+            border-left: 2px solid #c9a84c;
+        }
+        .bible-grid-books {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .bible-book-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 8px 2px;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bible-book-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: rgba(201, 168, 76, 0.3);
+            color: #c9a84c;
+        }
+        .bible-book-btn.active {
+            background: rgba(201, 168, 76, 0.2);
+            border-color: #c9a84c;
+            color: #c9a84c;
+            font-weight: 600;
+        }
+
+        .bible-chapter-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 15px;
+        }
+        .bible-back-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 15px;
+        }
+        .bible-back-btn {
+            background: none;
+            border: none;
+            color: #c9a84c;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .bible-back-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+        }
+        .bible-selected-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .bible-chapter-grid-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .bible-grid-chapters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 5px;
+        }
+        .bible-chapter-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px 0;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .bible-chapter-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: rgba(201, 168, 76, 0.3);
+            color: #c9a84c;
+        }
+
+        .bible-reader-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .bible-reader-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: rgba(13, 18, 32, 0.5);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+        }
+        .bible-reader-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .bible-nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c9a84c;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .bible-nav-btn:hover {
+            background: rgba(201, 168, 76, 0.15);
+            border-color: #c9a84c;
+        }
+        .bible-reader-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .bible-font-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bible-font-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bible-font-btn:hover {
+            background: rgba(201, 168, 76, 0.15);
+            color: #c9a84c;
+        }
+        .bible-text-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 18px;
+            background: linear-gradient(to bottom, #090d1a, #0b1122);
+            line-height: 1.8;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .bible-verse-item {
+            margin-bottom: 14px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .bible-verse-item:hover {
+            background: rgba(201, 168, 76, 0.08);
+        }
+        .bible-verse-num {
+            font-size: 11px;
+            font-weight: 600;
+            color: #c9a84c;
+            margin-top: 3px;
+            background: rgba(201, 168, 76, 0.12);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 4px;
+            width: 20px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .bible-verse-text {
+            flex: 1;
+            word-break: keep-all;
+        }
+        .bible-reader-footer {
+            padding: 12px;
+            background: rgba(13, 18, 32, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .bible-footer-btn {
+            background: linear-gradient(135deg, #c9a84c 0%, #a3812d 100%);
+            border: none;
+            border-radius: 10px;
+            color: #0a0f1e;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .bible-footer-btn:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 
@@ -1020,8 +1300,58 @@
                 <div class="modal-title" id="modalTitle">💬 영적인 대화</div>
                 <div class="modal-close" onclick="closeChatModal()">✕</div>
             </div>
+            <!-- 말씀찾기 전용 듀얼 탭 -->
+            <div class="modal-tabs" id="bibleModalTabs">
+                <div class="modal-tab active" id="tabBibleChat" onclick="switchBibleTab('chat')">말씀 검색 및 대화</div>
+                <div class="modal-tab" id="tabBibleRead" onclick="switchBibleTab('read')">성경책 직접 읽기</div>
+            </div>
             <div id="chatMessages"></div>
-            <div class="modal-input-area">
+            
+            <!-- 성경책 직접 읽기 브라우저 -->
+            <div id="bibleBrowser">
+                <!-- 1. 성경책 선택 뷰 -->
+                <div class="bible-book-list" id="bibleBookListView">
+                    <div class="bible-section-title">구약 성경 (39권)</div>
+                    <div class="bible-grid-books" id="bibleOtGrid"></div>
+                    <div class="bible-section-title" style="margin-top: 15px;">신약 성경 (27권)</div>
+                    <div class="bible-grid-books" id="bibleNtGrid"></div>
+                </div>
+                
+                <!-- 2. 장(Chapter) 선택 뷰 -->
+                <div class="bible-chapter-view" id="bibleChapterListView">
+                    <div class="bible-back-header">
+                        <button class="bible-back-btn" onclick="showBibleBookList()">◀ 책 선택</button>
+                        <span class="bible-selected-title" id="bibleSelectedBookTitle">-</span>
+                    </div>
+                    <div class="bible-chapter-grid-container">
+                        <div class="bible-grid-chapters" id="bibleChapterGrid"></div>
+                    </div>
+                </div>
+                
+                <!-- 3. 성경 본문 리더 뷰 -->
+                <div class="bible-reader-view" id="bibleReaderView">
+                    <div class="bible-reader-header">
+                        <div class="bible-reader-nav">
+                            <button class="bible-nav-btn" onclick="navigateChapter(-1)">◀</button>
+                            <span class="bible-reader-title" id="bibleReaderTitle">-</span>
+                            <button class="bible-nav-btn" onclick="navigateChapter(1)">▶</button>
+                        </div>
+                        <div class="bible-font-controls">
+                            <button class="bible-font-btn" onclick="changeBibleFontSize(-1)">A-</button>
+                            <button class="bible-font-btn" onclick="changeBibleFontSize(1)">A+</button>
+                        </div>
+                    </div>
+                    <div class="bible-text-content" id="bibleTextContent">
+                        <!-- 본문 구절들 렌더링 -->
+                    </div>
+                    <div class="bible-reader-footer">
+                        <button class="bible-footer-btn" onclick="meditateOnCurrentChapter()">✍️ 이 장 전체 내용으로 묵상/상담하기</button>
+                        <button class="bible-footer-btn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; margin-top: 4px;" onclick="showBibleChapterList()">목록으로 돌아가기</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-input-area" id="modalInputArea">
                 <div class="modal-input-row">
                     <button class="voice-btn" id="modalVoiceBtn" onclick="startVoice('modalInput', 'modalVoiceBtn')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"
@@ -1660,6 +1990,18 @@
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('chatModal').classList.add('active');
 
+            var tabs = document.getElementById('bibleModalTabs');
+            if (route === 'bible') {
+                tabs.style.display = 'flex';
+                switchBibleTab('chat');
+                initBibleBrowser();
+            } else {
+                tabs.style.display = 'none';
+                document.getElementById('chatMessages').style.display = 'block';
+                document.getElementById('bibleBrowser').style.display = 'none';
+                document.getElementById('modalInputArea').style.display = 'block';
+            }
+
             var input = document.getElementById('modalInput');
             var welcomeMsg = "";
 
@@ -1963,6 +2305,273 @@
                 alert('계좌번호 복사에 실패했습니다. 수동으로 복사해주세요.\\n(카카오뱅크 3333-03-9311986)');
             }
             document.body.removeChild(tempInput);
+        }
+
+        /* ── 성경책 직접 읽기 브라우저 로직 ── */
+        var bibleSelectedBook = "";
+        var bibleSelectedChapter = 1;
+        var bibleFontSize = 15;
+        var bibleMetadata = [
+            // 구약 39권
+            { name: "창세기", abbr: "창", type: "OT", chapters: 50 },
+            { name: "출애굽기", abbr: "출", type: "OT", chapters: 40 },
+            { name: "레위기", abbr: "레", type: "OT", chapters: 27 },
+            { name: "민수기", abbr: "민", type: "OT", chapters: 36 },
+            { name: "신명기", abbr: "신", type: "OT", chapters: 34 },
+            { name: "여호수아", abbr: "여", type: "OT", chapters: 24 },
+            { name: "사사기", abbr: "삿", type: "OT", chapters: 21 },
+            { name: "룻기", abbr: "룻", type: "OT", chapters: 4 },
+            { name: "사무엘상", abbr: "삼상", type: "OT", chapters: 31 },
+            { name: "사무엘하", abbr: "삼하", type: "OT", chapters: 24 },
+            { name: "열왕기상", abbr: "왕상", type: "OT", chapters: 22 },
+            { name: "열왕기하", abbr: "왕하", type: "OT", chapters: 25 },
+            { name: "역대상", abbr: "대상", type: "OT", chapters: 29 },
+            { name: "역대하", abbr: "대하", type: "OT", chapters: 36 },
+            { name: "에스라", abbr: "스", type: "OT", chapters: 10 },
+            { name: "느헤미야", abbr: "느", type: "OT", chapters: 13 },
+            { name: "에스더", abbr: "에", type: "OT", chapters: 10 },
+            { name: "욥기", abbr: "욥", type: "OT", chapters: 42 },
+            { name: "시편", abbr: "시", type: "OT", chapters: 150 },
+            { name: "잠언", abbr: "잠", type: "OT", chapters: 31 },
+            { name: "전도서", abbr: "전", type: "OT", chapters: 12 },
+            { name: "아가", abbr: "아", type: "OT", chapters: 8 },
+            { name: "이사야", abbr: "사", type: "OT", chapters: 66 },
+            { name: "예레미야", abbr: "렘", type: "OT", chapters: 52 },
+            { name: "예레미야애가", abbr: "애", type: "OT", chapters: 5 },
+            { name: "에스겔", abbr: "겔", type: "OT", chapters: 48 },
+            { name: "다니엘", abbr: "단", type: "OT", chapters: 12 },
+            { name: "호세아", abbr: "호", type: "OT", chapters: 14 },
+            { name: "요엘", abbr: "요엘", type: "OT", chapters: 3 },
+            { name: "아모스", abbr: "암", type: "OT", chapters: 9 },
+            { name: "오바디야", abbr: "옵", type: "OT", chapters: 1 },
+            { name: "요나", abbr: "욘", type: "OT", chapters: 4 },
+            { name: "미가", abbr: "미", type: "OT", chapters: 7 },
+            { name: "나훔", abbr: "나", type: "OT", chapters: 3 },
+            { name: "하박국", abbr: "하", type: "OT", chapters: 3 },
+            { name: "스바냐", abbr: "습", type: "OT", chapters: 3 },
+            { name: "학개", abbr: "학", type: "OT", chapters: 2 },
+            { name: "스가랴", abbr: "슥", type: "OT", chapters: 14 },
+            { name: "말라기", abbr: "말", type: "OT", chapters: 4 },
+            // 신약 27권
+            { name: "마태복음", abbr: "마", type: "NT", chapters: 28 },
+            { name: "마가복음", abbr: "막", type: "NT", chapters: 16 },
+            { name: "누가복음", abbr: "눅", type: "NT", chapters: 24 },
+            { name: "요한복음", abbr: "요", type: "NT", chapters: 21 },
+            { name: "사도행전", abbr: "행", type: "NT", chapters: 28 },
+            { name: "로마서", abbr: "롬", type: "NT", chapters: 16 },
+            { name: "고린도전서", abbr: "고전", type: "NT", chapters: 16 },
+            { name: "고린도후서", abbr: "고후", type: "NT", chapters: 13 },
+            { name: "갈라디아서", abbr: "갈", type: "NT", chapters: 6 },
+            { name: "에베소서", abbr: "엡", type: "NT", chapters: 6 },
+            { name: "빌립보서", abbr: "빌", type: "NT", chapters: 4 },
+            { name: "골로새서", abbr: "골", type: "NT", chapters: 4 },
+            { name: "데살로니가전서", abbr: "살전", type: "NT", chapters: 5 },
+            { name: "데살로니가후서", abbr: "살후", type: "NT", chapters: 3 },
+            { name: "디모데전서", abbr: "딤전", type: "NT", chapters: 6 },
+            { name: "디모데후서", abbr: "딤후", type: "NT", chapters: 4 },
+            { name: "디도서", abbr: "딛", type: "NT", chapters: 3 },
+            { name: "빌레몬서", abbr: "몬", type: "NT", chapters: 1 },
+            { name: "히브리서", abbr: "히", type: "NT", chapters: 13 },
+            { name: "야고보서", abbr: "약", type: "NT", chapters: 5 },
+            { name: "베드로전서", abbr: "벧전", type: "NT", chapters: 5 },
+            { name: "베드로후서", abbr: "벧후", type: "NT", chapters: 3 },
+            { name: "요한1서", abbr: "요일", type: "NT", chapters: 5 },
+            { name: "요한2서", abbr: "요이", type: "NT", chapters: 1 },
+            { name: "요한3서", abbr: "요삼", type: "NT", chapters: 1 },
+            { name: "유다서", abbr: "유", type: "NT", chapters: 1 },
+            { name: "요한계시록", abbr: "계", type: "NT", chapters: 22 }
+        ];
+
+        var bibleInitialized = false;
+
+        function initBibleBrowser() {
+            if (bibleInitialized) return;
+            var otGrid = document.getElementById('bibleOtGrid');
+            var ntGrid = document.getElementById('bibleNtGrid');
+            
+            otGrid.innerHTML = '';
+            ntGrid.innerHTML = '';
+
+            bibleMetadata.forEach(function (book) {
+                var btn = document.createElement('button');
+                btn.className = 'bible-book-btn';
+                btn.textContent = book.name;
+                btn.onclick = function () { selectBibleBook(book.name); };
+                
+                if (book.type === 'OT') {
+                    otGrid.appendChild(btn);
+                } else {
+                    ntGrid.appendChild(btn);
+                }
+            });
+            bibleInitialized = true;
+        }
+
+        function switchBibleTab(tab) {
+            var tabChat = document.getElementById('tabBibleChat');
+            var tabRead = document.getElementById('tabBibleRead');
+            var chatMessages = document.getElementById('chatMessages');
+            var bibleBrowser = document.getElementById('bibleBrowser');
+            var inputArea = document.getElementById('modalInputArea');
+
+            if (tab === 'chat') {
+                tabChat.classList.add('active');
+                tabRead.classList.remove('active');
+                chatMessages.style.display = 'block';
+                bibleBrowser.style.display = 'none';
+                inputArea.style.display = 'block';
+            } else {
+                tabChat.classList.remove('active');
+                tabRead.classList.add('active');
+                chatMessages.style.display = 'none';
+                bibleBrowser.style.display = 'flex';
+                inputArea.style.display = 'none';
+                showBibleBookList();
+            }
+        }
+
+        function selectBibleBook(bookName) {
+            bibleSelectedBook = bookName;
+            var bookData = bibleMetadata.find(function (b) { return b.name === bookName; });
+            if (!bookData) return;
+
+            document.getElementById('bibleSelectedBookTitle').textContent = bookName;
+            
+            var chapterGrid = document.getElementById('bibleChapterGrid');
+            chapterGrid.innerHTML = '';
+
+            for (var i = 1; i <= bookData.chapters; i++) {
+                (function (chapterNum) {
+                    var btn = document.createElement('button');
+                    btn.className = 'bible-chapter-btn';
+                    btn.textContent = chapterNum + '장';
+                    btn.onclick = function () { selectBibleChapter(chapterNum); };
+                    chapterGrid.appendChild(btn);
+                })(i);
+            }
+
+            document.getElementById('bibleBookListView').style.display = 'none';
+            document.getElementById('bibleChapterListView').style.display = 'flex';
+            document.getElementById('bibleReaderView').style.display = 'none';
+        }
+
+        function showBibleBookList() {
+            document.getElementById('bibleBookListView').style.display = 'block';
+            document.getElementById('bibleChapterListView').style.display = 'none';
+            document.getElementById('bibleReaderView').style.display = 'none';
+        }
+
+        function showBibleChapterList() {
+            document.getElementById('bibleBookListView').style.display = 'none';
+            document.getElementById('bibleChapterListView').style.display = 'flex';
+            document.getElementById('bibleReaderView').style.display = 'none';
+        }
+
+        function selectBibleChapter(chapterNum) {
+            bibleSelectedChapter = chapterNum;
+            fetchBibleChapterText();
+        }
+
+        function fetchBibleChapterText() {
+            var readerView = document.getElementById('bibleReaderView');
+            var textContent = document.getElementById('bibleTextContent');
+            var readerTitle = document.getElementById('bibleReaderTitle');
+
+            document.getElementById('bibleBookListView').style.display = 'none';
+            document.getElementById('bibleChapterListView').style.display = 'none';
+            readerView.style.display = 'flex';
+
+            readerTitle.textContent = bibleSelectedBook + ' ' + bibleSelectedChapter + '장';
+            textContent.innerHTML = '<div style="text-align:center;padding:50px 0;color:rgba(255,255,255,0.4);">성경 본문을 불러오는 중...</div>';
+
+            fetch('/api/bible/read?book=' + encodeURIComponent(bibleSelectedBook) + '&chapter=' + bibleSelectedChapter)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.error) {
+                        textContent.innerHTML = '<div style="text-align:center;padding:40px 10px;color:#ff6b6b;">본문 로드 실패: ' + data.error + '</div>';
+                        return;
+                    }
+
+                    textContent.innerHTML = '';
+                    if (data.verses && data.verses.length > 0) {
+                        data.verses.forEach(function (v) {
+                            var item = document.createElement('div');
+                            item.className = 'bible-verse-item';
+                            item.onclick = function () { selectVerseForCounsel(v.verse, v.text); };
+                            
+                            var num = document.createElement('span');
+                            num.className = 'bible-verse-num';
+                            num.textContent = v.verse;
+                            
+                            var text = document.createElement('span');
+                            text.className = 'bible-verse-text';
+                            text.textContent = v.text;
+                            text.style.fontSize = bibleFontSize + 'px';
+
+                            item.appendChild(num);
+                            item.appendChild(text);
+                            textContent.appendChild(item);
+                        });
+                        textContent.scrollTop = 0;
+                    } else {
+                        textContent.innerHTML = '<div style="text-align:center;padding:50px 0;color:rgba(255,255,255,0.4);">본문이 비어 있습니다.</div>';
+                    }
+                })
+                .catch(function (err) {
+                    textContent.innerHTML = '<div style="text-align:center;padding:40px 0;color:#ff6b6b;">성경을 불러오는 데 실패했습니다. 다시 시도해 주세요.</div>';
+                });
+        }
+
+        function navigateChapter(direction) {
+            var bookData = bibleMetadata.find(function (b) { return b.name === bibleSelectedBook; });
+            if (!bookData) return;
+
+            var newChapter = bibleSelectedChapter + direction;
+            if (newChapter >= 1 && newChapter <= bookData.chapters) {
+                bibleSelectedChapter = newChapter;
+                fetchBibleChapterText();
+            } else {
+                var bookIndex = bibleMetadata.findIndex(function (b) { return b.name === bibleSelectedBook; });
+                var newBookIndex = bookIndex + direction;
+                if (newBookIndex >= 0 && newBookIndex < bibleMetadata.length) {
+                    var newBook = bibleMetadata[newBookIndex];
+                    bibleSelectedBook = newBook.name;
+                    bibleSelectedChapter = direction === 1 ? 1 : newBook.chapters;
+                    fetchBibleChapterText();
+                } else {
+                    alert(direction === 1 ? "성경의 마지막 장입니다." : "성경의 첫 장입니다.");
+                }
+            }
+        }
+
+        function changeBibleFontSize(diff) {
+            bibleFontSize += diff * 2;
+            if (bibleFontSize < 13) bibleFontSize = 13;
+            if (bibleFontSize > 25) bibleFontSize = 25;
+            
+            var items = document.querySelectorAll('.bible-verse-text');
+            items.forEach(function (el) {
+                el.style.fontSize = bibleFontSize + 'px';
+            });
+        }
+
+        function selectVerseForCounsel(verseNum, text) {
+            var q = confirm('"' + bibleSelectedBook + ' ' + bibleSelectedChapter + ':' + verseNum + '" 구절로 김성수 목사님의 강해/상담을 진행하시겠습니까?');
+            if (q) {
+                switchBibleTab('chat');
+                var input = document.getElementById('modalInput');
+                var msg = bibleSelectedBook + ' ' + bibleSelectedChapter + '장 ' + verseNum + '절 "' + text + '" 말씀에 대해 깊이 있는 진리 강해를 들려주세요.';
+                input.value = msg;
+                sendMessage();
+            }
+        }
+
+        function meditateOnCurrentChapter() {
+            switchBibleTab('chat');
+            var input = document.getElementById('modalInput');
+            var msg = bibleSelectedBook + ' ' + bibleSelectedChapter + '장 전체 말씀을 묵상하며, 이를 통해 인간의 철저한 파산과 오직 예수 그리스도의 십자가 은혜에 대해 깊이 있게 강해해 주세요.';
+            input.value = msg;
+            sendMessage();
         }
 
         /* ── 페이지 초기화 ── */
