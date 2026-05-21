@@ -1659,6 +1659,31 @@
             font-size: 13.5px;
             line-height: 1.6;
         }
+        /* ── 공유하기 옵션 버튼 스타일 ── */
+        .share-option-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(201, 168, 76, 0.08) !important;
+            border: 1px solid rgba(201, 168, 76, 0.25) !important;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .share-option-btn:hover {
+            background: rgba(201, 168, 76, 0.15) !important;
+            border-color: rgba(201, 168, 76, 0.4) !important;
+            transform: translateY(-1px);
+        }
+        .share-option-btn:active {
+            transform: translateY(1px);
+        }
     </style>
 </head>
 
@@ -2100,6 +2125,56 @@
                 <span style="font-size: 11px; color: rgba(255, 255, 255, 0.4);">(예금주: 조X상)</span>
                 <div style="margin-top: 6px; font-size: 10px; color: #c9a84c; text-decoration: underline;">계좌번호 복사하기</div>
             </div>
+        </div>
+    </div>
+
+    <!-- 앱 공유하기 모달 -->
+    <div class="info-modal-overlay" id="shareModalOverlay">
+        <div class="info-modal" style="max-width: 340px;">
+            <h3 style="margin-bottom: 8px;">📢 나침반 공유하기</h3>
+            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4); text-align: center; margin-bottom: 20px; word-break: keep-all; line-height: 1.4;">
+                성경 말씀과 복음의 은혜를 다른 성도들과 나누어 보세요.
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- 1. 링크 주소 복사하기 -->
+                <button class="share-option-btn" id="shareCopyLinkBtn" onclick="executeAppShare('link')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">🔗</span>
+                        <div>
+                            <div>링크 주소 복사하기</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: normal; margin-top: 2px;">웹사이트 주소만 깔끔하게 복사</div>
+                        </div>
+                    </div>
+                    <span style="color: #c9a84c; font-size: 12px;">→</span>
+                </button>
+
+                <!-- 2. 카카오톡 공유 문구 복사 -->
+                <button class="share-option-btn" id="shareCopyTextBtn" onclick="executeAppShare('text')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">💬</span>
+                        <div>
+                            <div>카카오톡 공유 문구 복사</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: normal; margin-top: 2px;">소개 문구와 링크 전체 복사</div>
+                        </div>
+                    </div>
+                    <span style="color: #c9a84c; font-size: 12px;">→</span>
+                </button>
+
+                <!-- 3. 시스템 공유하기 (모바일 브라우저 지원 시 노출) -->
+                <button class="share-option-btn" id="shareSystemBtn" onclick="executeAppShare('system')" style="display: none; background: rgba(255, 255, 255, 0.04) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">📱</span>
+                        <div>
+                            <div>시스템 공유창 열기</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: normal; margin-top: 2px;">스마트폰 기본 공유 기능 사용</div>
+                        </div>
+                    </div>
+                    <span style="color: rgba(255,255,255,0.4); font-size: 12px;">→</span>
+                </button>
+            </div>
+            
+            <button class="close-info" onclick="closeShareModal()">닫기</button>
         </div>
     </div>
 
@@ -2838,22 +2913,70 @@
 
         /* ── 앱 공유하기 (우측 상단 버튼) ── */
         function shareApp() {
-            var url = window.location.origin;
-            var shareData = {
-                title: '나침반',
-                text: '성경 말씀과 기도로 함께하는 영혼의 길잡이, 영혼의 나침반',
-                url: url
-            };
+            document.getElementById('shareModalOverlay').classList.add('active');
+            
+            // 모바일 환경 등에서 navigator.share를 지원하는 경우 시스템 공유 옵션 활성화
+            var systemBtn = document.getElementById('shareSystemBtn');
             if (navigator.share) {
-                navigator.share(shareData).catch(function (err) { });
+                systemBtn.style.display = 'flex';
             } else {
+                systemBtn.style.display = 'none';
+            }
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModalOverlay').classList.remove('active');
+        }
+
+        function executeAppShare(type) {
+            var url = window.location.origin;
+            var text = '나침반 - 성경 말씀과 기도로 함께하는 영혼의 길잡이';
+            
+            if (type === 'link') {
                 var tempInput = document.createElement("input");
                 tempInput.value = url;
                 document.body.appendChild(tempInput);
                 tempInput.select();
-                document.execCommand("copy");
+                var success = false;
+                try {
+                    success = document.execCommand("copy");
+                } catch(e) {}
                 document.body.removeChild(tempInput);
-                alert("나침반 주소가 복사되었습니다. 카카오톡 창에 붙여넣기 해주세요!");
+                
+                if (success) {
+                    alert("🔗 나침반 링크 주소가 클립보드에 복사되었습니다!\n\n공유하고 싶으신 카카오톡 대화방이나 메신저 창에 대고 붙여넣기(Ctrl+V) 하시면 즉시 공유할 수 있습니다.");
+                } else {
+                    alert("링크 복사에 실패했습니다. 주소창의 주소를 복사해 주세요.");
+                }
+                closeShareModal();
+            } else if (type === 'text') {
+                var fullText = text + "\n" + url;
+                var tempTextArea = document.createElement("textarea");
+                tempTextArea.value = fullText;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                var success = false;
+                try {
+                    success = document.execCommand("copy");
+                } catch(e) {}
+                document.body.removeChild(tempTextArea);
+                
+                if (success) {
+                    alert("💬 카카오톡 공유용 소개 문구와 링크가 모두 복사되었습니다!\n\n카카오톡 대화방 입력창에 대고 붙여넣기(Ctrl+V) 하시면 예쁘게 대화방으로 은혜를 전달하실 수 있습니다.");
+                } else {
+                    alert("복사에 실패했습니다. 링크 복사하기를 이용해 주세요.");
+                }
+                closeShareModal();
+            } else if (type === 'system') {
+                navigator.share({
+                    title: '나침반',
+                    text: text,
+                    url: url
+                }).then(function() {
+                    closeShareModal();
+                }).catch(function(err) {
+                    console.log("System Share failed:", err);
+                });
             }
         }
 
