@@ -286,7 +286,25 @@ def read_bible():
         if not book or not chapter:
             return jsonify({"error": "책 이름(book)과 장 번호(chapter)를 지정해주세요."}), 400
             
-        # Gemini를 이용하여 특정 성경 책과 장의 개역개정 본문을 파싱하여 가져오기
+        # 캐시 폴더 생성 및 경로 구성
+        cache_dir = os.path.join(os.path.dirname(__file__), 'bible_cache')
+        os.makedirs(cache_dir, exist_ok=True)
+        
+        # 파일명 표준화 (공백 제거)
+        cache_filename = f"{book.replace(' ', '')}_{chapter}.json"
+        cache_path = os.path.join(cache_dir, cache_filename)
+        
+        # 1. 로컬 파일 캐시에 존재하면 즉시 반환
+        if os.path.exists(cache_path):
+            try:
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    bible_data = json.load(f)
+                    print(f"[BIBLE CACHE HIT] Loaded {book} {chapter}장 from local cache.")
+                    return jsonify(bible_data)
+            except Exception as cache_err:
+                print(f"[BIBLE CACHE READ ERROR] {cache_err} - falling back to Gemini API.")
+            
+        # 2. 캐시에 없으면 Gemini API를 이용하여 특정 성경 책과 장의 개역개정 본문을 파싱하여 가져오기
         prompt = (
             f"성경 '{book}' {chapter}장의 전체 절과 본문을 한국어 개역개정(Revised Korean Version) 버전으로 정확하게 가져와서 JSON 형식으로 출력하세요.\n"
             "오직 유효한 JSON 형식으로만 응답해야 하며, markdown 코드 블록(```json 등)이나 서론, 결론, 부연설명 없이 순수한 JSON 텍스트만 출력해야 합니다.\n"
@@ -322,6 +340,15 @@ def read_bible():
             text = "\n".join(lines).strip()
             
         bible_data = json.loads(text)
+        
+        # 3. 새로 파싱된 데이터를 로컬 파일 캐시에 저장
+        try:
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(bible_data, f, ensure_ascii=False, indent=2)
+                print(f"[BIBLE CACHE WRITE] Successfully cached {book} {chapter}장.")
+        except Exception as cache_save_err:
+            print(f"[BIBLE CACHE WRITE ERROR] {cache_save_err}")
+            
         return jsonify(bible_data)
         
     except Exception as e:
