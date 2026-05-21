@@ -2463,26 +2463,57 @@
             document.getElementById('chatModal').classList.add('active');
 
             var tabs = document.getElementById('bibleModalTabs');
+            var chatMessages = document.getElementById('chatMessages');
+            var bibleBrowser = document.getElementById('bibleBrowser');
+            var modalInputArea = document.getElementById('modalInputArea');
+            var prayerMaker = document.getElementById('prayerMaker');
+
             if (route === 'bible') {
                 tabs.style.display = 'flex';
-                document.getElementById('chatMessages').style.display = 'block';
-                document.getElementById('bibleBrowser').style.display = 'none';
-                document.getElementById('modalInputArea').style.display = 'block';
-                document.getElementById('prayerMaker').style.display = 'none';
+                chatMessages.style.display = 'block';
+                if (bibleBrowser) bibleBrowser.style.display = 'none';
+                if (prayerMaker) prayerMaker.style.display = 'none';
+                modalInputArea.style.display = 'block';
                 switchBibleTab('chat');
                 initBibleBrowser();
             } else if (route === 'prayer') {
                 tabs.style.display = 'none';
-                document.getElementById('chatMessages').style.display = 'none';
-                document.getElementById('bibleBrowser').style.display = 'none';
-                document.getElementById('modalInputArea').style.display = 'none';
-                document.getElementById('prayerMaker').style.display = 'block';
-                resetPrayerMaker();
+                chatMessages.style.display = 'none';
+                if (bibleBrowser) bibleBrowser.style.display = 'none';
+                modalInputArea.style.display = 'none';
+                if (prayerMaker) {
+                    prayerMaker.style.display = 'block';
+                    resetPrayerMaker();
+                }
             } else {
                 tabs.style.display = 'none';
-                document.getElementById('chatMessages').style.display = 'block';
-                document.getElementById('bibleBrowser').style.display = 'none';
-                document.getElementById('modalInputArea').style.display = 'block';
+                chatMessages.style.display = 'block';
+                if (bibleBrowser) bibleBrowser.style.display = 'none';
+                if (prayerMaker) prayerMaker.style.display = 'none';
+                modalInputArea.style.display = 'block';
+            }
+
+            var input = document.getElementById('modalInput');
+            var welcomeMsg = "";
+
+            if (route === 'meditation') {
+                welcomeMsg = "오늘 깊이 묵상하고 싶은 말씀이나 제목을 입력해 주세요. 함께 은혜를 나누고 묵상을 도와드리겠습니다.";
+                input.placeholder = "오늘의 말씀이나 묵상 제목을 입력하세요...";
+            } else if (route === 'bible') {
+                welcomeMsg = "찾고 싶은 성경 구절이나 신앙적인 궁금증을 말씀해 주세요.";
+                input.placeholder = "검색할 말씀을 입력하세요...";
+            } else if (route === 'prayer') {
+                input.placeholder = "기도 제목을 입력하세요...";
+            } else {
+                input.placeholder = "메시지를 입력하세요...";
+            }
+
+            if (welcomeMsg && route !== 'prayer') {
+                appendAIMessage({ main: welcomeMsg, deep: "" });
+            }
+
+            if (route !== 'prayer') {
+                setTimeout(function () { input.focus(); }, 300);
             }
         }
 
@@ -2734,54 +2765,6 @@
         }
 
         /* ── 채팅 모달 ── */
-        var currentRoute = '';
-
-        function handleClick(route) {
-            if (!requireProfile(function () { handleClick(route); })) return;
-            currentRoute = route;
-            var titles = {
-                'bible': '📖 말씀 강해',
-                'prayer': '🙏 기도문',
-                'meditation': '✨ 오늘의 묵상'
-            };
-            document.getElementById('modalTitle').textContent = titles[route] || '💬 AI 상담';
-            document.getElementById('chatMessages').innerHTML = '';
-            document.getElementById('chatModal').classList.add('active');
-
-            var tabs = document.getElementById('bibleModalTabs');
-            if (route === 'bible') {
-                tabs.style.display = 'flex';
-                switchBibleTab('chat');
-                initBibleBrowser();
-            } else {
-                tabs.style.display = 'none';
-                document.getElementById('chatMessages').style.display = 'block';
-                document.getElementById('bibleBrowser').style.display = 'none';
-                document.getElementById('modalInputArea').style.display = 'block';
-            }
-
-            var input = document.getElementById('modalInput');
-            var welcomeMsg = "";
-
-            if (route === 'meditation') {
-                welcomeMsg = "오늘 깊이 묵상하고 싶은 말씀이나 제목을 입력해 주세요. 함께 은혜를 나누고 묵상을 도와드리겠습니다.";
-                input.placeholder = "오늘의 말씀이나 묵상 제목을 입력하세요...";
-            } else if (route === 'bible') {
-                welcomeMsg = "찾고 싶은 성경 구절이나 신앙적인 궁금증을 말씀해 주세요.";
-                input.placeholder = "검색할 말씀을 입력하세요...";
-            } else if (route === 'prayer') {
-                welcomeMsg = "어떤 상황에서 기도가 필요하신가요? 마음을 담아 기도문을 작성해 드릴게요.";
-                input.placeholder = "기도 제목을 입력하세요...";
-            } else {
-                input.placeholder = "메시지를 입력하세요...";
-            }
-
-            if (welcomeMsg) {
-                appendAIMessage({ main: welcomeMsg, deep: "" });
-            }
-
-            setTimeout(function () { input.focus(); }, 300);
-        }
 
         function sendFromHome() {
             if (!requireProfile(function () { sendFromHome(); })) return;
