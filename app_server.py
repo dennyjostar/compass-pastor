@@ -215,6 +215,23 @@ def ask():
                 "- 마태복음 5:3 \"심령이 가난한 자는 복이 있나니 천국이 그들의 것임이요\"\n\n"
             )
 
+        # 기도문 특별 지시사항 정의
+        prayer_instruction = ""
+        if "[기도문]" in user_msg:
+            prayer_instruction = (
+                "★[기도문 작성 특수 지시사항]\n"
+                "성도님이 지금 간절한 마음으로 상황에 맞는 기도문 작성을 요청하고 계십니다. "
+                "성도님의 선택된 카테고리와 구체적인 기도제목/상황을 깊이 헤아리십시오. "
+                "만약 상황이나 기도제목과 연관된 이미지가 제공되었다면, 그 이미지에서 묘사되는 구체적인 정황(예: 병실, 서류, 풍경, 인물의 표정 등)을 적극적으로 반영하여 기도문을 작성해 주십시오.\n\n"
+                "1. [일반 답변 시작]과 [일반 답변 끝] 사이에는 **하나님 아버지를 향한 정중하고 간절한 복음적 기도문**만을 한 문단씩 문단을 나누어 아름답게 작성하십시오. "
+                "기도문은 목회자가 성도와 함께 손을 잡고 기도해 주듯 따뜻하고 거룩하게 써주십시오. "
+                "기도는 반드시 경어체를 사용하고, '하나님 아버지, ...'로 시작하여 '예수 그리스도의 이름으로 기도드립니다. 아멘.'으로 마치도록 완벽하게 작성해 주십시오. "
+                "여기에는 어떠한 설명이나 메타 텍스트도 적지 마십시오. 오직 순수한 기도문만 들어가야 합니다.\n\n"
+                "2. [심층 분석 시작]과 [심층 분석 끝] 사이에는 **김성수 목사의 신학적/목회적 관점의 영적 권면과 해설**을 작성하십시오. "
+                "이 기도제목과 성도님의 상황(그리고 이미지)이 인간의 연약함과 자기 부인, 그리고 하나님의 전적인 은혜와 십자가 사랑을 어떻게 드러내는지 복음적으로 깊게 조명해 주십시오. "
+                "세상적 복(기복주의)이나 긍정주의적 힐링을 절대 피하고, 고난의 유익과 오직 예수를 붙들어야 함을 깊고 감동적으로 역설해 주십시오. (분량: 400~700자)\n\n"
+            )
+
         # 서머나 교회 김성수 목사 전용 시스템 프롬프트 (신학적 페르소나 극대화)
         system_prompt = (
             f"당신은 서머나 교회의 '김성수 목사'입니다. 사용자는 '{user_name} 님'입니다.\n"
@@ -224,6 +241,7 @@ def ask():
             "★[매우 중요 - 환각 방지 시스템] 당신이 확실히 아는 김성수 목사의 강해가 아니거나, 사용자의 질문(단어)만으로는 어떤 성경적 문맥인지 도저히 알 수 없다면 절대 아는 척하며 무관한 성경(계시록, 여호수아 등) 내용을 길게 지어내지 마십시오.\n"
             "이 경우, 단순히 사용자에게 '구체적인 성경 구절이나 배경 설명을 더 해주시면 정확히 나누겠습니다'라고 짧게 질문만 하십시오.\n"
             "사용자의 요청이 '일반 묵상', '말씀강해', 또는 '기도문' 중 무엇이든 아래 형식을 준수하십시오.\n\n"
+            f"{prayer_instruction}"
             "반드시 다음 형식을 지켜 답변하십시오:\n"
             "[일반 답변 시작]\n"
             f"{bible_search_instruction}"
@@ -236,7 +254,40 @@ def ask():
         )
 
         model = get_gemini_model(system_prompt)
-        response = model.generate_content(user_msg)
+
+        # 이미지 데이터 처리 및 멀티모달 Gemini 호출
+        image_data = data.get('image', '')
+        if image_data:
+            try:
+                import base64
+                if ',' in image_data:
+                    header, base64_str = image_data.split(',', 1)
+                else:
+                    base64_str = image_data
+
+                mime_type = "image/jpeg"
+                if "image/png" in image_data:
+                    mime_type = "image/png"
+                elif "image/webp" in image_data:
+                    mime_type = "image/webp"
+                elif "image/gif" in image_data:
+                    mime_type = "image/gif"
+
+                img_bytes = base64.b64decode(base64_str)
+                contents = [
+                    user_msg,
+                    {
+                        'mime_type': mime_type,
+                        'data': img_bytes
+                    }
+                ]
+                response = model.generate_content(contents)
+            except Exception as img_err:
+                print(f"[IMAGE PROCESSING ERROR] {img_err} - falling back to text-only.")
+                response = model.generate_content(user_msg)
+        else:
+            response = model.generate_content(user_msg)
+
         reply = response.text
 
         # 사용량 증가 및 저장

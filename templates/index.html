@@ -678,6 +678,368 @@
             margin: 8px 20px;
         }
 
+        /* ── 기도 작성하기 (Prayer Maker) 스타일 ── */
+        #prayerMaker {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        #prayerMaker::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #prayerMaker::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #prayerMaker::-webkit-scrollbar-thumb {
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 4px;
+        }
+
+        .prayer-category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .prayer-cat-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 8px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prayer-cat-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .prayer-cat-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(201, 168, 76, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .prayer-cat-btn:hover::before {
+            opacity: 1;
+        }
+
+        .prayer-cat-btn.active {
+            background: rgba(201, 168, 76, 0.08);
+            border: 1px solid rgba(201, 168, 76, 0.45);
+            box-shadow: 0 0 12px rgba(201, 168, 76, 0.15);
+        }
+
+        .prayer-cat-btn.active .prayer-cat-label {
+            color: #c9a84c;
+            font-weight: 600;
+        }
+
+        .prayer-cat-icon {
+            font-size: 26px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .prayer-cat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .prayer-image-uploader {
+            border: 1.5px dashed rgba(201, 168, 76, 0.25);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+            background: rgba(201, 168, 76, 0.02);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            position: relative;
+        }
+
+        .prayer-image-uploader:hover {
+            border-color: rgba(201, 168, 76, 0.5);
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .prayer-image-remove {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+
+        .prayer-image-remove:hover {
+            background: rgba(239, 68, 68, 0.8);
+            border-color: transparent;
+        }
+
+        .prayer-textarea {
+            width: 100%;
+            height: 100px;
+            border-radius: 14px;
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            background: rgba(201, 168, 76, 0.04);
+            color: #ffffff;
+            padding: 14px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .prayer-textarea:focus {
+            border-color: rgba(201, 168, 76, 0.45);
+            background: rgba(201, 168, 76, 0.07);
+        }
+
+        .prayer-submit-btn {
+            background: linear-gradient(135deg, #c9a84c, #b8943f);
+            color: #0a0f1e;
+            border: none;
+            font-weight: 600;
+            padding: 14px;
+            border-radius: 14px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 18px;
+            transition: all 0.25s;
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        .prayer-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(201, 168, 76, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .prayer-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 로딩 스피너 */
+        .prayer-loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(201, 168, 76, 0.1);
+            border-radius: 50%;
+            border-top-color: #c9a84c;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 결과 화면 헤더 */
+        .prayer-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 4px;
+        }
+
+        .prayer-font-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .prayer-font-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 11px;
+            width: 28px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .prayer-font-btn:hover {
+            background: rgba(201, 168, 76, 0.15);
+            border-color: rgba(201, 168, 76, 0.3);
+            color: #c9a84c;
+        }
+
+        /* 양장본 양식의 두꺼운 종이 질감의 카드 */
+        .prayer-parchment-card {
+            background: linear-gradient(to bottom, #fcf8eb 0%, #f5ecd5 100%);
+            border: 1px solid #e2d1a6;
+            border-radius: 18px;
+            padding: 26px 22px;
+            color: #2b2214;
+            box-shadow: inset 0 0 30px rgba(139,114,64,0.07), 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .prayer-parchment-decor {
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: rgba(139,114,64,0.3);
+            font-weight: 300;
+            user-select: none;
+        }
+
+        .prayer-parchment-decor.top {
+            margin-bottom: 16px;
+        }
+
+        .prayer-parchment-decor.bottom {
+            margin-top: 16px;
+        }
+
+        .prayer-text-body {
+            width: 100%;
+            font-size: 15px;
+            line-height: 1.95;
+            text-align: justify;
+            word-break: keep-all;
+            font-weight: 500;
+            color: #2e2416;
+        }
+
+        .prayer-text-body p {
+            margin-bottom: 12px;
+        }
+
+        /* 하단 액션 버튼 그룹 */
+        .prayer-action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .prayer-action-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .prayer-action-btn:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: rgba(201, 168, 76, 0.3);
+            color: #c9a84c;
+        }
+
+        .prayer-action-btn.active-save {
+            background: rgba(201, 168, 76, 0.15) !important;
+            border-color: rgba(201, 168, 76, 0.45) !important;
+            color: #c9a84c !important;
+            font-weight: 600;
+        }
+
+        /* 목회적 권면 카드 */
+        .prayer-pastor-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-top: 6px;
+        }
+
+        .prayer-pastor-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #c9a84c;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+            padding-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .prayer-pastor-body {
+            font-size: 13px;
+            line-height: 1.75;
+            color: #d8cba0;
+            word-break: keep-all;
+        }
+
+        .prayer-reset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .prayer-reset-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
         /* ===== 찬양 모달 ===== */
         .hymn-overlay {
             display: none;
@@ -1307,6 +1669,135 @@
             </div>
             <div id="chatMessages"></div>
             
+            <!-- 기도 작성하기 위자드 (상황별 기도 생성기) -->
+            <div id="prayerMaker" style="display:none;">
+                <!-- 1단계: 작성 폼 -->
+                <div id="prayerForm">
+                    <div style="font-size: 13px; color: rgba(201, 168, 76, 0.6); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px;">기도 카테고리</div>
+                    <div class="prayer-category-grid">
+                        <div class="prayer-cat-btn active" onclick="selectPrayerCategory('개인', '🙏')" data-category="개인">
+                            <span class="prayer-cat-icon">🙏</span>
+                            <span class="prayer-cat-label">개인</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('가정', '🧑‍🤝‍🧑')" data-category="가정">
+                            <span class="prayer-cat-icon">🧑‍🤝‍🧑</span>
+                            <span class="prayer-cat-label">가정</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('교회', '⛪')" data-category="교회">
+                            <span class="prayer-cat-icon">⛪</span>
+                            <span class="prayer-cat-label">교회</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('나라', 'KR')" data-category="나라">
+                            <span class="prayer-cat-icon" style="font-family: sans-serif; font-weight: 800; font-size: 20px; color:#fff; display:block; margin-bottom:4px; height:32px; line-height:32px;">KR</span>
+                            <span class="prayer-cat-label">나라</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('세계', '🌍')" data-category="세계">
+                            <span class="prayer-cat-icon">🌍</span>
+                            <span class="prayer-cat-label">세계</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('건강', '💚')" data-category="건강">
+                            <span class="prayer-cat-icon">💚</span>
+                            <span class="prayer-cat-label">건강</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('직장/학업', '💼')" data-category="직장/학업">
+                            <span class="prayer-cat-icon">💼</span>
+                            <span class="prayer-cat-label">직장/학업</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('관계', '🤝')" data-category="관계">
+                            <span class="prayer-cat-icon">🤝</span>
+                            <span class="prayer-cat-label">관계</span>
+                        </div>
+                        <div class="prayer-cat-btn" onclick="selectPrayerCategory('기타', '✨')" data-category="기타">
+                            <span class="prayer-cat-icon">✨</span>
+                            <span class="prayer-cat-label">기타</span>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 13px; color: rgba(201, 168, 76, 0.6); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px;">상황 이미지 첨부 (선택)</div>
+                    <div class="prayer-image-uploader" id="prayerImageDropzone" onclick="triggerPrayerImageUpload()">
+                        <div id="prayerImagePlaceholder">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(201, 168, 76, 0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 4px; display: inline-block;">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">이미지를 탭하여 업로드하거나 끌어다 놓으세요</div>
+                        </div>
+                        <div id="prayerImagePreviewContainer" style="display: none; position: relative; width: 100%;">
+                            <img id="prayerImagePreview" src="" alt="기도 상황 이미지" style="max-height: 140px; border-radius: 8px; width: auto; object-fit: contain;">
+                            <button type="button" class="prayer-image-remove" onclick="removePrayerImage(event)">✕</button>
+                        </div>
+                        <input type="file" id="prayerImageInput" accept="image/*" style="display: none;" onchange="handlePrayerImageSelect(event)">
+                    </div>
+
+                    <div style="font-size: 13px; color: rgba(201, 168, 76, 0.6); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; margin-top: 16px;">기도 제목 및 마음의 고백</div>
+                    <textarea id="prayerTopicInput" class="prayer-textarea" placeholder="기도하고 싶으신 구체적인 고민이나 바라는 것을 적어주세요. (예: 새로 들어간 직장에서 지혜롭게 적응하고 동료들과 평화로운 관계를 맺고 싶습니다.)"></textarea>
+
+                    <button class="prayer-submit-btn" onclick="generatePrayer()">🙏 맞춤 기도문 작성하기</button>
+                </div>
+
+                <!-- 2단계: 로딩 상태 -->
+                <div id="prayerLoading" style="display: none; text-align: center; padding: 60px 20px; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+                    <div class="prayer-loading-spinner"></div>
+                    <div style="color: #c9a84c; font-size: 16px; font-weight: 600; text-align:center;">기도를 정성껏 작성하고 있습니다</div>
+                    <div style="color: rgba(255,255,255,0.4); font-size: 13px; word-break: keep-all; line-height: 1.5; max-width: 280px; margin: 0 auto; text-align:center;">성도님의 마음과 상황을 담아 하나님께 올릴 수 있는 영적인 기도문을 짓는 중입니다. 잠시만 기다려 주세요.</div>
+                </div>
+
+                <!-- 3단계: 결과 화면 -->
+                <div id="prayerResult" style="display: none; flex-direction: column; gap: 16px;">
+                    <div class="prayer-result-header">
+                        <div style="font-size: 14px; font-weight: 600; color: #c9a84c; display: flex; align-items: center; gap: 6px;">
+                            <span id="prayerResultCategoryIcon">🙏</span> <span id="prayerResultCategoryName">개인</span> 기도문
+                        </div>
+                        <div class="prayer-font-controls">
+                            <button class="prayer-font-btn" onclick="changePrayerFontSize(-1)">A-</button>
+                            <button class="prayer-font-btn" onclick="changePrayerFontSize(1)">A+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 양장본 종이 질감의 기도문 카드 -->
+                    <div class="prayer-parchment-card" id="prayerParchment">
+                        <div class="prayer-parchment-decor top">❖ ❖ ❖</div>
+                        <div class="prayer-text-body" id="prayerTextBody">
+                            <!-- 기도문 본문이 동적으로 들어감 -->
+                        </div>
+                        <div class="prayer-parchment-decor bottom">❖ ❖ ❖</div>
+                    </div>
+
+                    <!-- 복사 및 저장 버튼 -->
+                    <div class="prayer-action-buttons">
+                        <button class="prayer-action-btn copy" onclick="copyPrayerToClipboard()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            기도문 복사
+                        </button>
+                        <button class="prayer-action-btn save" id="savePrayerBtn" onclick="savePrayerLocally()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            기도 보관하기
+                        </button>
+                    </div>
+
+                    <!-- 목사의 영적 권면 카드 -->
+                    <div class="prayer-pastor-card" id="prayerPastorCard" style="display: none;">
+                        <div class="prayer-pastor-header">
+                            ✍️ 김성수 목사의 복음적 권면
+                        </div>
+                        <div class="prayer-pastor-body" id="prayerPastorBody">
+                            <!-- 목회적 묵상/권면이 동적으로 들어감 -->
+                        </div>
+                    </div>
+
+                    <!-- 새로 작성하기 버튼 -->
+                    <button class="prayer-reset-btn" onclick="resetPrayerMaker()">🔄 새로운 기도 작성하기</button>
+                </div>
+            </div>
+            
             <!-- 성경책 직접 읽기 브라우저 -->
             <div id="bibleBrowser">
                 <!-- 1. 성경책 선택 뷰 -->
@@ -1708,25 +2199,292 @@
             { t: "그는 네 생명이시요 네 장수시니", r: "신명기 30:20" },
             { t: "만물이 다 그로 말미암아 그를 위하여 창조되었고", r: "골로새서 1:16" },
             { t: "여호와여 주께서 나를 찾으시고 나를 아시나이다", r: "시편 139:1" },
-            { t: "주의 말씀의 강령은 진리이온데 주의 의로운 모든 규례는 영원하리이다", r: "시편 119:160" },
-            { t: "이 백성은 내가 나를 위하여 지었나니 나를 찬송하게 하려 함이니라", r: "이사야 43:21" },
-            { t: "대저 사람이 마음에 생각하는 그대로 그 사람의 됨됨이니라", r: "잠언 23:7" },
-            { t: "너는 여호와 네 하나님이 명령한 대로 행하여 좌로나 우로나 치우치지 말라", r: "신명기 5:32" },
-            { t: "형제를 사랑하는 자는 빛 가운데 거하여", r: "요한1서 2:10" },
-            { t: "주는 변함이 없고 주의 연대는 무궁하리이다", r: "시편 102:27" },
-            { t: "믿음도 행함이 없으면 그 자체가 죽은 것이라", r: "야고보서 2:17" },
-            { t: "여호와여 구하오니 주의 길을 내게 보이시고", r: "시편 25:4" },
-            { t: "하나님이 미리 아신 자들을 그 아들의 형상을 본받게 하기 위하여 미리 정하셨으니", r: "로마서 8:29" },
             { t: "주 하나님이 이르시되 여호와의 말씀을 듣지 못한 기갈이라", r: "아모스 8:11" },
             { t: "믿음의 주요 또 온전하게 하시는 이인 예수를 바라보자", r: "히브리서 12:2" },
             { t: "여호와를 가까이하라 그리하면 너희를 가까이하시리라", r: "야고보서 4:8" },
             { t: "주님은 미쁘사 너희를 굳건하게 하시고 악한 자에게서 지키시리라", r: "데살로니가후서 3:3" },
-            { t: "여호와여 주의 인자하심으로 나를 인도하소서", r: "시편 5:8" },
             { t: "여호와께서 너를 위하여 그의 천사들을 명령하사 네 모든 길에서 너를 지키게 하심이라", r: "시편 91:11" },
             { t: "하나님이 우리를 구원하사 거룩하신 소명으로 부르심은", r: "디모데후서 1:9" },
             { t: "일어나라 빛을 발하라 이는 네 빛이 이르렀고 여호와의 영광이 네 위에 임하였음이니라", r: "이사야 60:1" },
             { t: "나의 도움은 천지를 지으신 여호와에게서로다", r: "시편 121:2" }
         ];
+
+        /* ── 기도 작성하기 (Prayer Maker) 상태 및 함수 ── */
+        var selectedCategory = '개인';
+        var selectedCategoryIcon = '🙏';
+        var uploadedImageBase64 = '';
+        var prayerFontSize = 15;
+
+        function selectPrayerCategory(name, icon) {
+            selectedCategory = name;
+            selectedCategoryIcon = icon;
+            
+            // 모든 카테고리 버튼에서 active 제거
+            var buttons = document.querySelectorAll('.prayer-cat-btn');
+            buttons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            
+            // 선택된 버튼에 active 추가
+            var clickedBtn = document.querySelector('.prayer-cat-btn[data-category="' + name + '"]');
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
+            }
+        }
+
+        function triggerPrayerImageUpload() {
+            document.getElementById('prayerImageInput').click();
+        }
+
+        function handlePrayerImageSelect(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            processPrayerImage(file);
+        }
+
+        function processPrayerImage(file) {
+            if (!file.type.match('image.*')) {
+                alert('이미지 파일만 첨부할 수 있습니다.');
+                return;
+            }
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result;
+                
+                // 프리뷰 표시
+                document.getElementById('prayerImagePlaceholder').style.display = 'none';
+                document.getElementById('prayerImagePreviewContainer').style.display = 'block';
+                document.getElementById('prayerImagePreview').src = uploadedImageBase64;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePrayerImage(e) {
+            if (e) e.stopPropagation();
+            uploadedImageBase64 = '';
+            document.getElementById('prayerImageInput').value = '';
+            document.getElementById('prayerImagePlaceholder').style.display = 'block';
+            document.getElementById('prayerImagePreviewContainer').style.display = 'none';
+            document.getElementById('prayerImagePreview').src = '';
+        }
+
+        // 드래그 앤 드롭 바인딩
+        (function() {
+            setTimeout(function() {
+                var dropzone = document.getElementById('prayerImageDropzone');
+                if (dropzone) {
+                    dropzone.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.style.borderColor = '#c9a84c';
+                        dropzone.style.background = 'rgba(201, 168, 76, 0.08)';
+                    });
+                    
+                    dropzone.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.style.borderColor = 'rgba(201, 168, 76, 0.25)';
+                        dropzone.style.background = 'rgba(201, 168, 76, 0.02)';
+                    });
+                    
+                    dropzone.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.style.borderColor = 'rgba(201, 168, 76, 0.25)';
+                        dropzone.style.background = 'rgba(201, 168, 76, 0.02)';
+                        
+                        var files = e.dataTransfer.files;
+                        if (files && files.length > 0) {
+                            processPrayerImage(files[0]);
+                        }
+                    });
+                }
+            }, 500);
+        })();
+
+        function generatePrayer() {
+            var topicText = document.getElementById('prayerTopicInput').value.trim();
+            if (!topicText) {
+                alert('기도 제목이나 마음의 고민을 적어주세요. 성도님만을 위한 맞춤 기도문을 작성하는 데 필요합니다.');
+                return;
+            }
+            
+            // 로딩 상태 시작
+            document.getElementById('prayerForm').style.display = 'none';
+            document.getElementById('prayerLoading').style.display = 'flex';
+            document.getElementById('prayerResult').style.display = 'none';
+            
+            var profile = {
+                name: localStorage.getItem('userName') || '',
+                age: localStorage.getItem('userAge') || '',
+                gender: localStorage.getItem('userGender') || ''
+            };
+            
+            var msg = '[기도문] 카테고리: ' + selectedCategory + '\n기도제목: ' + topicText;
+            
+            fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: msg, 
+                    profile: profile,
+                    image: uploadedImageBase64
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.limit_reached) {
+                    alert('성도님, 오늘의 대화 한도(3회)를 모두 사용하셨습니다. 내일 다시 찾아와 주세요.');
+                    resetPrayerMaker();
+                    return;
+                }
+                
+                if (data.response) {
+                    var parsed = parseAIResponse(data.response);
+                    
+                    // 카테고리 정보 적용
+                    document.getElementById('prayerResultCategoryIcon').textContent = selectedCategoryIcon;
+                    document.getElementById('prayerResultCategoryName').textContent = selectedCategory;
+                    
+                    // 기도 본문 포맷팅
+                    var formattedPrayer = parsed.main.replace(/\n/g, '<br>');
+                    if (!formattedPrayer.includes('<br>')) {
+                        formattedPrayer = '<p>' + formattedPrayer + '</p>';
+                    } else {
+                        formattedPrayer = '<p>' + formattedPrayer.split('<br><br>').join('</p><p>').split('<br>').join('<br>') + '</p>';
+                    }
+                    
+                    document.getElementById('prayerTextBody').innerHTML = formattedPrayer;
+                    
+                    // 목회적 권면 포맷팅
+                    if (parsed.deep && parsed.deep.trim().length > 0) {
+                        var formattedDeep = parsed.deep.replace(/\n/g, '<br>');
+                        document.getElementById('prayerPastorBody').innerHTML = formattedDeep;
+                        document.getElementById('prayerPastorCard').style.display = 'block';
+                    } else {
+                        document.getElementById('prayerPastorCard').style.display = 'none';
+                    }
+                    
+                    // 보관함 버튼 초기화
+                    var saveBtn = document.getElementById('savePrayerBtn');
+                    saveBtn.className = 'prayer-action-btn save';
+                    saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> 기도 보관하기';
+                    saveBtn.disabled = false;
+                    
+                    // 결과 화면 보이기
+                    document.getElementById('prayerLoading').style.display = 'none';
+                    document.getElementById('prayerResult').style.display = 'flex';
+                    
+                    // 스크롤 탑
+                    document.getElementById('prayerMaker').scrollTop = 0;
+                } else {
+                    throw new Error('응답을 받지 못했습니다.');
+                }
+            })
+            .catch(function(err) {
+                alert('죄송합니다. 기도문을 작성하는 도중 오류가 발생했습니다. 다시 시도해 주세요.');
+                resetPrayerMaker();
+            });
+        }
+
+        function changePrayerFontSize(diff) {
+            prayerFontSize += diff;
+            if (prayerFontSize < 12) prayerFontSize = 12;
+            if (prayerFontSize > 24) prayerFontSize = 24;
+            document.getElementById('prayerTextBody').style.fontSize = prayerFontSize + 'px';
+        }
+
+        function copyPrayerToClipboard() {
+            var bodyText = document.getElementById('prayerTextBody').innerText;
+            
+            var temp = document.createElement('textarea');
+            temp.value = bodyText;
+            document.body.appendChild(temp);
+            temp.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('기도문이 클립보드에 복사되었습니다. 다른 성도들과 나누거나 보관해 보세요.');
+            } catch (err) {
+                alert('복사에 실패했습니다.');
+            }
+            document.body.removeChild(temp);
+        }
+
+        function savePrayerLocally() {
+            var bodyText = document.getElementById('prayerTextBody').innerHTML;
+            var pastorText = document.getElementById('prayerPastorBody').innerHTML;
+            
+            var prayerObj = {
+                id: 'prayer_' + Date.now(),
+                date: new Date().toLocaleDateString('ko-KR'),
+                category: selectedCategory,
+                icon: selectedCategoryIcon,
+                body: bodyText,
+                pastor: pastorText
+            };
+            
+            var saved = JSON.parse(localStorage.getItem('savedPrayers') || '[]');
+            saved.push(prayerObj);
+            localStorage.setItem('savedPrayers', JSON.stringify(saved));
+            
+            var saveBtn = document.getElementById('savePrayerBtn');
+            saveBtn.className = 'prayer-action-btn save active-save';
+            saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 보관함 저장됨';
+            saveBtn.disabled = true;
+        }
+
+        function resetPrayerMaker() {
+            document.getElementById('prayerTopicInput').value = '';
+            removePrayerImage();
+            selectPrayerCategory('개인', '🙏');
+            
+            document.getElementById('prayerForm').style.display = 'block';
+            document.getElementById('prayerLoading').style.display = 'none';
+            document.getElementById('prayerResult').style.display = 'none';
+            
+            prayerFontSize = 15;
+            document.getElementById('prayerTextBody').style.fontSize = prayerFontSize + 'px';
+        }
+
+        var currentRoute = '';
+
+        function handleClick(route) {
+            if (!requireProfile(function () { handleClick(route); })) return;
+            currentRoute = route;
+            var titles = {
+                'bible': '📖 말씀 강해',
+                'prayer': '🙏 기도문 작성하기',
+                'meditation': '✨ 오늘의 묵상'
+            };
+            document.getElementById('modalTitle').textContent = titles[route] || '💬 AI 상담';
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('chatModal').classList.add('active');
+
+            var tabs = document.getElementById('bibleModalTabs');
+            if (route === 'bible') {
+                tabs.style.display = 'flex';
+                document.getElementById('chatMessages').style.display = 'block';
+                document.getElementById('bibleBrowser').style.display = 'none';
+                document.getElementById('modalInputArea').style.display = 'block';
+                document.getElementById('prayerMaker').style.display = 'none';
+                switchBibleTab('chat');
+                initBibleBrowser();
+            } else if (route === 'prayer') {
+                tabs.style.display = 'none';
+                document.getElementById('chatMessages').style.display = 'none';
+                document.getElementById('bibleBrowser').style.display = 'none';
+                document.getElementById('modalInputArea').style.display = 'none';
+                document.getElementById('prayerMaker').style.display = 'block';
+                resetPrayerMaker();
+            } else {
+                tabs.style.display = 'none';
+                document.getElementById('chatMessages').style.display = 'block';
+                document.getElementById('bibleBrowser').style.display = 'none';
+                document.getElementById('modalInputArea').style.display = 'block';
+            }
+        }
 
         /* ── 오늘의 말씀 표시 ── */
         function showDailyVerse() {
