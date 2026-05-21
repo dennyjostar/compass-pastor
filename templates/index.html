@@ -1248,7 +1248,7 @@
         <div class="feature-grid">
             <div class="feature-card" onclick="handleClick('bible')">
                 <div class="card-icon">📖</div>
-                <div class="card-title">말씀 찾기</div>
+                <div class="card-title">말씀 강해</div>
                 <div class="card-desc">설교·성경 구절 검색</div>
             </div>
             <div class="feature-card" onclick="handleClick('prayer')">
@@ -1300,7 +1300,7 @@
                 <div class="modal-title" id="modalTitle">💬 영적인 대화</div>
                 <div class="modal-close" onclick="closeChatModal()">✕</div>
             </div>
-            <!-- 말씀찾기 전용 듀얼 탭 -->
+            <!-- 말씀강해 전용 듀얼 탭 -->
             <div class="modal-tabs" id="bibleModalTabs">
                 <div class="modal-tab active" id="tabBibleChat" onclick="switchBibleTab('chat')">말씀 검색 및 대화</div>
                 <div class="modal-tab" id="tabBibleRead" onclick="switchBibleTab('read')">성경책 직접 읽기</div>
@@ -1775,7 +1775,7 @@
                 html = '<h3>📋 이용 안내</h3>' +
                     '<p><strong>영혼의 나침반</strong>은 서머나 교회 김성수 목사님의 강해 데이터를 바탕으로 한 AI 목회 상담 서비스입니다.</p>' +
                     '<p><strong>주요 기능</strong></p>' +
-                    '<p>• 말씀 찾기: 성경 구절과 신앙 지식 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 찬양 듣기: 은혜로운 찬양 모음(준비 중)</p>' +
+                    '<p>• 말씀 강해: 성경 구절과 신앙 지식 검색<br>• 기도문: 상황에 맞는 기도문 생성<br>• 오늘의 묵상: 매일 새로운 묵상 가이드<br>• 찬양 듣기: 은혜로운 찬양 모음(준비 중)</p>' +
                     '<p><strong>안내 사항</strong></p>' +
                     '<p>• 모든 대화는 기기 내 암호화 저장됩니다<br>• AI가 생성하는 답변이므로 참고용으로 활용해주세요<br>• 심각한 위기 상황 시 전문 상담을 이용해주세요<br>&nbsp;&nbsp;- 자살예방상담 109<br>&nbsp;&nbsp;- 정신건강위기상담 1577-0199</p>' +
                     '<button class="close-info" onclick="closeInfoModal()">닫기</button>';
@@ -1982,7 +1982,7 @@
             if (!requireProfile(function () { handleClick(route); })) return;
             currentRoute = route;
             var titles = {
-                'bible': '📖 말씀 찾기',
+                'bible': '📖 말씀 강해',
                 'prayer': '🙏 기도문',
                 'meditation': '✨ 오늘의 묵상'
             };
@@ -2066,7 +2066,7 @@
             };
 
             var prefix = '';
-            if (currentRoute === 'bible') prefix = '[말씀찾기] ';
+            if (currentRoute === 'bible') prefix = '[말씀강해] ';
             else if (currentRoute === 'prayer') prefix = '[기도문] ';
             else if (currentRoute === 'meditation') prefix = '[묵상] ';
 
