@@ -33,6 +33,32 @@ print(f"--------------------------")
 # 김성수 목사 강해용 NotebookLM 설정
 KIM_NOTEBOOK_ID = "c84ff2ee-ceb5-4a58-a863-680fa1ba21dc"
 
+# 66권 한글 성경 순서 정의
+BIBLE_BOOKS_KOREAN = [
+    "창세기", "출애굽기", "레위기", "민수기", "신명기", "여호수아", "사사기", "룻기",
+    "사무엘상", "사무엘하", "열왕기상", "열왕기하", "역대기상", "역대기하", "에스라", "느헤미야",
+    "에스더", "욥기", "시편", "잠언", "전도서", "아가", "이사야", "예레미야",
+    "예레미야애가", "에스겔", "다니엘", "호세아", "요엘", "아모스", "오바디야", "요나",
+    "미가", "나훔", "하박국", "스바냐", "학개", "스가랴", "말라기",
+    "마태복음", "마가복음", "누가복음", "요한복음", "사도행전", "로마서", "고린도전서", "고린도후서",
+    "갈라디아서", "에베소서", "빌립보서", "골로새서", "데살로니가전서", "데살로니가후서", "디모데전서", "디모데후서",
+    "디도서", "빌레몬서", "히브리서", "야고보서", "베드로전서", "베드로후서", "요한1서", "요한2서",
+    "요한3서", "유다서", "요한계시록"
+]
+
+# 한글 성경 데이터베이스 로드
+BIBLE_DB = []
+try:
+    bible_db_path = os.path.join(os.path.dirname(__file__), 'total_bible_db.json')
+    if os.path.exists(bible_db_path):
+        with open(bible_db_path, 'r', encoding='utf-8') as f:
+            BIBLE_DB = json.load(f)
+        print(f"[OFFLINE BIBLE] Successfully loaded offline database with {len(BIBLE_DB)} books.")
+    else:
+        print("[OFFLINE BIBLE WARNING] total_bible_db.json NOT found.")
+except Exception as db_err:
+    print(f"[OFFLINE BIBLE ERROR] Failed to load database: {db_err}")
+
 # Gemini 설정
 def get_gemini_model(system_instruction):
     # 다양한 변수명 조합 확인 (대소문자 포함)
@@ -285,6 +311,32 @@ def read_bible():
         
         if not book or not chapter:
             return jsonify({"error": "책 이름(book)과 장 번호(chapter)를 지정해주세요."}), 400
+            
+        # 1. 오프라인 데이터베이스가 메모리에 로드된 경우 즉시 반환 (지연시간 0.1ms 미만, 100% 로컬 로드)
+        if BIBLE_DB and book in BIBLE_BOOKS_KOREAN:
+            try:
+                book_idx = BIBLE_BOOKS_KOREAN.index(book)
+                book_data = BIBLE_DB[book_idx]
+                chapter_num = int(chapter)
+                
+                if 1 <= chapter_num <= len(book_data["chapters"]):
+                    verses_list = book_data["chapters"][chapter_num - 1]
+                    verses_formatted = []
+                    for i, t in enumerate(verses_list):
+                        verses_formatted.append({
+                            "verse": i + 1,
+                            "text": t
+                        })
+                    
+                    bible_data = {
+                        "book": book,
+                        "chapter": chapter_num,
+                        "verses": verses_formatted
+                    }
+                    print(f"[OFFLINE BIBLE HIT] Loaded {book} {chapter}장 instantly from in-memory database.")
+                    return jsonify(bible_data)
+            except Exception as offline_err:
+                print(f"[OFFLINE BIBLE ERROR] {offline_err} - falling back to cache/Gemini API.")
             
         # 캐시 폴더 생성 및 경로 구성
         cache_dir = os.path.join(os.path.dirname(__file__), 'bible_cache')
