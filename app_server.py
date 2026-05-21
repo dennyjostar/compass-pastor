@@ -218,6 +218,8 @@ def ask():
 
 # Google Drive 찬양 API (기존 유지)
 import requests as http_requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 print("COMPASS SERVER v1.0.6 - Pastor Mode")
 
@@ -231,7 +233,7 @@ DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID", "1372ozYC2muXXXSjGUSBoKpMHDJd-nmb
 def get_hymns():
     try:
         url = f"https://www.googleapis.com/drive/v3/files?q='{DRIVE_FOLDER_ID}'+in+parents&key={DRIVE_API_KEY}&fields=files(id,name,mimeType)&pageSize=100"
-        resp = http_requests.get(url)
+        resp = http_requests.get(url, verify=False)
         
         if resp.status_code != 200:
             return jsonify({
@@ -251,7 +253,7 @@ def get_hymns():
 def play_hymn(file_id):
     try:
         url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media&key={DRIVE_API_KEY}"
-        resp = http_requests.get(url, stream=True)
+        resp = http_requests.get(url, stream=True, verify=False)
         from flask import Response
         return Response(
             resp.iter_content(chunk_size=8192),
