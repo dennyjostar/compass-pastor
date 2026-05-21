@@ -960,8 +960,8 @@
         /* 하단 액션 버튼 그룹 */
         .prayer-action-buttons {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
             margin-top: 4px;
         }
 
@@ -969,15 +969,15 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: #fff;
-            padding: 12px;
+            padding: 12px 6px;
             border-radius: 12px;
-            font-size: 12.5px;
+            font-size: 11.5px;
             font-weight: 500;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.2s;
         }
 
@@ -1558,6 +1558,107 @@
         .bible-footer-btn:hover {
             opacity: 0.9;
         }
+
+        /* ===== 기도 보관함 리스트 및 상세 스타일 ===== */
+        .archive-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            max-height: 480px;
+            padding: 4px;
+            margin-top: 10px;
+        }
+        .archive-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: relative;
+        }
+        .archive-card:hover {
+            background: rgba(201, 168, 76, 0.06);
+            border-color: rgba(201, 168, 76, 0.25);
+            transform: translateY(-2px);
+        }
+        .archive-card-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        .archive-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(201, 168, 76, 0.1);
+            color: #c9a84c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            border: 1px solid rgba(201, 168, 76, 0.15);
+        }
+        .archive-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        .archive-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .archive-card-category {
+            color: #c9a84c;
+            font-weight: 600;
+        }
+        .archive-card-snippet {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+        .archive-card-delete {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+        .archive-card-delete:hover {
+            background: #ff3b30;
+            color: #fff;
+        }
+        .archive-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 
@@ -1667,6 +1768,11 @@
                 <div class="modal-tab active" id="tabBibleChat" onclick="switchBibleTab('chat')">말씀 검색 및 대화</div>
                 <div class="modal-tab" id="tabBibleRead" onclick="switchBibleTab('read')">성경책 직접 읽기</div>
             </div>
+            <!-- 기도문 작성 전용 듀얼 탭 -->
+            <div class="modal-tabs" id="prayerModalTabs" style="display:none;">
+                <div class="modal-tab active" id="tabPrayerMake" onclick="switchPrayerTab('make')">기도문 작성하기</div>
+                <div class="modal-tab" id="tabPrayerArchive" onclick="switchPrayerTab('archive')">기도 보관함</div>
+            </div>
             <div id="chatMessages"></div>
             
             <!-- 기도 작성하기 위자드 (상황별 기도 생성기) -->
@@ -1764,7 +1870,7 @@
                         <div class="prayer-parchment-decor bottom">❖ ❖ ❖</div>
                     </div>
 
-                    <!-- 복사 및 저장 버튼 -->
+                    <!-- 복사, 저장, 공유 버튼 -->
                     <div class="prayer-action-buttons">
                         <button class="prayer-action-btn copy" onclick="copyPrayerToClipboard()">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1779,7 +1885,17 @@
                                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                                 <polyline points="7 3 7 8 15 8"></polyline>
                             </svg>
-                            기도 보관하기
+                            보관함 저장
+                        </button>
+                        <button class="prayer-action-btn share" id="sharePrayerBtn" onclick="sharePrayer()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="18" cy="5" r="3"></circle>
+                                <circle cx="6" cy="12" r="3"></circle>
+                                <circle cx="18" cy="19" r="3"></circle>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                            </svg>
+                            공유하기
                         </button>
                     </div>
 
@@ -1795,6 +1911,74 @@
 
                     <!-- 새로 작성하기 버튼 -->
                     <button class="prayer-reset-btn" onclick="resetPrayerMaker()">🔄 새로운 기도 작성하기</button>
+                </div>
+
+                <!-- 4단계: 보관함 화면 -->
+                <div id="prayerArchive" style="display: none; padding: 4px 0 16px;">
+                    <div id="prayerArchiveList">
+                        <!-- 보관된 기도 리스트가 동적으로 들어감 -->
+                    </div>
+                    <div id="prayerArchiveDetail" style="display: none; flex-direction: column; gap: 16px;">
+                        <div class="prayer-result-header">
+                            <div style="font-size: 14px; font-weight: 600; color: #c9a84c; display: flex; align-items: center; gap: 6px;">
+                                <span id="archiveDetailCategoryIcon">🙏</span> <span id="archiveDetailCategoryName">개인</span> 기도문 (보관됨)
+                            </div>
+                            <div class="prayer-font-controls">
+                                <button class="prayer-font-btn" onclick="changeArchiveFontSize(-1)">A-</button>
+                                <button class="prayer-font-btn" onclick="changeArchiveFontSize(1)">A+</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 양장본 종이 질감의 기도문 카드 -->
+                        <div class="prayer-parchment-card" id="archiveDetailParchment">
+                            <div class="prayer-parchment-decor top">❖ ❖ ❖</div>
+                            <div class="prayer-text-body" id="archiveDetailTextBody">
+                                <!-- 기도문 본문이 동적으로 들어감 -->
+                            </div>
+                            <div class="prayer-parchment-decor bottom">❖ ❖ ❖</div>
+                        </div>
+
+                        <!-- 복사 및 저장 버튼 -->
+                        <div class="prayer-action-buttons">
+                            <button class="prayer-action-btn copy" id="archiveCopyBtn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                기도문 복사
+                            </button>
+                            <button class="prayer-action-btn share" id="archiveShareBtn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                                공유하기
+                            </button>
+                            <button class="prayer-action-btn delete" id="archiveDeleteDetailBtn" style="border-color: rgba(255, 59, 48, 0.3); color: #ff3b30; background: rgba(255, 59, 48, 0.05);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                보관 삭제
+                            </button>
+                        </div>
+
+                        <!-- 목사의 영적 권면 카드 -->
+                        <div class="prayer-pastor-card" id="archiveDetailPastorCard" style="display: none;">
+                            <div class="prayer-pastor-header">
+                                ✍️ 김성수 목사의 복음적 권면
+                            </div>
+                            <div class="prayer-pastor-body" id="archiveDetailPastorBody">
+                                <!-- 목회적 묵상/권면이 동적으로 들어감 -->
+                            </div>
+                        </div>
+
+                        <!-- 새로 작성하기 버튼 -->
+                        <button class="prayer-reset-btn" onclick="backToArchiveList()">◀ 보관함 목록으로 돌아가기</button>
+                    </div>
                 </div>
             </div>
             
@@ -2446,6 +2630,13 @@
             
             prayerFontSize = 15;
             document.getElementById('prayerTextBody').style.fontSize = prayerFontSize + 'px';
+
+            var saveBtn = document.getElementById('savePrayerBtn');
+            if (saveBtn) {
+                saveBtn.className = 'prayer-action-btn save';
+                saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> 보관함 저장';
+                saveBtn.disabled = false;
+            }
         }
 
         var currentRoute = '';
@@ -2470,6 +2661,7 @@
 
             if (route === 'bible') {
                 tabs.style.display = 'flex';
+                document.getElementById('prayerModalTabs').style.display = 'none';
                 chatMessages.style.display = 'block';
                 if (bibleBrowser) bibleBrowser.style.display = 'none';
                 if (prayerMaker) prayerMaker.style.display = 'none';
@@ -2478,15 +2670,18 @@
                 initBibleBrowser();
             } else if (route === 'prayer') {
                 tabs.style.display = 'none';
+                document.getElementById('prayerModalTabs').style.display = 'flex';
                 chatMessages.style.display = 'none';
                 if (bibleBrowser) bibleBrowser.style.display = 'none';
                 modalInputArea.style.display = 'none';
                 if (prayerMaker) {
                     prayerMaker.style.display = 'block';
                     resetPrayerMaker();
+                    switchPrayerTab('make');
                 }
             } else {
                 tabs.style.display = 'none';
+                document.getElementById('prayerModalTabs').style.display = 'none';
                 chatMessages.style.display = 'block';
                 if (bibleBrowser) bibleBrowser.style.display = 'none';
                 if (prayerMaker) prayerMaker.style.display = 'none';
@@ -3168,6 +3363,245 @@
                 bibleBrowser.style.display = 'flex';
                 inputArea.style.display = 'none';
                 showBibleBookList();
+            }
+        }
+
+        /* ===== 기도문 작성 탭 & 보관함 JS 로직 ===== */
+        function switchPrayerTab(tab) {
+            var tabMake = document.getElementById('tabPrayerMake');
+            var tabArchive = document.getElementById('tabPrayerArchive');
+            var prayerForm = document.getElementById('prayerForm');
+            var prayerResult = document.getElementById('prayerResult');
+            var prayerLoading = document.getElementById('prayerLoading');
+            var prayerArchive = document.getElementById('prayerArchive');
+
+            if (tab === 'make') {
+                tabMake.classList.add('active');
+                tabArchive.classList.remove('active');
+                
+                // Hide archive screen
+                prayerArchive.style.display = 'none';
+                
+                // Restore standard maker screens
+                if (prayerLoading.style.display === 'flex' || prayerLoading.style.display === 'block') {
+                    prayerForm.style.display = 'none';
+                    prayerResult.style.display = 'none';
+                    prayerLoading.style.display = 'flex';
+                } else if (prayerResult.style.display === 'flex' || prayerResult.style.display === 'block') {
+                    prayerForm.style.display = 'none';
+                    prayerLoading.style.display = 'none';
+                    prayerResult.style.display = 'flex';
+                } else {
+                    prayerForm.style.display = 'block';
+                    prayerLoading.style.display = 'none';
+                    prayerResult.style.display = 'none';
+                }
+            } else {
+                tabMake.classList.remove('active');
+                tabArchive.classList.add('active');
+                
+                // Hide all standard maker panels
+                prayerForm.style.display = 'none';
+                prayerLoading.style.display = 'none';
+                prayerResult.style.display = 'none';
+                
+                // Show archive panel and load list
+                prayerArchive.style.display = 'block';
+                loadPrayerArchiveList();
+            }
+        }
+
+        function loadPrayerArchiveList() {
+            var saved = JSON.parse(localStorage.getItem('savedPrayers') || '[]');
+            var listContainer = document.getElementById('prayerArchiveList');
+            var detailContainer = document.getElementById('prayerArchiveDetail');
+            
+            listContainer.style.display = 'block';
+            detailContainer.style.display = 'none';
+            
+            if (saved.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="archive-empty-state">
+                        <span style="font-size: 40px; display: block; margin-bottom: 12px; filter: grayscale(0.2);">💾</span>
+                        <div style="font-size: 15px; font-weight: 600; color: #c9a84c; margin-bottom: 6px;">보관된 기도문이 없습니다</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.5; word-break: keep-all;">
+                            맞춤 기도문을 작성하신 후 하단의 '보관함 저장' 버튼을 누르면 이 공간에 영구히 저장되어 언제든 다시 읽으실 수 있습니다.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            var html = '<div class="archive-list-container">';
+            for (var i = saved.length - 1; i >= 0; i--) {
+                var prayer = saved[i];
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = prayer.body;
+                var plainText = tempDiv.textContent || tempDiv.innerText || '';
+                var snippet = plainText.length > 55 ? plainText.substring(0, 55) + '...' : plainText;
+                
+                html += `
+                    <div class="archive-card" onclick="viewArchiveDetail('${prayer.id}')">
+                        <div class="archive-card-left">
+                            <div class="archive-card-icon">${prayer.icon || '🙏'}</div>
+                            <div class="archive-card-info">
+                                <div class="archive-card-meta">
+                                    <span class="archive-card-category">${prayer.category || '개인'}</span>
+                                    <span>•</span>
+                                    <span>${prayer.date || ''}</span>
+                                </div>
+                                <div class="archive-card-snippet">${snippet}</div>
+                            </div>
+                        </div>
+                        <div class="archive-card-delete" onclick="deleteArchivePrayer(event, '${prayer.id}')" title="삭제">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            listContainer.innerHTML = html;
+        }
+
+        var archiveFontSize = 15;
+        function viewArchiveDetail(id) {
+            var saved = JSON.parse(localStorage.getItem('savedPrayers') || '[]');
+            var prayer = saved.find(function (p) { return p.id === id; });
+            if (!prayer) return;
+            
+            document.getElementById('archiveDetailCategoryIcon').textContent = prayer.icon || '🙏';
+            document.getElementById('archiveDetailCategoryName').textContent = prayer.category || '개인';
+            document.getElementById('archiveDetailTextBody').innerHTML = prayer.body;
+            
+            archiveFontSize = 15;
+            document.getElementById('archiveDetailTextBody').style.fontSize = archiveFontSize + 'px';
+            
+            var pastorCard = document.getElementById('archiveDetailPastorCard');
+            var pastorBody = document.getElementById('archiveDetailPastorBody');
+            if (prayer.pastor && prayer.pastor.trim() !== '') {
+                pastorCard.style.display = 'block';
+                pastorBody.innerHTML = prayer.pastor;
+            } else {
+                pastorCard.style.display = 'none';
+            }
+            
+            document.getElementById('archiveCopyBtn').onclick = function() {
+                copyArchiveText(prayer.body);
+            };
+            document.getElementById('archiveShareBtn').onclick = function() {
+                shareArchiveText(prayer.body);
+            };
+            document.getElementById('archiveDeleteDetailBtn').onclick = function() {
+                if (confirm('이 기도문을 보관함에서 삭제하시겠습니까?')) {
+                    performDelete(prayer.id);
+                    backToArchiveList();
+                }
+            };
+
+            document.getElementById('prayerArchiveList').style.display = 'none';
+            document.getElementById('prayerArchiveDetail').style.display = 'flex';
+        }
+
+        function backToArchiveList() {
+            document.getElementById('prayerArchiveDetail').style.display = 'none';
+            document.getElementById('prayerArchiveList').style.display = 'block';
+            loadPrayerArchiveList();
+        }
+
+        function deleteArchivePrayer(event, id) {
+            if (event) event.stopPropagation();
+            if (confirm('이 기도문을 보관함에서 삭제하시겠습니까?')) {
+                performDelete(id);
+                loadPrayerArchiveList();
+            }
+        }
+
+        function performDelete(id) {
+            var saved = JSON.parse(localStorage.getItem('savedPrayers') || '[]');
+            var updated = saved.filter(function (p) { return p.id !== id; });
+            localStorage.setItem('savedPrayers', JSON.stringify(updated));
+        }
+
+        function changeArchiveFontSize(direction) {
+            archiveFontSize += direction;
+            if (archiveFontSize < 12) archiveFontSize = 12;
+            if (archiveFontSize > 24) archiveFontSize = 24;
+            document.getElementById('archiveDetailTextBody').style.fontSize = archiveFontSize + 'px';
+        }
+
+        function copyArchiveText(htmlBody) {
+            var temp = document.createElement('div');
+            temp.innerHTML = htmlBody;
+            var textToCopy = temp.textContent || temp.innerText || '';
+            
+            var tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('보관된 기도문이 클립보드에 복사되었습니다. 카카오톡이나 다른 메신저에 붙여넣어 보세요.');
+            } catch (err) {
+                alert('복사에 실패했습니다.');
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        function sharePrayer() {
+            var bodyText = document.getElementById('prayerTextBody').innerHTML;
+            executeShare(bodyText);
+        }
+
+        function shareArchiveText(bodyHtml) {
+            executeShare(bodyHtml);
+        }
+
+        function executeShare(htmlText) {
+            var temp = document.createElement('div');
+            temp.innerHTML = htmlText;
+            var textToShare = temp.textContent || temp.innerText || '';
+            
+            textToShare += "\n\n나침반 - 당신의 영혼을 위한 AI 영적 동반자\nhttps://web-production-1ffb5.up.railway.app";
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '나침반 맞춤 기도문',
+                    text: textToShare
+                }).then(function() {
+                    // shared
+                }).catch(function(err) {
+                    console.log("Web Share failed, fallback to copy:", err);
+                    fallbackShareCopy(textToShare);
+                });
+            } else {
+                fallbackShareCopy(textToShare);
+            }
+        }
+
+        function fallbackShareCopy(text) {
+            var tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            tempTextArea.style.position = 'fixed';
+            tempTextArea.style.left = '-9999px';
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            var copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (err) {
+                console.error("Fallback copy failed", err);
+            }
+            document.body.removeChild(tempTextArea);
+            
+            if (copied) {
+                alert('📋 기도문과 나침반 링크가 클립보드에 복사되었습니다!\n\n카카오톡 창을 열고 입력창에 대고 붙여넣기(Ctrl+V) 하여 성도들과 따뜻한 은혜를 나눠 보세요.');
+            } else {
+                alert('텍스트를 복사하는 도중 오류가 발생했습니다. 직접 드래그해서 복사한 후 공유해 주세요.');
             }
         }
 
