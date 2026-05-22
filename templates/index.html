@@ -3674,6 +3674,31 @@
                     var files = data.files || data.hymns || [];
                     hymnsData = [];
                     
+                    // 기존 68곡 원곡 목록 정의
+                    var originalHymns = [
+                        "Amazing Grace", "Danny Boy", "가버린 친구에게", "갈보리 십자가", "강", "겟세마네의 기도",
+                        "광야를 건너 - 나레이션", "기도", "나 주를 멀리 떠났다", "나같은 죄인", "나를 돌아 보며",
+                        "나사로야 나오라", "나의 죄를 씻기는", "나의 하나님", "나팔 불때 나의 이름", "난곡에서",
+                        "내 너를 위하여", "내 사랑", "내 영혼이 은총입어", "내 이름 아시죠", "내 주를 가까이 하게함은",
+                        "내 주의 보혈은", "눈을 들어 하늘 보라", "당신은 알고 있나요", "돌아와 돌아와", "동상이몽",
+                        "만왕의 왕 내주께서", "말없이 서 계신 한 분을 보라", "모두 일어나", "베데스다", "보라",
+                        "보이지 않아도 보이는 나라", "사랑합니다", "사마리아 여인의 노래", "사무엘 베케트의 연극이 끝나던 날",
+                        "삶은 계란을 한입 물은채 - 나레이션", "성삼이의 편지 - 나래이션", "성삼이의 편지",
+                        "세번 부인 할지라도", "세상에서 가장 귀한 것은", "순례자의 노래", "실락원", "아버지의 땅",
+                        "애화", "양복입은 무당들", "어둠은 걷히고", "예수 나를 위하여", "예수로 나의 구주 삼고",
+                        "오 갈보리", "오! 주여", "왕이 다시 오시리", "왜 서머나인가 - 나래이션", "우리 기도 들으소서",
+                        "우리 할머니", "이 산지를 내게 주소서", "인애하신 구세주여", "정결한 맘 주시옵소서",
+                        "죄 많은 이 세상은 - 나레이션", "죄 많은 이 세상은 내집 아니네", "주여 지금 가오니",
+                        "집으로 가자 - 나레이션", "집으로 가자", "친구야", "하나님은 왜 나를 버리셨나요 - 나레이션",
+                        "하나님의 나팔소리", "하나님의 자녀들", "할머니, 고향, 그 그리움", "할머니의 말씀"
+                    ];
+                    
+                    var normalizeName = function(name) {
+                        return name.toLowerCase().replace(/[\s\-_]/g, '').trim();
+                    };
+                    
+                    var originalHymnsNormalized = originalHymns.map(normalizeName);
+                    
                     // 각 곡 데이터 파싱 및 정규화
                     files.forEach(function(f, idx) {
                         var rawName = f.name.replace(/\.(mp3|wav|m4a|ogg)$/i, '');
@@ -3681,15 +3706,21 @@
                         var category = 'CCM'; // 기본 카테고리는 CCM
                         var userCategories = ['예배', '묵상', 'CCM', '기도', '김성수'];
                         
-                        // 1단계: 파일명에서 대괄호 카테고리 추출 (예: "갈보리의 빛 [예배]")
-                        var catMatch = rawName.match(/\[(.*?)\]/);
-                        if (catMatch && catMatch[1]) {
-                            var tag = catMatch[1].trim();
-                            if (userCategories.indexOf(tag) !== -1) {
-                                category = tag;
-                                title = rawName.replace(/\[.*?\]/, '').trim();
-                            }
+                        var normName = normalizeName(rawName);
+                        var isOriginalHymn = originalHymnsNormalized.indexOf(normName) !== -1;
+                        
+                        if (isOriginalHymn) {
+                            category = '김성수';
                         } else {
+                            // 1단계: 파일명에서 대괄호 카테고리 추출 (예: "갈보리의 빛 [예배]")
+                            var catMatch = rawName.match(/\[(.*?)\]/);
+                            if (catMatch && catMatch[1]) {
+                                var tag = catMatch[1].trim();
+                                if (userCategories.indexOf(tag) !== -1) {
+                                    category = tag;
+                                    title = rawName.replace(/\[.*?\]/, '').trim();
+                                }
+                            } else {
                             // 2단계: 대괄호가 없는 경우 AI 키워드 자동 분류 규칙 실행
                             var lowerName = rawName.toLowerCase();
                             
@@ -3756,6 +3787,7 @@
                             else {
                                 category = 'CCM';
                             }
+                        }
                         }
                         
                         // 아티스트 명을 카테고리에 맞춰 동기화 (김성수 테마는 김성수 목사, 나머지는 Dennyjo)
