@@ -2507,57 +2507,9 @@
                     </div>
                 </div>
                 
-                <!-- 카테고리 탭 영역 -->
-                <div class="hymn-tabs" id="hymnTabs">
-                    <div class="hymn-tab active" onclick="selectHymnCategory('all', this)">전체</div>
-                    <div class="hymn-tab" onclick="selectHymnCategory('김성수', this)">김성수</div>
-                    <div class="hymn-tab" onclick="selectHymnCategory('예배', this)">예배</div>
-                    <div class="hymn-tab" onclick="selectHymnCategory('묵상', this)">묵상</div>
-                    <div class="hymn-tab" onclick="selectHymnCategory('CCM', this)">CCM</div>
-                    <div class="hymn-tab" onclick="selectHymnCategory('기도', this)">기도</div>
-                </div>
-                
-                <!-- 추천 찬양 영역 -->
-                <div class="hymn-section-title">
-                    <h3>추천 찬양</h3>
-                    <span class="see-all" onclick="selectHymnCategory('all')">전체보기</span>
-                </div>
-                
-                <div class="hymn-recommended-grid" id="hymnRecGrid">
-                    <!-- 추천 찬양 카드 4개 -->
-                    <div class="hymn-rec-card" onclick="playRecommendedHymn(0)">
-                        <img src="/static/images/hymn_calvary.png" alt="갈보리의 빛">
-                        <div class="hymn-rec-overlay">
-                            <div class="hymn-rec-title">갈보리의 빛</div>
-                            <div class="hymn-rec-subtitle">CALVARY'S RADIANCE</div>
-                        </div>
-                    </div>
-                    <div class="hymn-rec-card" onclick="playRecommendedHymn(1)">
-                        <img src="/static/images/hymn_sunlight.png" alt="창가 햇살 손길">
-                        <div class="hymn-rec-overlay">
-                            <div class="hymn-rec-title">창가 햇살 손길</div>
-                            <div class="hymn-rec-subtitle">SUNLIGHT'S GENTLE TOUCH</div>
-                        </div>
-                    </div>
-                    <div class="hymn-rec-card" onclick="playRecommendedHymn(2)">
-                        <img src="/static/images/hymn_glory.png" alt="거친 나무의 영광">
-                        <div class="hymn-rec-overlay">
-                            <div class="hymn-rec-title">거친 나무의 영광</div>
-                            <div class="hymn-rec-subtitle">GLORY OF THE ROUGH TREE</div>
-                        </div>
-                    </div>
-                    <div class="hymn-rec-card" onclick="playRecommendedHymn(3)">
-                        <img src="/static/images/hymn_sacrifice.png" alt="고결한 희생">
-                        <div class="hymn-rec-overlay">
-                            <div class="hymn-rec-title">고결한 희생</div>
-                            <div class="hymn-rec-subtitle">SACRED SACRIFICE</div>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- 모든 찬양 영역 -->
-                <div class="hymn-section-title">
-                    <h3>모든 찬양</h3>
+                <div class="hymn-section-title" style="margin-top: 20px;">
+                    <h3>찬양 목록</h3>
                 </div>
                 
                 <div class="hymn-all-section" id="hymnList">
@@ -3534,7 +3486,6 @@
 
         /* ── 찬양 모달 ── */
         var hymnsData = [];
-        var currentCategory = 'all';
         var currentSearchQuery = '';
         var playingFileId = null;
         var hymnLikes = {};
@@ -3545,14 +3496,6 @@
             '/static/images/hymn_sunlight.png',
             '/static/images/hymn_glory.png',
             '/static/images/hymn_sacrifice.png'
-        ];
-
-        // 추천 찬양 템플릿 정보 및 매칭 키워드
-        var recHymns = [
-            { title: '갈보리의 빛', subtitle: 'CALVARY\'S RADIANCE', cover: '/static/images/hymn_calvary.png', keywords: ['갈보리', '빛', 'calvary'] },
-            { title: '창가 햇살 손길', subtitle: 'SUNLIGHT\'S GENTLE TOUCH', cover: '/static/images/hymn_sunlight.png', keywords: ['창가', '햇살', '손길', 'sunlight'] },
-            { title: '거친 나무의 영광', subtitle: 'GLORY OF THE ROUGH TREE', cover: '/static/images/hymn_glory.png', keywords: ['거친', '나무', '영광', 'glory'] },
-            { title: '고결한 희생', subtitle: 'SACRED SACRIFICE', cover: '/static/images/hymn_sacrifice.png', keywords: ['고결', '희생', 'sacrifice'] }
         ];
 
         // 로컬스토리지를 통해 좋아요 정보 복원
@@ -3569,17 +3512,10 @@
             if (!requireProfile(function () { openHymnModal(); })) return;
             document.getElementById('hymnModal').classList.add('active');
             
-            // 검색어 및 카테고리 탭 초기화
-            currentCategory = 'all';
+            // 검색어 초기화
             currentSearchQuery = '';
             var searchInput = document.getElementById('hymnSearchInput');
             if (searchInput) searchInput.value = '';
-            
-            var tabs = document.querySelectorAll('.hymn-tab');
-            tabs.forEach(function(t, idx) {
-                if (idx === 0) t.classList.add('active');
-                else t.classList.remove('active');
-            });
 
             // 오디오 이벤트 리스너 바인딩 (최초 1회 설정)
             initAudioEventListeners();
@@ -3674,127 +3610,12 @@
                     var files = data.files || data.hymns || [];
                     hymnsData = [];
                     
-                    // 기존 68곡 원곡 목록 정의
-                    var originalHymns = [
-                        "Amazing Grace", "Danny Boy", "가버린 친구에게", "갈보리 십자가", "강", "겟세마네의 기도",
-                        "광야를 건너 - 나레이션", "기도", "나 주를 멀리 떠났다", "나같은 죄인", "나를 돌아 보며",
-                        "나사로야 나오라", "나의 죄를 씻기는", "나의 하나님", "나팔 불때 나의 이름", "난곡에서",
-                        "내 너를 위하여", "내 사랑", "내 영혼이 은총입어", "내 이름 아시죠", "내 주를 가까이 하게함은",
-                        "내 주의 보혈은", "눈을 들어 하늘 보라", "당신은 알고 있나요", "돌아와 돌아와", "동상이몽",
-                        "만왕의 왕 내주께서", "말없이 서 계신 한 분을 보라", "모두 일어나", "베데스다", "보라",
-                        "보이지 않아도 보이는 나라", "사랑합니다", "사마리아 여인의 노래", "사무엘 베케트의 연극이 끝나던 날",
-                        "삶은 계란을 한입 물은채 - 나레이션", "성삼이의 편지 - 나래이션", "성삼이의 편지",
-                        "세번 부인 할지라도", "세상에서 가장 귀한 것은", "순례자의 노래", "실락원", "아버지의 땅",
-                        "애화", "양복입은 무당들", "어둠은 걷히고", "예수 나를 위하여", "예수로 나의 구주 삼고",
-                        "오 갈보리", "오! 주여", "왕이 다시 오시리", "왜 서머나인가 - 나래이션", "우리 기도 들으소서",
-                        "우리 할머니", "이 산지를 내게 주소서", "인애하신 구세주여", "정결한 맘 주시옵소서",
-                        "죄 많은 이 세상은 - 나레이션", "죄 많은 이 세상은 내집 아니네", "주여 지금 가오니",
-                        "집으로 가자 - 나레이션", "집으로 가자", "친구야", "하나님은 왜 나를 버리셨나요 - 나레이션",
-                        "하나님의 나팔소리", "하나님의 자녀들", "할머니, 고향, 그 그리움", "할머니의 말씀"
-                    ];
-                    
-                    var normalizeName = function(name) {
-                        return name.toLowerCase().replace(/[\s\-_]/g, '').trim();
-                    };
-                    
-                    var originalHymnsNormalized = originalHymns.map(normalizeName);
-                    
                     // 각 곡 데이터 파싱 및 정규화
                     files.forEach(function(f, idx) {
                         var rawName = f.name.replace(/\.(mp3|wav|m4a|ogg)$/i, '');
                         var title = rawName;
-                        var category = 'CCM'; // 기본 카테고리는 CCM
-                        var userCategories = ['예배', '묵상', 'CCM', '기도', '김성수'];
-                        
-                        var normName = normalizeName(rawName);
-                        var isOriginalHymn = originalHymnsNormalized.indexOf(normName) !== -1;
-                        
-                        if (isOriginalHymn) {
-                            category = '김성수';
-                        } else {
-                            // 1단계: 파일명에서 대괄호 카테고리 추출 (예: "갈보리의 빛 [예배]")
-                            var catMatch = rawName.match(/\[(.*?)\]/);
-                            if (catMatch && catMatch[1]) {
-                                var tag = catMatch[1].trim();
-                                if (userCategories.indexOf(tag) !== -1) {
-                                    category = tag;
-                                    title = rawName.replace(/\[.*?\]/, '').trim();
-                                }
-                            } else {
-                            // 2단계: 대괄호가 없는 경우 AI 키워드 자동 분류 규칙 실행
-                            var lowerName = rawName.toLowerCase();
-                            
-                            // A. 김성수 목사 은혜/십자가 테마 (십자가, 보혈, 갈보리, 고난, 희생, 어린양, 나무, 못 박힌 등)
-                            if (lowerName.indexOf('십자가') !== -1 || 
-                                lowerName.indexOf('보혈') !== -1 || 
-                                lowerName.indexOf('갈보리') !== -1 || 
-                                lowerName.indexOf('고난') !== -1 || 
-                                lowerName.indexOf('희생') !== -1 || 
-                                lowerName.indexOf('어린양') !== -1 || 
-                                lowerName.indexOf('나무') !== -1 || 
-                                lowerName.indexOf('못 박힌') !== -1 || 
-                                lowerName.indexOf('abyss') !== -1 ||
-                                lowerName.indexOf('cross') !== -1 ||
-                                lowerName.indexOf('calvary') !== -1 ||
-                                lowerName.indexOf('blood') !== -1 ||
-                                lowerName.indexOf('lamb') !== -1 ||
-                                lowerName.indexOf('sacrifice') !== -1) {
-                                category = '김성수';
-                            }
-                            // B. 기도 테마 (기도, 눈물, 심령 등)
-                            else if (lowerName.indexOf('기도') !== -1 || 
-                                     lowerName.indexOf('눈물') !== -1 || 
-                                     lowerName.indexOf('심령') !== -1 ||
-                                     lowerName.indexOf('prayer') !== -1 ||
-                                     lowerName.indexOf('tears') !== -1 ||
-                                     lowerName.indexOf('broken heart') !== -1) {
-                                category = '기도';
-                            }
-                            // C. 예배 테마 (예배자, 왕, 할렐루야, 임재, 찬양, 빛, 반석, king 등)
-                            else if (lowerName.indexOf('예배') !== -1 || 
-                                     lowerName.indexOf('왕') !== -1 || 
-                                     lowerName.indexOf('할렐루야') !== -1 || 
-                                     lowerName.indexOf('임재') !== -1 || 
-                                     lowerName.indexOf('찬양') !== -1 || 
-                                     lowerName.indexOf('빛') !== -1 || 
-                                     lowerName.indexOf('반석') !== -1 ||
-                                     lowerName.indexOf('worshiper') !== -1 ||
-                                     lowerName.indexOf('king') !== -1 ||
-                                     lowerName.indexOf('hallelujah') !== -1 ||
-                                     lowerName.indexOf('presence') !== -1 ||
-                                     lowerName.indexOf('light') !== -1 ||
-                                     lowerName.indexOf('rock') !== -1) {
-                                category = '예배';
-                            }
-                            // D. 묵상 테마 (고요, 안식, 시냇가, 품, 길, 꿈결, 햇살 등)
-                            else if (lowerName.indexOf('고요') !== -1 || 
-                                     lowerName.indexOf('안식') !== -1 || 
-                                     lowerName.indexOf('시냇가') !== -1 || 
-                                     lowerName.indexOf('품') !== -1 || 
-                                     lowerName.indexOf('길') !== -1 || 
-                                     lowerName.indexOf('꿈결') !== -1 || 
-                                     lowerName.indexOf('햇살') !== -1 ||
-                                     lowerName.indexOf('silent') !== -1 ||
-                                     lowerName.indexOf('rest') !== -1 ||
-                                     lowerName.indexOf('stream') !== -1 ||
-                                     lowerName.indexOf('embrace') !== -1 ||
-                                     lowerName.indexOf('walk') !== -1 ||
-                                     lowerName.indexOf('dream') !== -1 ||
-                                     lowerName.indexOf('sunlight') !== -1) {
-                                category = '묵상';
-                            }
-                            // E. 기본값
-                            else {
-                                category = 'CCM';
-                            }
-                        }
-                        }
-                        
-                        // 아티스트 명을 카테고리에 맞춰 동기화 (김성수 테마는 김성수 목사, 나머지는 Dennyjo)
+                        var category = '김성수';
                         var artist = '김성수 목사';
-                        if (category !== '김성수') {
-                            artist = 'Dennyjo';
-                        }
                         
                         // 4가지 앨범아트 순환 할당
                         var cover = hymnCovers[idx % hymnCovers.length];
@@ -3822,17 +3643,13 @@
                 });
         }
 
-        // 검색 및 카테고리 기준 찬양 리스트 렌더링
+        // 검색 기준 찬양 리스트 렌더링
         function renderHymnsList() {
             var list = document.getElementById('hymnList');
             if (!list) return;
 
             var filtered = hymnsData.filter(function(h) {
-                // 1. 카테고리 필터링
-                if (currentCategory !== 'all' && h.category !== currentCategory) {
-                    return false;
-                }
-                // 2. 검색어 필터링
+                // 검색어 필터링
                 if (currentSearchQuery) {
                     var query = currentSearchQuery.toLowerCase();
                     return h.title.toLowerCase().indexOf(query) !== -1 || h.artist.toLowerCase().indexOf(query) !== -1;
@@ -3857,7 +3674,7 @@
                     '    </div>' +
                     '    <div class="hymn-list-info">' +
                     '        <div class="hymn-list-title">' + h.title + '</div>' +
-                    '        <div class="hymn-list-subtitle">' + h.artist + ' &bull; ' + h.category + '</div>' +
+                    '        <div class="hymn-list-subtitle">' + h.artist + '</div>' +
                     '    </div>' +
                     '    <div class="hymn-list-actions">' +
                     '        <button class="hymn-like-btn ' + isLiked + '" onclick="event.stopPropagation(); toggleLike(\'' + h.id + '\')">' + heartIcon + '</button>' +
@@ -3873,60 +3690,6 @@
             if (input) {
                 currentSearchQuery = input.value.trim();
                 renderHymnsList();
-            }
-        }
-
-        // 카테고리 탭 선택
-        function selectHymnCategory(category, element) {
-            currentCategory = category;
-            
-            // UI 활성화 클래스 조절
-            var tabs = document.querySelectorAll('.hymn-tab');
-            tabs.forEach(function(t) {
-                t.classList.remove('active');
-            });
-
-            if (element) {
-                element.classList.add('active');
-            } else {
-                // 클릭한 탭이 없고 텍스트로 지정했을 때 탭 UI 맞춰주기
-                tabs.forEach(function(t) {
-                    if (category === 'all' && t.textContent === '전체') t.classList.add('active');
-                    else if (t.textContent === category) t.classList.add('active');
-                });
-            }
-
-            renderHymnsList();
-        }
-
-        // 추천 찬양 4개 카드 클릭 시 연동 플레이
-        function playRecommendedHymn(recIndex) {
-            if (hymnsData.length === 0) return;
-            
-            var targetRec = recHymns[recIndex];
-            var matchedHymn = null;
-
-            // 1단계: 추천 카드의 키워드가 곡 제목(또는 파일명)에 포함되어 있는지 검색
-            for (var i = 0; i < hymnsData.length; i++) {
-                var h = hymnsData[i];
-                var nameLower = h.rawName.toLowerCase();
-                var match = targetRec.keywords.some(function(keyword) {
-                    return nameLower.indexOf(keyword.toLowerCase()) !== -1;
-                });
-                if (match) {
-                    matchedHymn = h;
-                    break;
-                }
-            }
-
-            // 2단계: 매칭되는 곡이 없으면 인덱스 가중치 매칭 (안전장치)
-            if (!matchedHymn) {
-                matchedHymn = hymnsData[recIndex % hymnsData.length];
-            }
-
-            // 재생 실행 (추천 카드 고유의 아름다운 커버와 영문 타이틀을 전달하여 미니플레이어 강화)
-            if (matchedHymn) {
-                playHymnWithCustomMetadata(matchedHymn.id, matchedHymn.title, targetRec.subtitle, targetRec.cover);
             }
         }
 
