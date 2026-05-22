@@ -1061,72 +1061,484 @@
         .hymn-modal {
             width: 100%;
             max-width: 420px;
-            height: 85vh;
-            background: linear-gradient(160deg, #0d1220 0%, #111a30 50%, #0d1220 100%);
-            border-radius: 20px 20px 0 0;
+            height: 90vh;
+            background: #090e1a;
+            border-radius: 24px 24px 0 0;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             animation: slideUp 0.3s ease;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
 
-        .hymn-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px 16px;
-        }
-
-        .hymn-item {
+        .hymn-modal-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            background: #090e1a;
+            position: relative;
+        }
+
+        .hymn-modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .hymn-modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .hymn-modal-close {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .hymn-modal-close:hover {
+            color: #ffffff;
+        }
+
+        .hymn-scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 0 100px 0; /* 미니 플레이어 공간 확보 */
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .hymn-scroll-content::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        /* 소개 문구 영역 */
+        .hymn-intro-section {
+            padding: 16px 20px 10px;
+        }
+
+        .hymn-intro-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .hymn-intro-desc {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0;
+            line-height: 1.5;
+            letter-spacing: -0.1px;
+        }
+
+        /* 검색 영역 */
+        .hymn-search-wrapper {
+            padding: 10px 20px 16px;
+            position: relative;
+        }
+
+        .hymn-search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .hymn-search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .hymn-search-input:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(233, 196, 110, 0.3);
+        }
+
+        .hymn-search-input::placeholder {
+            color: #4a5468;
+        }
+
+        .hymn-search-icon {
+            position: absolute;
+            left: 16px;
+            width: 16px;
+            height: 16px;
+            color: #4a5468;
+            pointer-events: none;
+        }
+
+        /* 카테고리 탭 (가로 스크롤) */
+        .hymn-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 20px 16px;
+            scrollbar-width: none;
+        }
+
+        .hymn-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hymn-tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 20px;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .hymn-tab:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .hymn-tab.active {
+            background: #e9c46a;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        /* 섹션 타이틀 */
+        .hymn-section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+
+        .hymn-section-title h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.2px;
+        }
+
+        .hymn-section-title .see-all {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .hymn-section-title .see-all:hover {
+            color: #e9c46a;
+        }
+
+        /* 추천 찬양 (2x2 그리드) */
+        .hymn-recommended-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
-            padding: 12px 14px;
-            background: rgba(201, 168, 76, 0.04);
-            border: 1px solid rgba(201, 168, 76, 0.08);
-            border-radius: 12px;
+            padding: 0 20px 20px;
+        }
+
+        .hymn-rec-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 1.35;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .hymn-rec-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hymn-rec-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.65);
+            transition: filter 0.2s;
+        }
+
+        .hymn-rec-card:hover img {
+            filter: brightness(0.75);
+        }
+
+        .hymn-rec-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to top, rgba(9, 14, 26, 0.9) 0%, rgba(9, 14, 26, 0.4) 60%, rgba(9, 14, 26, 0) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            box-sizing: border-box;
+            height: 80%;
+        }
+
+        .hymn-rec-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.3;
+            margin-bottom: 2px;
+            letter-spacing: -0.3px;
+        }
+
+        .hymn-rec-subtitle {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 모든 찬양 세로 리스트 */
+        .hymn-all-section {
+            padding: 0 20px 24px;
+        }
+
+        .hymn-list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
             margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .hymn-item:hover {
-            background: rgba(201, 168, 76, 0.1);
-            border-color: rgba(201, 168, 76, 0.2);
+        .hymn-list-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
-        .hymn-item.playing {
-            background: rgba(201, 168, 76, 0.12);
-            border-color: rgba(201, 168, 76, 0.3);
+        .hymn-list-item.playing {
+            background: rgba(233, 196, 110, 0.04);
+            border-color: rgba(233, 196, 110, 0.15);
         }
 
-        .hymn-icon {
-            font-size: 20px;
+        .hymn-list-thumb {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
+            transition: all 0.2s;
         }
 
-        .hymn-name {
-            flex: 1;
-            font-size: 14px;
-            color: #e0e0e0;
-            font-weight: 500;
+        .hymn-list-item.playing .hymn-list-thumb {
+            border-color: #e9c46a;
+            animation: spin-thumb 15s linear infinite;
         }
 
-        .hymn-player {
-            padding: 16px;
-            border-top: 1px solid rgba(201, 168, 76, 0.1);
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .hymn-player .now-playing {
-            font-size: 13px;
-            color: #c9a84c;
-            margin-bottom: 8px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .hymn-player audio {
+        .hymn-list-thumb img {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hymn-list-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hymn-list-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.2px;
+        }
+
+        .hymn-list-subtitle {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hymn-list-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hymn-like-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hymn-like-btn:hover {
+            color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .hymn-like-btn.liked {
+            color: #ff4d4f;
+        }
+
+        /* 360도 원형 회전 애니메이션 */
+        @keyframes spin-thumb {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 하단 미니 오디오 플레이어 (모달 내 하단 플로팅 고정) */
+        .hymn-mini-player {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(14, 20, 36, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-sizing: border-box;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .mini-player-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mini-player-thumb {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .mini-player-thumb.spinning {
+            animation: spin-thumb 12s linear infinite;
+        }
+
+        .mini-player-thumb.paused {
+            animation-play-state: paused;
+        }
+
+        .mini-player-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mini-player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mini-player-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.2px;
+        }
+
+        .mini-player-artist {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+            letter-spacing: -0.1px;
+        }
+
+        .mini-player-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .mini-play-btn {
+            background: rgba(233, 196, 110, 0.12);
+            border: 1px solid rgba(233, 196, 110, 0.25);
+            color: #e9c46a;
+            width: 36px;
             height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mini-play-btn:hover {
+            background: #e9c46a;
+            color: #000000;
+            transform: scale(1.05);
+        }
+
+        .mini-close-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mini-close-btn:hover {
+            color: #ffffff;
         }
 
         /* ===== 정보 모달 ===== */
@@ -2073,17 +2485,107 @@
     <!-- 찬양 모달 -->
     <div class="hymn-overlay" id="hymnModal">
         <div class="hymn-modal">
-            <div class="modal-header">
-                <div class="modal-title">🎵 찬양 듣기</div>
-                <div class="modal-close" onclick="closeHymnModal()">✕</div>
+            <div class="hymn-modal-header">
+                <div class="hymn-modal-title">🎵 찬양 듣기</div>
+                <div class="hymn-modal-close" onclick="closeHymnModal()">✕</div>
             </div>
-            <div class="hymn-list" id="hymnList">
-                <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양 목록을 불러오는 중...</div>
+            
+            <div class="hymn-scroll-content">
+                <!-- 소개 문구 영역 -->
+                <div class="hymn-intro-section">
+                    <h1 class="hymn-intro-title">찬양</h1>
+                    <p class="hymn-intro-desc">주님을 향한 고백이 선율이 되어 당신의 마음에 평안을 더합니다.</p>
+                </div>
+                
+                <!-- 검색 영역 -->
+                <div class="hymn-search-wrapper">
+                    <div class="hymn-search-container">
+                        <svg class="hymn-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="hymnSearchInput" class="hymn-search-input" placeholder="찬양 제목 또는 아티스트 검색" oninput="filterHymns()">
+                    </div>
+                </div>
+                
+                <!-- 카테고리 탭 영역 -->
+                <div class="hymn-tabs" id="hymnTabs">
+                    <div class="hymn-tab active" onclick="selectHymnCategory('all', this)">전체</div>
+                    <div class="hymn-tab" onclick="selectHymnCategory('김성수', this)">김성수</div>
+                    <div class="hymn-tab" onclick="selectHymnCategory('예배', this)">예배</div>
+                    <div class="hymn-tab" onclick="selectHymnCategory('묵상', this)">묵상</div>
+                    <div class="hymn-tab" onclick="selectHymnCategory('CCM', this)">CCM</div>
+                    <div class="hymn-tab" onclick="selectHymnCategory('기도', this)">기도</div>
+                </div>
+                
+                <!-- 추천 찬양 영역 -->
+                <div class="hymn-section-title">
+                    <h3>추천 찬양</h3>
+                    <span class="see-all" onclick="selectHymnCategory('all')">전체보기</span>
+                </div>
+                
+                <div class="hymn-recommended-grid" id="hymnRecGrid">
+                    <!-- 추천 찬양 카드 4개 -->
+                    <div class="hymn-rec-card" onclick="playRecommendedHymn(0)">
+                        <img src="/static/images/hymn_calvary.png" alt="갈보리의 빛">
+                        <div class="hymn-rec-overlay">
+                            <div class="hymn-rec-title">갈보리의 빛</div>
+                            <div class="hymn-rec-subtitle">CALVARY'S RADIANCE</div>
+                        </div>
+                    </div>
+                    <div class="hymn-rec-card" onclick="playRecommendedHymn(1)">
+                        <img src="/static/images/hymn_sunlight.png" alt="창가 햇살 손길">
+                        <div class="hymn-rec-overlay">
+                            <div class="hymn-rec-title">창가 햇살 손길</div>
+                            <div class="hymn-rec-subtitle">SUNLIGHT'S GENTLE TOUCH</div>
+                        </div>
+                    </div>
+                    <div class="hymn-rec-card" onclick="playRecommendedHymn(2)">
+                        <img src="/static/images/hymn_glory.png" alt="거친 나무의 영광">
+                        <div class="hymn-rec-overlay">
+                            <div class="hymn-rec-title">거친 나무의 영광</div>
+                            <div class="hymn-rec-subtitle">GLORY OF THE ROUGH TREE</div>
+                        </div>
+                    </div>
+                    <div class="hymn-rec-card" onclick="playRecommendedHymn(3)">
+                        <img src="/static/images/hymn_sacrifice.png" alt="고결한 희생">
+                        <div class="hymn-rec-overlay">
+                            <div class="hymn-rec-title">고결한 희생</div>
+                            <div class="hymn-rec-subtitle">SACRED SACRIFICE</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 모든 찬양 영역 -->
+                <div class="hymn-section-title">
+                    <h3>모든 찬양</h3>
+                </div>
+                
+                <div class="hymn-all-section" id="hymnList">
+                    <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양 목록을 불러오는 중...</div>
+                </div>
             </div>
-            <div class="hymn-player" id="hymnPlayer" style="display:none;">
-                <div class="now-playing" id="nowPlaying">재생 중: -</div>
-                <audio id="hymnAudio" controls></audio>
+            
+            <!-- 미니 오디오 플레이어 -->
+            <div class="hymn-mini-player" id="hymnMiniPlayer" style="display: none;">
+                <div class="mini-player-left" onclick="focusPlayingHymn()">
+                    <div class="mini-player-thumb" id="miniPlayerThumb">
+                        <img src="/static/images/hymn_calvary.png" id="miniPlayerImg" alt="현재 재생 커버">
+                    </div>
+                    <div class="mini-player-info">
+                        <div class="mini-player-title" id="miniPlayerTitle">재생 중인 곡 없음</div>
+                        <div class="mini-player-artist" id="miniPlayerArtist">김성수 목사</div>
+                    </div>
+                </div>
+                <div class="mini-player-controls">
+                    <div class="mini-play-btn" id="miniPlayBtn" onclick="toggleMiniPlayerPlay()">
+                        <span id="miniPlayIcon">▶</span>
+                    </div>
+                    <button class="mini-close-btn" onclick="stopHymnPlayer()">✕</button>
+                </div>
             </div>
+            
+            <!-- 실제 오디오 태그 -->
+            <audio id="hymnAudio" style="display:none;"></audio>
         </div>
     </div>
 
@@ -3031,20 +3533,135 @@
         }
 
         /* ── 찬양 모달 ── */
+        var hymnsData = [];
+        var currentCategory = 'all';
+        var currentSearchQuery = '';
+        var playingFileId = null;
+        var hymnLikes = {};
+        
+        // 앨범 아트 경로 정의
+        var hymnCovers = [
+            '/static/images/hymn_calvary.png',
+            '/static/images/hymn_sunlight.png',
+            '/static/images/hymn_glory.png',
+            '/static/images/hymn_sacrifice.png'
+        ];
+
+        // 추천 찬양 템플릿 정보 및 매칭 키워드
+        var recHymns = [
+            { title: '갈보리의 빛', subtitle: 'CALVARY\'S RADIANCE', cover: '/static/images/hymn_calvary.png', keywords: ['갈보리', '빛', 'calvary'] },
+            { title: '창가 햇살 손길', subtitle: 'SUNLIGHT\'S GENTLE TOUCH', cover: '/static/images/hymn_sunlight.png', keywords: ['창가', '햇살', '손길', 'sunlight'] },
+            { title: '거친 나무의 영광', subtitle: 'GLORY OF THE ROUGH TREE', cover: '/static/images/hymn_glory.png', keywords: ['거친', '나무', '영광', 'glory'] },
+            { title: '고결한 희생', subtitle: 'SACRED SACRIFICE', cover: '/static/images/hymn_sacrifice.png', keywords: ['고결', '희생', 'sacrifice'] }
+        ];
+
+        // 로컬스토리지를 통해 좋아요 정보 복원
+        try {
+            var storedLikes = localStorage.getItem('hymn_likes');
+            if (storedLikes) {
+                hymnLikes = JSON.parse(storedLikes);
+            }
+        } catch (e) {
+            console.error("좋아요 상태 로드 에러:", e);
+        }
+
         function openHymnModal() {
             if (!requireProfile(function () { openHymnModal(); })) return;
             document.getElementById('hymnModal').classList.add('active');
+            
+            // 검색어 및 카테고리 탭 초기화
+            currentCategory = 'all';
+            currentSearchQuery = '';
+            var searchInput = document.getElementById('hymnSearchInput');
+            if (searchInput) searchInput.value = '';
+            
+            var tabs = document.querySelectorAll('.hymn-tab');
+            tabs.forEach(function(t, idx) {
+                if (idx === 0) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+
+            // 오디오 이벤트 리스너 바인딩 (최초 1회 설정)
+            initAudioEventListeners();
+
             loadHymns();
         }
+
         function closeHymnModal() {
             document.getElementById('hymnModal').classList.remove('active');
+            // 모달을 닫을 때 음악은 멈추지 않고 하단에서 배경 재생되도록 설정합니다. (프리미엄 경험)
+            // 만약 멈추는 것을 명시적으로 원하면 아래 코드를 활성화할 수 있습니다:
+            // stopHymnPlayer();
+        }
+
+        // 오디오 실제 이벤트에 따라 미니플레이어 UI 동기화
+        var isAudioListenerBound = false;
+        function initAudioEventListeners() {
+            if (isAudioListenerBound) return;
             var audio = document.getElementById('hymnAudio');
-            if (audio) audio.pause();
+            if (!audio) return;
+
+            audio.addEventListener('play', function() {
+                var playIcon = document.getElementById('miniPlayIcon');
+                var thumb = document.getElementById('miniPlayerThumb');
+                if (playIcon) playIcon.textContent = '⏸';
+                if (thumb) {
+                    thumb.classList.add('spinning');
+                    thumb.classList.remove('paused');
+                }
+                
+                // 재생 중인 목록 아이템의 클래스 갱신
+                updateListPlayingState();
+            });
+
+            audio.addEventListener('pause', function() {
+                var playIcon = document.getElementById('miniPlayIcon');
+                var thumb = document.getElementById('miniPlayerThumb');
+                if (playIcon) playIcon.textContent = '▶';
+                if (thumb) {
+                    thumb.classList.add('paused');
+                }
+                updateListPlayingState();
+            });
+
+            audio.addEventListener('ended', function() {
+                var playIcon = document.getElementById('miniPlayIcon');
+                var thumb = document.getElementById('miniPlayerThumb');
+                if (playIcon) playIcon.textContent = '▶';
+                if (thumb) {
+                    thumb.classList.remove('spinning');
+                    thumb.classList.remove('paused');
+                }
+                updateListPlayingState();
+                
+                // 곡이 끝나면 다음 곡 자동재생 (선택 옵션)
+                playNextHymn();
+            });
+
+            isAudioListenerBound = true;
+        }
+
+        function updateListPlayingState() {
+            var audio = document.getElementById('hymnAudio');
+            var items = document.querySelectorAll('.hymn-list-item');
+            items.forEach(function(item) {
+                var fId = item.getAttribute('data-file-id');
+                if (fId === playingFileId) {
+                    if (audio && !audio.paused) {
+                        item.classList.add('playing');
+                    } else {
+                        item.classList.remove('playing');
+                    }
+                } else {
+                    item.classList.remove('playing');
+                }
+            });
         }
 
         function loadHymns() {
             var list = document.getElementById('hymnList');
-            list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">불러오는 중...</div>';
+            list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양 목록을 불러오는 중...</div>';
+            
             fetch('/api/hymns')
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
@@ -3053,33 +3670,356 @@
                             data.error + '<br><span style="opacity:0.5;font-size:10px;">' + (data.details || '') + '</span></div>';
                         return;
                     }
+                    
                     var files = data.files || data.hymns || [];
-                    if (files.length === 0) {
-                        list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">찬양이 없습니다 (v1.0.3)</div>';
+                    hymnsData = [];
+                    
+                    // 각 곡 데이터 파싱 및 정규화
+                    files.forEach(function(f, idx) {
+                        var rawName = f.name.replace(/\.(mp3|wav|m4a|ogg)$/i, '');
+                        var title = rawName;
+                        var category = 'CCM'; // 기본 카테고리는 CCM
+                        var userCategories = ['예배', '묵상', 'CCM', '기도', '김성수'];
+                        
+                        // 1단계: 파일명에서 대괄호 카테고리 추출 (예: "갈보리의 빛 [예배]")
+                        var catMatch = rawName.match(/\[(.*?)\]/);
+                        if (catMatch && catMatch[1]) {
+                            var tag = catMatch[1].trim();
+                            if (userCategories.indexOf(tag) !== -1) {
+                                category = tag;
+                                title = rawName.replace(/\[.*?\]/, '').trim();
+                            }
+                        } else {
+                            // 2단계: 대괄호가 없는 경우 AI 키워드 자동 분류 규칙 실행
+                            var lowerName = rawName.toLowerCase();
+                            
+                            // A. 김성수 목사 은혜/십자가 테마 (십자가, 보혈, 갈보리, 고난, 희생, 어린양, 나무, 못 박힌 등)
+                            if (lowerName.indexOf('십자가') !== -1 || 
+                                lowerName.indexOf('보혈') !== -1 || 
+                                lowerName.indexOf('갈보리') !== -1 || 
+                                lowerName.indexOf('고난') !== -1 || 
+                                lowerName.indexOf('희생') !== -1 || 
+                                lowerName.indexOf('어린양') !== -1 || 
+                                lowerName.indexOf('나무') !== -1 || 
+                                lowerName.indexOf('못 박힌') !== -1 || 
+                                lowerName.indexOf('abyss') !== -1 ||
+                                lowerName.indexOf('cross') !== -1 ||
+                                lowerName.indexOf('calvary') !== -1 ||
+                                lowerName.indexOf('blood') !== -1 ||
+                                lowerName.indexOf('lamb') !== -1 ||
+                                lowerName.indexOf('sacrifice') !== -1) {
+                                category = '김성수';
+                            }
+                            // B. 기도 테마 (기도, 눈물, 심령 등)
+                            else if (lowerName.indexOf('기도') !== -1 || 
+                                     lowerName.indexOf('눈물') !== -1 || 
+                                     lowerName.indexOf('심령') !== -1 ||
+                                     lowerName.indexOf('prayer') !== -1 ||
+                                     lowerName.indexOf('tears') !== -1 ||
+                                     lowerName.indexOf('broken heart') !== -1) {
+                                category = '기도';
+                            }
+                            // C. 예배 테마 (예배자, 왕, 할렐루야, 임재, 찬양, 빛, 반석, king 등)
+                            else if (lowerName.indexOf('예배') !== -1 || 
+                                     lowerName.indexOf('왕') !== -1 || 
+                                     lowerName.indexOf('할렐루야') !== -1 || 
+                                     lowerName.indexOf('임재') !== -1 || 
+                                     lowerName.indexOf('찬양') !== -1 || 
+                                     lowerName.indexOf('빛') !== -1 || 
+                                     lowerName.indexOf('반석') !== -1 ||
+                                     lowerName.indexOf('worshiper') !== -1 ||
+                                     lowerName.indexOf('king') !== -1 ||
+                                     lowerName.indexOf('hallelujah') !== -1 ||
+                                     lowerName.indexOf('presence') !== -1 ||
+                                     lowerName.indexOf('light') !== -1 ||
+                                     lowerName.indexOf('rock') !== -1) {
+                                category = '예배';
+                            }
+                            // D. 묵상 테마 (고요, 안식, 시냇가, 품, 길, 꿈결, 햇살 등)
+                            else if (lowerName.indexOf('고요') !== -1 || 
+                                     lowerName.indexOf('안식') !== -1 || 
+                                     lowerName.indexOf('시냇가') !== -1 || 
+                                     lowerName.indexOf('품') !== -1 || 
+                                     lowerName.indexOf('길') !== -1 || 
+                                     lowerName.indexOf('꿈결') !== -1 || 
+                                     lowerName.indexOf('햇살') !== -1 ||
+                                     lowerName.indexOf('silent') !== -1 ||
+                                     lowerName.indexOf('rest') !== -1 ||
+                                     lowerName.indexOf('stream') !== -1 ||
+                                     lowerName.indexOf('embrace') !== -1 ||
+                                     lowerName.indexOf('walk') !== -1 ||
+                                     lowerName.indexOf('dream') !== -1 ||
+                                     lowerName.indexOf('sunlight') !== -1) {
+                                category = '묵상';
+                            }
+                            // E. 기본값
+                            else {
+                                category = 'CCM';
+                            }
+                        }
+                        
+                        // 아티스트 명을 카테고리에 맞춰 동기화 (김성수 테마는 김성수 목사, 나머지는 Dennyjo)
+                        var artist = '김성수 목사';
+                        if (category !== '김성수') {
+                            artist = 'Dennyjo';
+                        }
+                        
+                        // 4가지 앨범아트 순환 할당
+                        var cover = hymnCovers[idx % hymnCovers.length];
+                        
+                        hymnsData.push({
+                            id: f.id,
+                            rawName: f.name,
+                            title: title,
+                            category: category,
+                            cover: cover,
+                            artist: artist
+                        });
+                    });
+
+                    if (hymnsData.length === 0) {
+                        list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">구글 드라이브에 등록된 찬양이 없습니다.</div>';
                         return;
                     }
-                    var html = '';
-                    files.forEach(function (f) {
-                        var name = f.name.replace(/\.(mp3|wav|m4a|ogg)$/i, '');
-                        html += '<div class="hymn-item" onclick="playHymn(\'' + f.id + '\',\'' + name.replace(/'/g, "\\'") + '\')">' +
-                            '<span class="hymn-icon">🎵</span>' +
-                            '<span class="hymn-name">' + name + '</span></div>';
-                    });
-                    list.innerHTML = html;
+
+                    // 리스트 그리기
+                    renderHymnsList();
                 })
                 .catch(function (err) {
-                    list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">서버 연결 실패<br><span style="font-size:10px;opacity:0.5;">' + err + '</span></div>';
+                    list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">서버 연결에 실패했습니다.<br><span style="font-size:10px;opacity:0.5;">' + err + '</span></div>';
                 });
         }
 
-        function playHymn(fileId, name) {
-            var player = document.getElementById('hymnPlayer');
+        // 검색 및 카테고리 기준 찬양 리스트 렌더링
+        function renderHymnsList() {
+            var list = document.getElementById('hymnList');
+            if (!list) return;
+
+            var filtered = hymnsData.filter(function(h) {
+                // 1. 카테고리 필터링
+                if (currentCategory !== 'all' && h.category !== currentCategory) {
+                    return false;
+                }
+                // 2. 검색어 필터링
+                if (currentSearchQuery) {
+                    var query = currentSearchQuery.toLowerCase();
+                    return h.title.toLowerCase().indexOf(query) !== -1 || h.artist.toLowerCase().indexOf(query) !== -1;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">일치하는 찬양이 없습니다.</div>';
+                return;
+            }
+
+            var html = '';
+            filtered.forEach(function (h) {
+                var isLiked = hymnLikes[h.id] ? 'liked' : '';
+                var isPlaying = (h.id === playingFileId) ? 'playing' : '';
+                var heartIcon = hymnLikes[h.id] ? '♥' : '♡';
+
+                html += '<div class="hymn-list-item ' + isPlaying + '" data-file-id="' + h.id + '" onclick="playHymn(\'' + h.id + '\')">' +
+                    '    <div class="hymn-list-thumb">' +
+                    '        <img src="' + h.cover + '" alt="' + h.title + '">' +
+                    '    </div>' +
+                    '    <div class="hymn-list-info">' +
+                    '        <div class="hymn-list-title">' + h.title + '</div>' +
+                    '        <div class="hymn-list-subtitle">' + h.artist + ' &bull; ' + h.category + '</div>' +
+                    '    </div>' +
+                    '    <div class="hymn-list-actions">' +
+                    '        <button class="hymn-like-btn ' + isLiked + '" onclick="event.stopPropagation(); toggleLike(\'' + h.id + '\')">' + heartIcon + '</button>' +
+                    '    </div>' +
+                    '</div>';
+            });
+            list.innerHTML = html;
+        }
+
+        // 실시간 텍스트 검색
+        function filterHymns() {
+            var input = document.getElementById('hymnSearchInput');
+            if (input) {
+                currentSearchQuery = input.value.trim();
+                renderHymnsList();
+            }
+        }
+
+        // 카테고리 탭 선택
+        function selectHymnCategory(category, element) {
+            currentCategory = category;
+            
+            // UI 활성화 클래스 조절
+            var tabs = document.querySelectorAll('.hymn-tab');
+            tabs.forEach(function(t) {
+                t.classList.remove('active');
+            });
+
+            if (element) {
+                element.classList.add('active');
+            } else {
+                // 클릭한 탭이 없고 텍스트로 지정했을 때 탭 UI 맞춰주기
+                tabs.forEach(function(t) {
+                    if (category === 'all' && t.textContent === '전체') t.classList.add('active');
+                    else if (t.textContent === category) t.classList.add('active');
+                });
+            }
+
+            renderHymnsList();
+        }
+
+        // 추천 찬양 4개 카드 클릭 시 연동 플레이
+        function playRecommendedHymn(recIndex) {
+            if (hymnsData.length === 0) return;
+            
+            var targetRec = recHymns[recIndex];
+            var matchedHymn = null;
+
+            // 1단계: 추천 카드의 키워드가 곡 제목(또는 파일명)에 포함되어 있는지 검색
+            for (var i = 0; i < hymnsData.length; i++) {
+                var h = hymnsData[i];
+                var nameLower = h.rawName.toLowerCase();
+                var match = targetRec.keywords.some(function(keyword) {
+                    return nameLower.indexOf(keyword.toLowerCase()) !== -1;
+                });
+                if (match) {
+                    matchedHymn = h;
+                    break;
+                }
+            }
+
+            // 2단계: 매칭되는 곡이 없으면 인덱스 가중치 매칭 (안전장치)
+            if (!matchedHymn) {
+                matchedHymn = hymnsData[recIndex % hymnsData.length];
+            }
+
+            // 재생 실행 (추천 카드 고유의 아름다운 커버와 영문 타이틀을 전달하여 미니플레이어 강화)
+            if (matchedHymn) {
+                playHymnWithCustomMetadata(matchedHymn.id, matchedHymn.title, targetRec.subtitle, targetRec.cover);
+            }
+        }
+
+        // 일반 리스트에서 곡을 실행할 때
+        function playHymn(fileId) {
+            var h = hymnsData.find(function(item) { return item.id === fileId; });
+            if (h) {
+                playHymnWithCustomMetadata(h.id, h.title, h.artist, h.cover);
+            }
+        }
+
+        // 미니플레이어 커스텀 메타데이터를 입혀 재생하는 핵심 코어
+        function playHymnWithCustomMetadata(fileId, title, subtitle, cover) {
+            playingFileId = fileId;
+            
             var audio = document.getElementById('hymnAudio');
-            var nowPlaying = document.getElementById('nowPlaying');
-            player.style.display = 'block';
-            nowPlaying.textContent = '재생 중: ' + name;
+            var miniPlayer = document.getElementById('hymnMiniPlayer');
+            var miniTitle = document.getElementById('miniPlayerTitle');
+            var miniArtist = document.getElementById('miniPlayerArtist');
+            var miniImg = document.getElementById('miniPlayerImg');
+            var miniThumb = document.getElementById('miniPlayerThumb');
+
+            if (!audio) return;
+
+            // 미니 플레이어 UI 노출 및 갱신
+            if (miniPlayer) miniPlayer.style.display = 'flex';
+            if (miniTitle) miniTitle.textContent = title;
+            if (miniArtist) miniArtist.textContent = subtitle;
+            if (miniImg) miniImg.src = cover;
+            
+            // 오디오 소스 입력 및 실행
             audio.src = '/api/hymn-play/' + fileId;
             audio.play();
+
+            // 리스트 상태값 업데이트
+            updateListPlayingState();
+        }
+
+        // 미니플레이어 재생 / 일시정지 토글
+        function toggleMiniPlayerPlay() {
+            var audio = document.getElementById('hymnAudio');
+            if (!audio) return;
+
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
+
+        // 찬양 완전히 중지 및 플레이어 닫기
+        function stopHymnPlayer() {
+            var audio = document.getElementById('hymnAudio');
+            var miniPlayer = document.getElementById('hymnMiniPlayer');
+            var miniThumb = document.getElementById('miniPlayerThumb');
+
+            if (audio) {
+                audio.pause();
+                audio.src = '';
+            }
+
+            playingFileId = null;
+            if (miniPlayer) miniPlayer.style.display = 'none';
+            if (miniThumb) {
+                miniThumb.classList.remove('spinning');
+                miniThumb.classList.remove('paused');
+            }
+
+            // 리스트 하이라이트 상태 리셋
+            updateListPlayingState();
+        }
+
+        // 다음 곡 자동 순환 재생
+        function playNextHymn() {
+            if (hymnsData.length === 0 || !playingFileId) return;
+
+            // 현재 재생 중이던 곡의 인덱스 찾기
+            var currentIndex = -1;
+            for (var i = 0; i < hymnsData.length; i++) {
+                if (hymnsData[i].id === playingFileId) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex !== -1) {
+                var nextIndex = (currentIndex + 1) % hymnsData.length;
+                var nextHymn = hymnsData[nextIndex];
+                if (nextHymn) {
+                    playHymn(nextHymn.id);
+                }
+            }
+        }
+
+        // 재생 중인 곡 목록으로 스크롤 이동 기능 (편의 기능)
+        function focusPlayingHymn() {
+            if (!playingFileId) return;
+            var targetItem = document.querySelector('.hymn-list-item[data-file-id="' + playingFileId + '"]');
+            if (targetItem) {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // 좋아요 토글 기능
+        function toggleLike(fileId) {
+            hymnLikes[fileId] = !hymnLikes[fileId];
+            
+            // 로컬스토리지에 저장
+            try {
+                localStorage.setItem('hymn_likes', JSON.stringify(hymnLikes));
+            } catch (e) {
+                console.error("좋아요 보존 오류:", e);
+            }
+
+            // 목록의 하트 아이콘 상태만 즉시 업데이트
+            renderHymnsList();
+            
+            // 좋아요 클릭에 따른 작고 고급스러운 햅틱 느낌 애니메이션
+            var btn = document.querySelector('.hymn-list-item[data-file-id="' + fileId + '"] .hymn-like-btn');
+            if (btn) {
+                btn.style.transform = 'scale(1.3)';
+                setTimeout(function() {
+                    btn.style.transform = 'scale(1)';
+                }, 200);
+            }
         }
 
         /* ── 채팅 모달 ── */
