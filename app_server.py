@@ -73,7 +73,7 @@ def get_gemini_model(system_instruction):
     
     genai.configure(api_key=key)
     return genai.GenerativeModel(
-        model_name='gemini-2.0-flash',
+        model_name='gemini-3.5-flash',
         system_instruction=system_instruction
     )
 
