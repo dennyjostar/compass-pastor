@@ -59,23 +59,66 @@ try:
 except Exception as db_err:
     print(f"[OFFLINE BIBLE ERROR] Failed to load database: {db_err}")
 
-# Gemini 설정
-def get_gemini_model(system_instruction):
-    # 다양한 변수명 조합 확인 (대소문자 포함)
-    possible_keys = ["GEMINI_API_KEY", "smna_api_key", "SMNA_API_KEY", "gemini_api_key"]
-    key = None
-    for k in possible_keys:
-        key = os.getenv(k)
-        if key: break
+# Gemini 설정 - 다중 API 키 자동 로테이션 및 모델 폴백 지원
+def get_all_gemini_api_keys():
+    """환경변수에서 설정된 모든 Gemini API 키 목록을 수집 (쉼표 구분자 및 GEMINI_API_KEY_1 등 지원)"""
+    keys = []
+    key_vars = ["GEMINI_API_KEYS", "GEMINI_API_KEY", "smna_api_key", "SMNA_API_KEY", "gemini_api_key"]
+    for var in key_vars:
+        val = os.getenv(var)
+        if val:
+            for k in val.split(","):
+                k_clean = k.strip()
+                if k_clean and k_clean not in keys:
+                    keys.append(k_clean)
     
-    if not key:
-        raise ValueError(f"API 키를 찾을 수 없습니다. (체크항목: {', '.join(possible_keys)})")
-    
-    genai.configure(api_key=key)
-    return genai.GenerativeModel(
-        model_name='gemini-3.5-flash',
-        system_instruction=system_instruction
-    )
+    for i in range(1, 10):
+        k = os.getenv(f"GEMINI_API_KEY_{i}")
+        if k:
+            k_clean = k.strip()
+            if k_clean and k_clean not in keys:
+                keys.append(k_clean)
+                
+    return keys
+
+FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.5-flash']
+
+def generate_with_gemini(system_instruction, contents):
+    """
+    Gemini API를 호출할 때 키 로테이션 및 모델 폴백을 자동으로 수행합니다.
+    """
+    keys = get_all_gemini_api_keys()
+    if not keys:
+        raise ValueError("Gemini API 키가 설정되지 않았습니다. .env 파일에 GEMINI_API_KEY를 설정하세요.")
+
+    last_error = None
+    for key_idx, key in enumerate(keys):
+        try:
+            genai.configure(api_key=key)
+        except Exception as cfg_err:
+            print(f"[API KEY CONFIG ERROR] Key #{key_idx+1}: {cfg_err}")
+            continue
+
+        for model_name in FALLBACK_MODELS:
+            try:
+                model = genai.GenerativeModel(
+                    model_name=model_name,
+                    system_instruction=system_instruction
+                )
+                response = model.generate_content(contents)
+                if response and hasattr(response, 'text') and response.text:
+                    print(f"[GEMINI SUCCESS] Used Key #{key_idx+1} ({key[:6]}...) with model '{model_name}'")
+                    return response.text
+            except Exception as err:
+                last_error = err
+                err_msg = str(err)
+                print(f"[GEMINI RETRY] Key #{key_idx+1} ({key[:6]}...) / Model '{model_name}' failed: {err_msg[:120]}")
+                continue
+
+    if last_error:
+        raise last_error
+    else:
+        raise Exception("모든 API 키 및 모델 시도가 실패했습니다.")
 
 # 서버 사이드 사용량 추적 및 파일 저장
 USER_STATS_PATH = os.path.join(os.path.dirname(__file__), 'logs', 'user_stats.json')
@@ -121,10 +164,9 @@ def home():
 
 @app.route('/debug-env')
 def debug_env():
-    # 모든 환경 변수 키 목록 추출 (보안상 이름만)
     all_keys = sorted(list(os.environ.keys()))
+    gemini_keys = get_all_gemini_api_keys()
     
-    # 특정 키들의 상세 상태
     targets = ["GEMINI_API_KEY", "smna_api_key", "SECRET_KEY", "DRIVE_API_KEY"]
     status = {}
     for k in targets:
@@ -133,6 +175,9 @@ def debug_env():
     
     return jsonify({
         "environment": "Railway/Production" if not os.path.exists(env_path) else "Local/Dev",
+        "gemini_api_keys_count": len(gemini_keys),
+        "gemini_key_previews": [f"{k[:6]}...{k[-4:]}" for k in gemini_keys],
+        "fallback_models": FALLBACK_MODELS,
         "status": status,
         "available_keys_preview": [k for k in all_keys if "API" in k or "KEY" in k or "RAILWAY" in k],
         "current_time": datetime.now().isoformat()
@@ -274,8 +319,6 @@ def ask():
                 "[심층 분석 끝]"
             )
 
-        model = get_gemini_model(system_prompt)
-
         # 이미지 데이터 처리 및 멀티모달 Gemini 호출
         image_data = data.get('image', '')
         if image_data:
@@ -302,14 +345,12 @@ def ask():
                         'data': img_bytes
                     }
                 ]
-                response = model.generate_content(contents)
+                reply = generate_with_gemini(system_prompt, contents)
             except Exception as img_err:
                 print(f"[IMAGE PROCESSING ERROR] {img_err} - falling back to text-only.")
-                response = model.generate_content(user_msg)
+                reply = generate_with_gemini(system_prompt, user_msg)
         else:
-            response = model.generate_content(user_msg)
-
-        reply = response.text
+            reply = generate_with_gemini(system_prompt, user_msg)
 
         # 사용량 증가 및 저장
         stats[user_id]["count"] += 1
@@ -324,8 +365,26 @@ def ask():
         })
 
     except Exception as e:
-        print(f"[ERROR] {e}")
-        return jsonify({"response": f"오류 발생: {str(e)}"}), 500
+        err_msg = str(e)
+        print(f"[ASK ERROR] {err_msg}")
+        if "429" in err_msg or "resourceexhausted" in err_msg.lower() or "prepayment credits" in err_msg.lower() or "quota" in err_msg.lower():
+            friendly_response = (
+                "[일반 답변 시작]\n"
+                "성도님, 현재 서버의 일시적인 AI 서비스 사용량(Gemini API 크레딧)이 초과되어 대답을 생성할 수 없습니다. 🙏\n\n"
+                "Google AI Studio에서 API 키를 충전하거나 새로운 API 키로 교체하면 즉시 정상 이용이 가능합니다.\n"
+                "[일반 답변 끝]\n\n"
+                "[심층 분석 시작]\n"
+                "💡 API 오류 조치 방법 (운영자 안내):\n"
+                "1. https://aistudio.google.com/app/apikey 접속\n"
+                "2. 새 API Key 발급 (무료 Tier 지원)\n"
+                "3. compass_app/.env 파일의 GEMINI_API_KEY 업데이트\n"
+                "[심층 분석 끝]"
+            )
+            return jsonify({
+                "response": friendly_response,
+                "limit_reached": False
+            }), 200
+        return jsonify({"response": f"오류 발생: {err_msg}"}), 500
 
 
 # Google Drive 찬양 API (기존 유지)
@@ -456,9 +515,7 @@ def read_bible():
             "JSON 형식 외에는 어떠한 텍스트나 설명도 출력해선 안 되며, JSON 문법 오류가 없도록 쉼표와 큰따옴표 처리를 완벽하게 하십시오."
         )
         
-        model = get_gemini_model(system_instruction)
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        text = generate_with_gemini(system_instruction, prompt).strip()
         
         # markdown json 블록이 있는 경우 제거
         if text.startswith("```"):
