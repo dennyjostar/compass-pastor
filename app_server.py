@@ -158,30 +158,46 @@ def get_user_hash(name, age_group="", gender=""):
     raw = f"{name}_{age_group}_{gender}"
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/debug-env')
-def debug_env():
-    all_keys = sorted(list(os.environ.keys()))
-    gemini_keys = get_all_gemini_api_keys()
-    
-    targets = ["GEMINI_API_KEY", "smna_api_key", "SECRET_KEY", "DRIVE_API_KEY"]
-    status = {}
-    for k in targets:
-        val = os.getenv(k)
-        status[k] = f"Found (Length: {len(val)})" if val else "Missing"
-    
-    return jsonify({
-        "environment": "Railway/Production" if not os.path.exists(env_path) else "Local/Dev",
-        "gemini_api_keys_count": len(gemini_keys),
-        "gemini_key_previews": [f"{k[:6]}...{k[-4:]}" for k in gemini_keys],
-        "fallback_models": FALLBACK_MODELS,
-        "status": status,
-        "available_keys_preview": [k for k in all_keys if "API" in k or "KEY" in k or "RAILWAY" in k],
-        "current_time": datetime.now().isoformat()
-    })
+# ── 로마서 미완성 강해 아카이브 (103강~130강) 라우트 ──
+@app.route('/romans')
+def romans_archive():
+    return render_template('romans_archive.html')
+
+@app.route('/api/romans/lectures', methods=['GET'])
+def get_romans_lectures():
+    try:
+        db_path = os.path.join(os.path.dirname(__file__), 'romans_archive_db.json')
+        if not os.path.exists(db_path):
+            return jsonify([])
+        with open(db_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        print(f"[ROMANS API ERROR] {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/romans/lectures/<int:lecture_id>', methods=['GET'])
+def get_romans_lecture_detail(lecture_id):
+    try:
+        db_path = os.path.join(os.path.dirname(__file__), 'romans_archive_db.json')
+        if not os.path.exists(db_path):
+            return jsonify({"error": "데이터베이스를 찾을 수 없습니다."}), 404
+        with open(db_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        lecture = next((item for item in data if item["id"] == lecture_id), None)
+        if not lecture:
+            return jsonify({"error": "해당 강해를 찾을 수 없습니다."}), 404
+        return jsonify(lecture)
+    except Exception as e:
+        print(f"[ROMANS DETAIL API ERROR] {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 def get_seron_context(query):

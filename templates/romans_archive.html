@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로마서 미완성 강해 아카이브 (103강~130강) | COMPASS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #060a14;
+            --bg-card: rgba(201, 168, 76, 0.04);
+            --border-color: rgba(201, 168, 76, 0.18);
+            --accent-gold: #c9a84c;
+            --gold-light: #e8d48b;
+            --text-main: #e0e0e0;
+            --text-sub: rgba(255, 255, 255, 0.55);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(160deg, #060a14 0%, #0f1526 40%, #111a30 70%, #060a14 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ── 헤더 ── */
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(201, 168, 76, 0.08);
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(201, 168, 76, 0.18);
+        }
+
+        .header-title-box {
+            text-align: right;
+        }
+
+        .header-title-box h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+        }
+
+        .header-title-box p {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        /* ── 메인 배너 ── */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.12) 0%, rgba(201, 168, 76, 0.02) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px 24px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(201, 168, 76, 0.2);
+            color: var(--accent-gold);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+        }
+
+        .hero-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .hero-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.65;
+            word-break: keep-all;
+        }
+
+        .hero-info-box {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(201, 168, 76, 0.2);
+            font-size: 12px;
+            color: var(--gold-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── 검색 및 필터 ── */
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: var(--accent-gold);
+            background: rgba(201, 168, 76, 0.06);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--text-sub);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: rgba(201, 168, 76, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        /* ── 카드 리스트 ── */
+        .lecture-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .lecture-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .lecture-card:hover {
+            background: rgba(201, 168, 76, 0.08);
+            border-color: var(--accent-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .lecture-num {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            background: rgba(201, 168, 76, 0.1);
+            padding: 3px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+        }
+
+        .scripture-ref {
+            font-size: 13px;
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .card-lecture-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .card-summary {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        .card-footer {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .read-btn {
+            font-size: 12px;
+            color: var(--accent-gold);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 독서 모달 (Reader Modal) ── */
+        .reader-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .reader-modal-overlay.active {
+            display: flex;
+        }
+
+        .reader-modal {
+            width: 100%;
+            max-width: 760px;
+            height: 92vh;
+            background: #0d1220;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .reader-header {
+            padding: 16px 24px;
+            background: rgba(13, 18, 32, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .reader-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(201, 168, 76, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .reader-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 36px 32px;
+            font-family: 'Noto Serif KR', serif;
+            font-size: 16px;
+            line-height: 1.95;
+            color: #e2dfd5;
+        }
+
+        .reader-lecture-meta {
+            text-align: center;
+            margin-bottom: 36px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .reader-tag {
+            display: inline-block;
+            background: rgba(201, 168, 76, 0.15);
+            color: var(--accent-gold);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+        }
+
+        .reader-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .reader-scripture {
+            font-size: 15px;
+            color: var(--gold-light);
+            font-weight: 600;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .reader-content p {
+            margin-bottom: 24px;
+            word-break: keep-all;
+            white-space: pre-line;
+        }
+
+        .reader-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #090e1a;
+        }
+
+        /* ── 인쇄/PDF 스타일 ── */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            .top-header, .hero-banner, .filter-section, .lecture-list, .reader-header, .reader-footer {
+                display: none !important;
+            }
+            .reader-modal-overlay {
+                position: static !important;
+                background: none !important;
+                display: block !important;
+            }
+            .reader-modal {
+                border: none !important;
+                box-shadow: none !important;
+                height: auto !important;
+                background: #ffffff !important;
+            }
+            .reader-body {
+                color: #000000 !important;
+                font-size: 12pt !important;
+                line-height: 1.8 !important;
+                padding: 0 !important;
+            }
+            .reader-title {
+                color: #000000 !important;
+            }
+            .reader-scripture {
+                color: #333333 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="top-header">
+            <a href="/" class="back-btn">
+                <span>←</span> Compass 메인으로
+            </a>
+            <div class="header-title-box">
+                <h1>로마서 강해 아카이브</h1>
+                <p>故 김성수 목사 미완성 묵상집</p>
+            </div>
+        </header>
+
+        <!-- 히어로 배너 -->
+        <section class="hero-banner">
+            <span class="hero-badge">복음의 정수 103강 ~ 130강</span>
+            <h2 class="hero-title">로마서 미완성 강해 아카이브</h2>
+            <p class="hero-desc">
+                故 김성수 목사님이 로마서 102강(롬 9:4-5)을 끝으로 소천하심에 따라, 목사님의 십자가 복음 신학 체계와 기존 설교 데이터베이스를 바탕으로 AI가 로마서 9장 6절부터 16장까지의 남은 본문을 묵상 원고로 재구성한 아카이브입니다.
+            </p>
+            <div class="hero-info-box">
+                <span>📖 총 28편 시리즈 완간</span>
+                <span>•</span>
+                <span>오직 십자가 은혜와 약속의 자녀</span>
+            </div>
+        </section>
+
+        <!-- 검색 및 필터 -->
+        <section class="filter-section">
+            <input type="text" id="searchInput" class="search-box" placeholder="강해 제목, 본문 구절, 내용 검색..." oninput="filterLectures()">
+            <div class="filter-tabs">
+                <button class="tab-btn active" onclick="setFilter(0)">전체보기 (28편)</button>
+                <button class="tab-btn" onclick="setFilter(1)">파트1: 약속의 자녀 (103~114강)</button>
+                <button class="tab-btn" onclick="setFilter(2)">파트2: 산 제물의 삶 (115~121강)</button>
+                <button class="tab-btn" onclick="setFilter(3)">파트3: 교제와 송영 (122~130강)</button>
+            </div>
+        </section>
+
+        <!-- 카드 목록 -->
+        <main id="lectureList" class="lecture-list">
+            <!-- 자바스크립트로 로드됨 -->
+        </main>
+    </div>
+
+    <!-- 독서 모달 -->
+    <div id="readerModalOverlay" class="reader-modal-overlay">
+        <div class="reader-modal">
+            <div class="reader-header">
+                <span id="readerHeaderTag" class="reader-num" style="color: var(--accent-gold); font-weight: 700;">로마서 103강</span>
+                <div class="reader-controls">
+                    <button class="ctrl-btn" onclick="changeFontSize(-1)">A-</button>
+                    <button class="ctrl-btn" onclick="changeFontSize(1)">A+</button>
+                    <button class="ctrl-btn" id="copyBtn" onclick="copyPlainText()">📋 텍스트 복사</button>
+                    <button class="ctrl-btn" onclick="printArticle()">🖨️ PDF/인쇄</button>
+                    <button class="ctrl-btn" onclick="closeReader()" style="background: rgba(255, 68, 68, 0.2); color: #ff6b6b;">✕ 닫기</button>
+                </div>
+            </div>
+            <div id="readerBody" class="reader-body">
+                <div class="reader-lecture-meta">
+                    <span id="readerModalPart" class="reader-tag">파트 1</span>
+                    <h2 id="readerModalTitle" class="reader-title">강해 제목</h2>
+                    <p id="readerModalScripture" class="reader-scripture">본문</p>
+                </div>
+                <div id="readerModalContent" class="reader-content">
+                    <!-- 본문 텍스트 -->
+                </div>
+            </div>
+            <div class="reader-footer">
+                <button id="prevBtn" class="ctrl-btn" onclick="navigateLecture(-1)">← 이전 강해</button>
+                <span id="readerPageIndicator" style="font-size: 13px; color: var(--text-sub);">103 / 130</span>
+                <button id="nextBtn" class="ctrl-btn" onclick="navigateLecture(1)">다음 강해 →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allLectures = [];
+        let currentFilterPart = 0;
+        let currentLectureId = 103;
+        let currentFontSize = 16;
+
+        async function fetchLectures() {
+            try {
+                const res = await fetch('/api/romans/lectures');
+                allLectures = await res.json();
+                renderLectures();
+            } catch (err) {
+                console.error("Failed to load lectures:", err);
+            }
+        }
+
+        function renderLectures() {
+            const listEl = document.getElementById('lectureList');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const filtered = allLectures.filter(item => {
+                const matchPart = (currentFilterPart === 0) || (item.part === currentFilterPart);
+                const matchSearch = item.title.toLowerCase().includes(searchVal) || 
+                                    item.scripture.toLowerCase().includes(searchVal) || 
+                                    item.summary.toLowerCase().includes(searchVal);
+                return matchPart && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-sub);">검색 결과가 없습니다.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(item => {
+                const hasBlog = item.blog_url && item.blog_url.trim();
+                const cardClick = hasBlog
+                    ? `onclick="window.open('${item.blog_url}', '_blank')"`
+                    : `onclick="openReader(${item.id})"`;
+                
+                const footerBtn = hasBlog
+                    ? `<a class="read-btn blog-btn" href="${item.blog_url}" target="_blank" onclick="event.stopPropagation()">
+                            <span style="font-size:11px; background: #c9a84c; color: #0d1220; padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-right: 6px;">티스토리</span>
+                            전체 원문 읽기 ↗
+                       </a>`
+                    : `<span class="read-btn">강해 원문 읽기 →</span>`;
+                
+                const blogBadge = hasBlog
+                    ? `<span style="font-size:10px; background: rgba(201,168,76,0.15); color: #c9a84c; padding: 2px 8px; border-radius: 8px; font-weight: 600; border: 1px solid rgba(201,168,76,0.3);">📝 블로그 게재</span>`
+                    : '';
+                
+                return `
+                    <div class="lecture-card" ${cardClick}>
+                        <div class="card-top">
+                            <span class="lecture-num">로마서 ${item.id}강</span>
+                            <span class="scripture-ref">📖 ${item.scripture}</span>
+                        </div>
+                        <h3 class="card-lecture-title">${item.title}</h3>
+                        <p class="card-summary">${item.summary}</p>
+                        <div class="card-footer" style="justify-content: space-between; align-items: center;">
+                            ${footerBtn}
+                            ${blogBadge}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function setFilter(partNum) {
+            currentFilterPart = partNum;
+            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+                if (idx === partNum) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            renderLectures();
+        }
+
+        function filterLectures() {
+            renderLectures();
+        }
+
+        function openReader(lectureId) {
+            currentLectureId = lectureId;
+            const item = allLectures.find(l => l.id === lectureId);
+            if (!item) return;
+
+            document.getElementById('readerHeaderTag').innerText = `로마서 ${item.id}강`;
+            document.getElementById('readerModalPart').innerText = item.part_title;
+            document.getElementById('readerModalTitle').innerText = item.title;
+            document.getElementById('readerModalScripture').innerText = `본문: ${item.scripture}`;
+            
+            // 본문 줄바꿈 처리
+            document.getElementById('readerModalContent').innerHTML = item.content.split('\n\n').map(p => `<p>${p}</p>`).join('');
+            document.getElementById('readerPageIndicator').innerText = `${item.id} / 130`;
+
+            document.getElementById('readerModalOverlay').classList.add('active');
+            document.getElementById('readerBody').scrollTop = 0;
+
+            // 이전/다음 버튼 활성화 여부
+            document.getElementById('prevBtn').style.opacity = (item.id <= 103) ? "0.3" : "1";
+            document.getElementById('nextBtn').style.opacity = (item.id >= 130) ? "0.3" : "1";
+        }
+
+        function closeReader() {
+            document.getElementById('readerModalOverlay').classList.remove('active');
+        }
+
+        function navigateLecture(direction) {
+            const targetId = currentLectureId + direction;
+            if (targetId >= 103 && targetId <= 130) {
+                openReader(targetId);
+            }
+        }
+
+        function changeFontSize(delta) {
+            currentFontSize = Math.max(14, Math.min(24, currentFontSize + delta));
+            document.getElementById('readerBody').style.fontSize = currentFontSize + 'px';
+        }
+
+        function printArticle() {
+            window.print();
+        }
+
+        // 순수 텍스트만 복사 (배경색/서식 없이)
+        function copyPlainText() {
+            const item = allLectures.find(l => l.id === currentLectureId);
+            if (!item) return;
+
+            // 제목 + 본문을 순수 텍스트로 조합
+            const plainText = [
+                `로마서 ${item.id}강`,
+                item.title,
+                `본문: ${item.scripture}`,
+                '',
+                item.content
+            ].join('\n');
+
+            navigator.clipboard.writeText(plainText).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const original = btn.innerText;
+                btn.innerText = '✅ 복사 완료!';
+                btn.style.color = '#4ade80';
+                setTimeout(() => {
+                    btn.innerText = original;
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                alert('복사 실패: ' + err);
+            });
+        }
+
+        // 페이지 로드 시 강해 목록 가져오기
+        window.addEventListener('DOMContentLoaded', fetchLectures);
+    </script>
+</body>
+</html>
