@@ -414,6 +414,14 @@
                     <input type="text" id="bookOrCategory" class="form-control" placeholder="예: 로마서, 요한복음, 신앙수필 등" value="로마서" onchange="fetchNextNum()">
                 </div>
 
+                <!-- 로마서 남은 강해 커리큘럼 선택 드롭다운 -->
+                <div class="form-group" id="romansCurriculumGroup">
+                    <label class="form-label" for="romansCurriculumSelect">📜 로마서 남은 강해 커리큘럼 선택 (104강~123강 완결)</label>
+                    <select id="romansCurriculumSelect" class="form-select" onchange="selectRomansCurriculum()" style="border-color: var(--accent-gold);">
+                        <option value="">-- 로마서 강해를 선택하시면 제목과 본문이 자동입력됩니다 --</option>
+                    </select>
+                </div>
+
                 <!-- 3. 회차 / 제목 -->
                 <div class="form-group">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
@@ -572,8 +580,44 @@
             fetchNextNum();
         }
 
+        async function loadRomansCurriculum() {
+            try {
+                const res = await fetch('/api/studio/romans-curriculum');
+                if (res.ok) {
+                    const list = await res.json();
+                    const select = document.getElementById('romansCurriculumSelect');
+                    if (select) {
+                        select.innerHTML = '<option value="">-- 로마서 남은 강해 선택 (104강~123강 완결) --</option>';
+                        list.forEach(item => {
+                            const opt = document.createElement('option');
+                            opt.value = item.num;
+                            opt.innerText = `[${item.num}강] ${item.title.replace(/로마서 \d+강 \| /, '')}`;
+                            opt.dataset.title = item.title;
+                            opt.dataset.summary = item.summary;
+                            select.appendChild(opt);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.log("Load curriculum error", e);
+            }
+        }
+
+        function selectRomansCurriculum() {
+            const select = document.getElementById('romansCurriculumSelect');
+            const selectedOpt = select.options[select.selectedIndex];
+            if (!selectedOpt.value) return;
+
+            document.getElementById('genreSelect').value = '성경강해';
+            document.getElementById('bookOrCategory').value = '로마서';
+            document.getElementById('lectureNum').value = selectedOpt.value;
+            document.getElementById('titleInput').value = selectedOpt.dataset.title;
+            document.getElementById('summaryInput').value = selectedOpt.dataset.summary;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             fetchNextNum();
+            loadRomansCurriculum();
         });
 
         async function suggestTopic() {
