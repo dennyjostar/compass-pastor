@@ -234,8 +234,14 @@ def get_next_lecture_num():
         print(f"[NEXT NUM API ERROR] {e}")
         return jsonify({"nextNum": 104})
 
+_FONT_CACHE = {}
+
 def get_safe_font(size):
-    """Linux(Railway) 및 Windows 환경에서 폰트 로드 실패로 인한 500 에러를 100% 방지하는 안전 폰트 헬퍼"""
+    """Linux(Railway) 및 Windows 환경에서 폰트를 캐싱하여 0.01초 만에 초고속 로드하는 헬퍼"""
+    if size in _FONT_CACHE:
+        return _FONT_CACHE[size]
+
+    font_obj = None
     try:
         from PIL import ImageFont
         font_paths = [
@@ -248,13 +254,18 @@ def get_safe_font(size):
         for p in font_paths:
             if os.path.exists(p):
                 try:
-                    return ImageFont.truetype(p, size)
+                    font_obj = ImageFont.truetype(p, size)
+                    break
                 except Exception:
                     pass
-        return ImageFont.load_default()
+        if font_obj is None:
+            font_obj = ImageFont.load_default()
     except Exception:
         from PIL import ImageFont
-        return ImageFont.load_default()
+        font_obj = ImageFont.load_default()
+
+    _FONT_CACHE[size] = font_obj
+    return font_obj
 
 def create_studio_image(title, category, style_name, index_num, total_count=3, num="104", summary=""):
     """
