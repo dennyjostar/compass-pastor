@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compass Studio — 故 김성수 목사 묵상집 저작 스튜디오</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #121826;
+            --accent-gold: #c9a84c;
+            --gold-light: #fce38a;
+            --border-color: rgba(201, 168, 76, 0.25);
+            --text-main: #f0ede6;
+            --text-sub: #a0a8b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .header-bar {
+            background: rgba(18, 24, 38, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--accent-gold);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: rgba(201, 168, 76, 0.2);
+            border: 1px solid var(--accent-gold);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .page-title-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title-box h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-title-box p {
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        .studio-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .studio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── 옵션 패널 ── */
+        .option-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+        }
+
+        .section-h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-gold);
+            background: rgba(201, 168, 76, 0.08);
+        }
+
+        .form-select option {
+            background: #121826;
+            color: #ffffff;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .range-value {
+            display: inline-block;
+            float: right;
+            color: var(--gold-light);
+            font-weight: 700;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #c9a84c 0%, #a88832 100%);
+            color: #0d1220;
+            font-weight: 800;
+            font-size: 15px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201, 168, 76, 0.5);
+        }
+
+        /* ── 결과 에디터 패널 ── */
+        .result-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .action-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+        }
+
+        .tool-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-btn:hover {
+            background: rgba(201, 168, 76, 0.2);
+            border-color: var(--accent-gold);
+            color: var(--gold-light);
+        }
+
+        .tool-btn-gold {
+            background: rgba(201, 168, 76, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .output-box {
+            flex: 1;
+            background: #faf7f0;
+            color: #2a1f0e;
+            border-radius: 14px;
+            padding: 28px;
+            font-family: 'Noto Serif KR', serif;
+            font-size: 16px;
+            line-height: 2.0;
+            overflow-y: auto;
+            max-height: 650px;
+            border: 1px solid #e8d9b5;
+            white-space: pre-line;
+        }
+
+        .placeholder-text {
+            color: var(--text-sub);
+            text-align: center;
+            padding: 100px 20px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* ── 이미지 갤러리 섹션 ── */
+        .image-gallery-section {
+            margin-top: 24px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 14px;
+            margin-top: 12px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #000;
+            aspect-ratio: 16/9;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .download-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-item:hover .download-overlay {
+            opacity: 1;
+        }
+
+        .download-btn {
+            background: var(--accent-gold);
+            color: #0d1220;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* 로딩 스피너 */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(201, 168, 76, 0.2);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더 바 -->
+    <header class="header-bar">
+        <a href="/" class="brand">
+            <div class="brand-logo">🧭</div>
+            <span>Compass Studio</span>
+        </a>
+        <div style="font-size: 13px; color: var(--gold-light);">
+            ✍️ 故 김성수 목사 강해·수필 저작 스튜디오
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="page-title-box">
+            <h1>故 김성수 목사 묵상집 AI 저작 스튜디오</h1>
+            <p>성경 강해, 신앙 수필, 신학 칼럼 등 원하는 분량과 스타일로 나만의 묵상 원고와 블로그 이미지를 자동 제작합니다.</p>
+        </div>
+
+        <div class="studio-grid">
+            <!-- 왼쪽: 저작 설정 패널 -->
+            <aside class="option-panel">
+                <h2 class="section-h2">⚙️ 원고 및 이미지 설정</h2>
+
+                <!-- 1. 장르 선택 -->
+                <div class="form-group">
+                    <label class="form-label" for="genreSelect">장르 / 카테고리</label>
+                    <select id="genreSelect" class="form-select" onchange="toggleGenreInput()">
+                        <option value="성경강해">📖 성경 강해 (로마서, 요한복음...)</option>
+                        <option value="신앙수필">✍️ 신앙 수필집 (은혜, 고난, 일상)</option>
+                        <option value="신학칼럼">🏛️ 신학 칼럼 (복음, 인본주의 파쇄)</option>
+                        <option value="자유주제">💡 자유 주제 직접 입력</option>
+                    </select>
+                </div>
+
+                <!-- 2. 성경책/카테고리 세부 이름 -->
+                <div class="form-group">
+                    <label class="form-label" for="bookOrCategory">성경책 / 분류 이름</label>
+                    <input type="text" id="bookOrCategory" class="form-control" placeholder="예: 로마서, 요한복음, 신앙수필 등" value="로마서">
+                </div>
+
+                <!-- 3. 회차 / 제목 -->
+                <div class="form-group">
+                    <label class="form-label" for="lectureNum">강해 회차 / 편수</label>
+                    <input type="number" id="lectureNum" class="form-control" value="104" placeholder="예: 104">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="titleInput">제목 / 구절</label>
+                    <input type="text" id="titleInput" class="form-control" placeholder="예: 약속의 자녀와 하나님의 열심 (롬 9:14-24)">
+                </div>
+
+                <!-- 4. 핵심 주제 / 원고 구상 -->
+                <div class="form-group">
+                    <label class="form-label" for="summaryInput">핵심 주제 / 메인 질문</label>
+                    <textarea id="summaryInput" class="form-control" placeholder="원고에서 강조하고 싶은 핵심 주제나 질문을 적으세요."></textarea>
+                </div>
+
+                <!-- 5. 글자 수 설정 -->
+                <div class="form-group">
+                    <label class="form-label" for="charCountSelect">목표 글자 수 <span id="charCountLabel" class="range-value">10,000자</span></label>
+                    <select id="charCountSelect" class="form-select" onchange="updateCharLabel()">
+                        <option value="3000">수필/칼럼용 (약 3,000자)</option>
+                        <option value="5000">단편 묵상용 (약 5,000자)</option>
+                        <option value="10000" selected>중형 강해용 (약 10,000자)</option>
+                        <option value="20000">완판 초대형 강해 (20,000자 이상)</option>
+                    </select>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+                <!-- 6. 이미지 개수 선택 -->
+                <div class="form-group">
+                    <label class="form-label" for="imageCountSelect">AI 블로그 이미지 개수</label>
+                    <select id="imageCountSelect" class="form-select">
+                        <option value="1">1장 (메인 대표 썸네일)</option>
+                        <option value="2">2장 (썸네일 + 본문 삽화)</option>
+                        <option value="3" selected>3장 (서론, 본문, 결론 세트)</option>
+                        <option value="5">5장 (단락별 세트)</option>
+                    </select>
+                </div>
+
+                <!-- 7. 이미지 화풍/스타일 선택 -->
+                <div class="form-group">
+                    <label class="form-label" for="imageStyleSelect">이미지 화풍 (Style)</label>
+                    <select id="imageStyleSelect" class="form-select">
+                        <option value="고전유화">🎨 고전 유화 명화 (Classical Oil)</option>
+                        <option value="수채화">🖌️ 감성 수채화 (Soft Watercolor)</option>
+                        <option value="시네마틱실사">📸 시네마틱 실사 (Cinematic Realism)</option>
+                        <option value="현대일러스트">✒️ 현대 일러스트 & 펜화 (Modern Art)</option>
+                        <option value="모바일배너">📱 모바일 카드 배너 (Card Banner)</option>
+                    </select>
+                </div>
+
+                <button class="btn-generate" onclick="generateDevotional()">✨ AI 원고 & 이미지 생성하기</button>
+            </aside>
+
+            <!-- 오른쪽: 생성 원고 미리보기 및 툴바 -->
+            <section class="result-panel">
+                <div class="action-toolbar">
+                    <h2 class="section-h2" style="margin-bottom:0; border:none; padding:0;">📄 원고 & 이미지 결과</h2>
+                    <div class="tool-btn-group">
+                        <button class="tool-btn tool-btn-gold" id="copyTextBtn" onclick="copyPlainText()">📋 순수 텍스트 복사</button>
+                        <button class="tool-btn" id="copyHtmlBtn" onclick="copyMobileHtml()">📱 모바일 HTML 복사</button>
+                    </div>
+                </div>
+
+                <!-- 로딩 표시 -->
+                <div id="loadingBox" class="loading-spinner">
+                    <div class="spinner"></div>
+                    <h3 style="color: var(--gold-light); font-size: 18px; margin-bottom: 8px;">김성수 목사의 신학 체계로 원고 및 이미지 생성 중...</h3>
+                    <p style="color: var(--text-sub); font-size: 13px;">지정한 분량과 이미지 개수에 따라 30초~1분 정도 소요될 수 있습니다.</p>
+                </div>
+
+                <!-- 원고 출력 박스 -->
+                <div id="outputContent" class="output-box">
+                    <div class="placeholder-text">
+                        👈 왼쪽 메뉴에서 장르, 글자 수, 이미지 화풍을 선택한 후<br>
+                        <strong>[✨ AI 원고 & 이미지 생성하기]</strong> 버튼을 누르세요.
+                    </div>
+                </div>
+
+                <!-- 생성된 이미지 갤러리 -->
+                <div class="image-gallery-section">
+                    <h3 style="font-size: 14px; color: var(--gold-light); font-weight: 700; margin-bottom: 8px;">
+                        🖼️ 생성된 AI 이미지 갤러리 (<span id="galleryCount">0</span>장)
+                    </h3>
+                    <div id="galleryGrid" class="gallery-grid">
+                        <div style="font-size: 12px; color: var(--text-sub); grid-column: 1/-1;">원고 생성 시 선택한 개수와 화풍 스타일대로 이미지가 이곳에 표시됩니다.</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        let currentGeneratedContent = "";
+        let currentGeneratedImages = [];
+
+        function updateCharLabel() {
+            const val = document.getElementById('charCountSelect').value;
+            document.getElementById('charCountLabel').innerText = parseInt(val).toLocaleString() + '자';
+        }
+
+        function toggleGenreInput() {
+            const genre = document.getElementById('genreSelect').value;
+            const bookInput = document.getElementById('bookOrCategory');
+            if (genre === '성경강해') {
+                bookInput.value = '로마서';
+            } else if (genre === '신앙수필') {
+                bookInput.value = '신앙 수필집';
+            } else if (genre === '신학칼럼') {
+                bookInput.value = '신학 칼럼';
+            } else {
+                bookInput.value = '자유 카테고리';
+            }
+        }
+
+        async function generateDevotional() {
+            const genre = document.getElementById('genreSelect').value;
+            const category = document.getElementById('bookOrCategory').value;
+            const num = document.getElementById('lectureNum').value;
+            const title = document.getElementById('titleInput').value;
+            const summary = document.getElementById('summaryInput').value;
+            const targetCharCount = document.getElementById('charCountSelect').value;
+            const imageCount = document.getElementById('imageCountSelect').value;
+            const imageStyle = document.getElementById('imageStyleSelect').value;
+
+            if (!title) {
+                alert("원고 제목 또는 본문 구절을 입력해 주세요!");
+                return;
+            }
+
+            // 로딩 시작
+            document.getElementById('loadingBox').style.display = 'block';
+            document.getElementById('outputContent').style.display = 'none';
+
+            try {
+                const res = await fetch('/api/studio/generate-text', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        genre, category, num, title, summary,
+                        targetCharCount: parseInt(targetCharCount),
+                        imageCount: parseInt(imageCount),
+                        imageStyle
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    alert("오류 발생: " + data.error);
+                    return;
+                }
+
+                currentGeneratedContent = data.content;
+                currentGeneratedImages = data.images || [];
+
+                // 화면 렌더링
+                document.getElementById('outputContent').innerText = currentGeneratedContent;
+                renderGallery(currentGeneratedImages);
+
+            } catch (err) {
+                alert("생성 실패: " + err);
+            } finally {
+                document.getElementById('loadingBox').style.display = 'none';
+                document.getElementById('outputContent').style.display = 'block';
+            }
+        }
+
+        function renderGallery(images) {
+            const grid = document.getElementById('galleryGrid');
+            document.getElementById('galleryCount').innerText = images.length;
+
+            if (!images || images.length === 0) {
+                grid.innerHTML = `<div style="font-size: 12px; color: var(--text-sub); grid-column: 1/-1;">생성된 이미지가 없습니다.</div>`;
+                return;
+            }
+
+            grid.innerHTML = images.map((imgUrl, idx) => `
+                <div class="gallery-item">
+                    <img src="${imgUrl}" alt="AI 생성 이미지 ${idx+1}">
+                    <div class="download-overlay">
+                        <a href="${imgUrl}" download="sermon_image_${idx+1}.png" class="download-btn">📥 다운로드</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copyPlainText() {
+            if (!currentGeneratedContent) {
+                alert("복사할 원고가 없습니다. 먼저 원고를 생성해 주세요!");
+                return;
+            }
+            navigator.clipboard.writeText(currentGeneratedContent).then(() => {
+                const btn = document.getElementById('copyTextBtn');
+                btn.innerText = '✅ 텍스트 복사 완료!';
+                setTimeout(() => btn.innerText = '📋 순수 텍스트 복사', 2000);
+            });
+        }
+
+        function copyMobileHtml() {
+            if (!currentGeneratedContent) {
+                alert("복사할 원고가 없습니다!");
+                return;
+            }
+
+            const title = document.getElementById('titleInput').value || "故 김성수 목사 묵상";
+            const category = document.getElementById('bookOrCategory').value || "로마서";
+            const num = document.getElementById('lectureNum').value || "1";
+
+            const htmlCode = `
+<div style="background: linear-gradient(135deg, #121929 0%, #1a2438 100%); border: 2px solid #c9a84c; border-radius: 16px; padding: 22px 18px; margin-bottom: 30px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); width: 100%; box-sizing: border-box;">
+    <div style="display: inline-block; background: #2a200f; color: #ffe082; font-size: 14px; font-weight: 700; padding: 5px 12px; border-radius: 10px; border: 1px solid #c9a84c; margin-bottom: 12px;">
+        ${category} ${num}강 · 故 김성수 목사 묵상집
+    </div>
+    <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 14px 0; line-height: 1.4; word-break: keep-all;">
+        ${title}
+    </h2>
+    <p style="font-size: 16px; color: #f0ede6; line-height: 1.75; margin: 0 0 16px 0; word-break: keep-all; font-weight: 400;">
+        본 원고는 故 김성수 목사님의 십자가 복음 신학 체계를 바탕으로 AI가 재구성한 묵상 원고입니다.
+    </p>
+    <div style="border-top: 1px dashed rgba(201, 168, 76, 0.4); margin-bottom: 14px;"></div>
+    <div style="font-size: 15px; color: #ffe082; font-weight: 700; line-height: 1.5; word-break: keep-all;">
+        📖 오직 십자가 은혜와 자기 부인
+    </div>
+</div>
+`;
+            navigator.clipboard.writeText(htmlCode).then(() => {
+                const btn = document.getElementById('copyHtmlBtn');
+                btn.innerText = '✅ 모바일 HTML 복사 완료!';
+                setTimeout(() => btn.innerText = '📱 모바일 HTML 복사', 2000);
+            });
+        }
+    </script>
+</body>
+</html>

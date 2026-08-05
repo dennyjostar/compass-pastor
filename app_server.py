@@ -198,6 +198,139 @@ def get_romans_lecture_detail(lecture_id):
         return jsonify({"error": str(e)}), 500
 
 
+# ── 故 김성수 목사 묵상집 AI 저작 스튜디오 라우트 ──
+@app.route('/studio')
+def devotional_studio():
+    return render_template('devotional_studio.html')
+
+def create_studio_image(title, category, style_name, index_num):
+    """지정한 화풍 스타일과 제목으로 고해상도 묵상집 이미지를 생성"""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        import random
+
+        static_gen_dir = os.path.join(os.path.dirname(__file__), 'static', 'generated_images')
+        os.makedirs(static_gen_dir, exist_ok=True)
+
+        width, height = 1200, 675
+        
+        # 화풍별 컬러 펠레트 및 그래픽 스타일
+        styles_map = {
+            "고전유화": {"bg_gradient": ("#0f141f", "#1e160a"), "accent": "#c9a84c", "border": "#8b6e32", "text": "#ffffff", "tag": "🎨 고전 명화 스타일"},
+            "수채화": {"bg_gradient": ("#f7f4ed", "#e6ded1"), "accent": "#5a4020", "border": "#c9a84c", "text": "#1a0f00", "tag": "🖌️ 감성 수채화 스타일"},
+            "시네마틱실사": {"bg_gradient": ("#070b12", "#0f172a"), "accent": "#60a5fa", "border": "#3b82f6", "text": "#ffffff", "tag": "📸 시네마틱 실사"},
+            "현대일러스트": {"bg_gradient": ("#18181b", "#27272a"), "accent": "#f43f5e", "border": "#fb7185", "text": "#ffffff", "tag": "✒️ 현대 일러스트"},
+            "모바일배너": {"bg_gradient": ("#0d1220", "#171f33"), "accent": "#c9a84c", "border": "#fce38a", "text": "#ffffff", "tag": "📱 모바일 카드 배너"}
+        }
+
+        s = styles_map.get(style_name, styles_map["고전유화"])
+        img = Image.new('RGB', (width, height), color=s["bg_gradient"][0])
+        draw = ImageDraw.Draw(img)
+
+        # 폰트 경로 획득
+        font_path = 'C:/Windows/Fonts/malgunbd.ttf'
+        if not os.path.exists(font_path):
+            font_path = 'C:/Windows/Fonts/malgun.ttf'
+
+        font_tag = ImageFont.truetype(font_path, 24)
+        font_title = ImageFont.truetype(font_path, 44)
+        font_sub = ImageFont.truetype(font_path, 28)
+
+        # 외곽 테두리 렌더링
+        draw.rounded_rectangle([30, 30, width-30, height-30], radius=20, fill=s["bg_gradient"][1], outline=s["border"], width=3)
+
+        # 태그 뱃지
+        badge_text = f" {s['tag']} #{index_num} "
+        draw.rounded_rectangle([60, 60, 360, 110], radius=12, fill=s["accent"], outline=None)
+        draw.text((75, 72), badge_text, fill="#0d1220" if s["accent"]=="#c9a84c" else "#ffffff", font=font_tag)
+
+        # 타이틀
+        draw.text((60, 150), f"[{category}]", fill=s["accent"], font=font_sub)
+        
+        # 제목 줄바꿈 처리
+        if len(title) > 20:
+            t1 = title[:20]
+            t2 = title[20:]
+            draw.text((60, 210), t1, fill=s["text"], font=font_title)
+            draw.text((60, 270), t2, fill=s["text"], font=font_title)
+        else:
+            draw.text((60, 210), title, fill=s["text"], font=font_title)
+
+        # 하단 문구
+        footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집"
+        draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
+
+        file_name = f"studio_img_{int(time.time())}_{index_num}.png"
+        file_path = os.path.join(static_gen_dir, file_name)
+        img.save(file_path, 'PNG')
+        
+        return f"/static/generated_images/{file_name}"
+    except Exception as img_err:
+        print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
+        return "/static/default_banner.png"
+
+@app.route('/api/studio/generate-text', methods=['POST'])
+def generate_studio_devotional():
+    try:
+        data = request.json or {}
+        genre = data.get('genre', '성경강해')
+        category = data.get('category', '로마서')
+        num = data.get('num', '104')
+        title = data.get('title', '원고 제목')
+        summary = data.get('summary', '')
+        target_char_count = int(data.get('targetCharCount', 10000))
+        image_count = int(data.get('imageCount', 3))
+        image_style = data.get('imageStyle', '고전유화')
+
+        # 시스템 지침 및 김성수 목사 페르소나
+        system_instruction = f"""당신은 故 김성수 목사님(서머나교회)의 신학 체계와 설교 문체를 바탕으로 묵상집 원고를 저작하는 전문 신학 작가입니다.
+
+[신학 핵심 및 어조]
+1. 장르: {genre} ({category})
+2. 인간의 전적 파산과 무능력, 철저한 자기 부인을 강하게 강조하라.
+3. 율법주의, 기복주의, 인본주의 종교 교리를 날카롭게 파쇄하고, 오직 예수 그리스도의 십자가 은혜만을 붙들게 하라.
+4. 어조: "성도 여러분", "안녕하십니까", "~입니다", "~하십니까?", "~라는 말입니다"
+5. 성경 원어(히브리어/헬라어)와 주석적 전개를 간간이 포함하라.
+6. 마무리는 간절한 기도로 종결하라 (반드시 "예수 그리스도의 이름으로 기도드립니다. 아멘" 으로 끝맺음).
+
+[분량 요구사항 - 중요]
+- 반드시 공백 포함 {target_char_count:,}자 이상으로 작성하라.
+- 본문의 단락을 충분히 깊고 입체적으로 전개하라."""
+
+        user_prompt = f"""다음 정보로 {genre} 묵상집 원고를 공백 포함 {target_char_count:,}자 이상으로 완성하라.
+
+- 분류: {category} {num}강
+- 제목: {title}
+- 핵심 주제/질문: {summary}
+
+구조:
+1. [서론]: 오늘 주제가 던지는 신학적 긴장과 질문
+2. [본문 분석 및 원어 강해]: 성경 구속사적 배경과 헬라어/히브리어 풀이
+3. [인본주의 종교성 폭로]: 인간의 자기 의와 거짓 열심 파쇄
+4. [십자가 복음 핵심 해설]: 오직 예수 그리스도의 은혜와 자기 부인
+5. [성도의 삶 적용]: 역사 속 성도의 자기 부인과 소망
+6. [결론 및 기도]: 마무리 권면과 1인칭 기도문 ("예수 그리스도의 이름으로 기도드립니다. 아멘" 종결)"""
+
+        # Gemini API를 이용한 원고 생성
+        content = generate_with_gemini(system_instruction, user_prompt)
+
+        # 요청한 개수 및 스타일대로 이미지 생성
+        generated_images = []
+        for i in range(1, image_count + 1):
+            img_url = create_studio_image(title, category, image_style, i)
+            generated_images.append(img_url)
+
+        return jsonify({
+            "content": content,
+            "images": generated_images,
+            "charCount": len(content)
+        })
+
+    except Exception as e:
+        print(f"[STUDIO GENERATE ERROR] {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 def get_seron_context(query):
