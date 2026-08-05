@@ -269,6 +269,45 @@ def create_studio_image(title, category, style_name, index_num):
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
         return "/static/default_banner.png"
 
+@app.route('/api/studio/suggest-topic', methods=['POST'])
+def suggest_studio_topic():
+    try:
+        data = request.json or {}
+        category = data.get('category', '로마서')
+        num = data.get('num', '104')
+        genre = data.get('genre', '성경강해')
+        
+        prompt = f"""故 김성수 목사님의 신학 체계(인간의 전적 무능력, 자기 부인, 십자가 은혜)에 맞춰 다음 묵상 원고의 본문 구절 및 제목, 핵심 질문 주제를 기획하라.
+- 장르: {genre}
+- 성경책/분류: {category}
+- 회차: {num}강
+
+반드시 순수한 JSON 형식으로만 응답하라:
+{{
+  "title": "{category} {num}강 | 추천 제목 및 본문 구절",
+  "summary": "오늘 원고에서 던지는 핵심 신학적 질문과 십자가 은혜의 주제"
+}}"""
+
+        sys_inst = "당신은 김성수 목사의 신학 체계에 맞추어 성경 강해 및 수필의 제목과 본문 구절, 주제를 전문 기획하는 신학 에디터입니다. 오직 JSON만 출력하십시오."
+        res_text = generate_with_gemini(sys_inst, prompt).strip()
+        
+        if res_text.startswith("```"):
+            lines = res_text.split("\n")
+            if lines[0].startswith("```json") or lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines[-1].startswith("```"):
+                lines = lines[:-1]
+            res_text = "\n".join(lines).strip()
+            
+        topic_data = json.loads(res_text)
+        return jsonify(topic_data)
+    except Exception as e:
+        print(f"[SUGGEST TOPIC ERROR] {e}")
+        return jsonify({
+            "title": f"{category} {num}강 | 토기장이의 주권과 하나님의 열심",
+            "summary": "인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도만을 의지하는 진리의 묵상"
+        })
+
 @app.route('/api/studio/generate-text', methods=['POST'])
 def generate_studio_devotional():
     try:

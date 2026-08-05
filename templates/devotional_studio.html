@@ -387,19 +387,22 @@
 
                 <!-- 3. 회차 / 제목 -->
                 <div class="form-group">
-                    <label class="form-label" for="lectureNum">강해 회차 / 편수</label>
-                    <input type="number" id="lectureNum" class="form-control" value="104" placeholder="예: 104">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <label class="form-label" for="lectureNum" style="margin-bottom:0;">강해 회차 / 편수</label>
+                        <button type="button" class="tool-btn tool-btn-gold" onclick="suggestTopic()" style="padding: 4px 10px; font-size: 12px;">🎲 AI 주제 자동 추천</button>
+                    </div>
+                    <input type="number" id="lectureNum" class="form-control" value="104" placeholder="예: 104" onchange="suggestTopic()">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="titleInput">제목 / 구절</label>
-                    <input type="text" id="titleInput" class="form-control" placeholder="예: 약속의 자녀와 하나님의 열심 (롬 9:14-24)">
+                    <label class="form-label" for="titleInput">제목 / 구절 <span style="font-size: 11px; color: var(--gold-light); font-weight: normal;">(비워두면 AI가 자동 기획)</span></label>
+                    <input type="text" id="titleInput" class="form-control" placeholder="비워두시거나 [🎲 AI 주제 자동 추천]을 누르세요.">
                 </div>
 
                 <!-- 4. 핵심 주제 / 원고 구상 -->
                 <div class="form-group">
-                    <label class="form-label" for="summaryInput">핵심 주제 / 메인 질문</label>
-                    <textarea id="summaryInput" class="form-control" placeholder="원고에서 강조하고 싶은 핵심 주제나 질문을 적으세요."></textarea>
+                    <label class="form-label" for="summaryInput">핵심 주제 / 메인 질문 <span style="font-size: 11px; color: var(--gold-light); font-weight: normal;">(비워두면 AI가 자동 기획)</span></label>
+                    <textarea id="summaryInput" class="form-control" placeholder="원고에서 강조하고 싶은 내용이 있으면 적으세요. 비워두시면 AI가 깊이 있는 주제를 자동 선정합니다."></textarea>
                 </div>
 
                 <!-- 5. 글자 수 설정 -->
@@ -502,19 +505,44 @@
             }
         }
 
+        async function suggestTopic() {
+            const category = document.getElementById('bookOrCategory').value || '로마서';
+            const num = document.getElementById('lectureNum').value || '104';
+            const genre = document.getElementById('genreSelect').value || '성경강해';
+
+            const titleInput = document.getElementById('titleInput');
+            const summaryInput = document.getElementById('summaryInput');
+
+            titleInput.value = "AI가 최적의 구절과 제목을 찾는 중...";
+            summaryInput.value = "AI가 십자가 복음 중심의 메인 질문을 기획하는 중...";
+
+            try {
+                const res = await fetch('/api/studio/suggest-topic', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ category, num, genre })
+                });
+                const data = await res.json();
+                if (data.title) titleInput.value = data.title;
+                if (data.summary) summaryInput.value = data.summary;
+            } catch (err) {
+                titleInput.value = `${category} ${num}강 | 하나님의 주권과 십자가 은혜`;
+                summaryInput.value = `인간의 전적 타락과 무능력을 폭로하고 오직 십자가 복음을 붙드는 신학적 묵상`;
+            }
+        }
+
         async function generateDevotional() {
             const genre = document.getElementById('genreSelect').value;
             const category = document.getElementById('bookOrCategory').value;
             const num = document.getElementById('lectureNum').value;
-            const title = document.getElementById('titleInput').value;
-            const summary = document.getElementById('summaryInput').value;
+            let title = document.getElementById('titleInput').value.trim();
+            let summary = document.getElementById('summaryInput').value.trim();
             const targetCharCount = document.getElementById('charCountSelect').value;
             const imageCount = document.getElementById('imageCountSelect').value;
             const imageStyle = document.getElementById('imageStyleSelect').value;
 
             if (!title) {
-                alert("원고 제목 또는 본문 구절을 입력해 주세요!");
-                return;
+                title = `${category} ${num}강 | 하나님의 주권과 은혜`;
             }
 
             // 로딩 시작
