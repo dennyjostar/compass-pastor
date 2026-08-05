@@ -841,26 +841,59 @@
             const category = document.getElementById('bookOrCategory').value || "로마서";
             const num = document.getElementById('lectureNum').value || "1";
 
+            // 원고 텍스트를 모바일 고가독성 HTML 단락으로 변환
+            const formattedParagraphs = currentGeneratedContent.split('\n\n').map(p => {
+                const trimmed = p.trim();
+                if (!trimmed) return '';
+
+                // 소제목 (예: 1. [서론], [본문 분석], 숫자. 등)
+                if (trimmed.startsWith('[') || /^\d+\./.test(trimmed) || trimmed.startsWith('■') || trimmed.startsWith('◆')) {
+                    return `<h3 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 34px 0 16px 0; padding-left: 12px; border-left: 4px solid #c9a84c; line-height: 1.5; word-break: keep-all;">${trimmed}</h3>`;
+                }
+                
+                // 기도문 세션
+                if (trimmed.includes('기도드립니다') || trimmed.startsWith('하나님 아버지') || trimmed.startsWith('[기도]')) {
+                    return `<div style="background: #fdfbf7; border: 1px solid #e2d9c8; border-left: 4px solid #c9a84c; border-radius: 12px; padding: 20px; margin: 30px 0; font-size: 17px; line-height: 1.85; color: #334155; word-break: keep-all; font-style: italic;">
+                        <strong>🙏 묵상 기도문</strong><br><br>${trimmed.replace(/\n/g, '<br>')}
+                    </div>`;
+                }
+
+                // 일반 본문 단락 (스마트폰 최적화 font-size: 18px, word-break: keep-all)
+                return `<p style="font-size: 18px; line-height: 1.88; color: #2c3e50; margin-bottom: 22px; word-break: keep-all; letter-spacing: -0.2px;">${trimmed.replace(/\n/g, '<br>')}</p>`;
+            }).join('');
+
             const htmlCode = `
-<div style="background: linear-gradient(135deg, #121929 0%, #1a2438 100%); border: 2px solid #c9a84c; border-radius: 16px; padding: 22px 18px; margin-bottom: 30px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); width: 100%; box-sizing: border-box;">
+<!-- 모바일 최적화 헤더 카드 -->
+<div style="background: linear-gradient(135deg, #121929 0%, #1a2438 100%); border: 2px solid #c9a84c; border-radius: 16px; padding: 24px 20px; margin-bottom: 32px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); width: 100%; box-sizing: border-box;">
     <div style="display: inline-block; background: #2a200f; color: #ffe082; font-size: 14px; font-weight: 700; padding: 5px 12px; border-radius: 10px; border: 1px solid #c9a84c; margin-bottom: 12px;">
         ${category} ${num}강 · 故 김성수 목사 묵상집
     </div>
     <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 14px 0; line-height: 1.4; word-break: keep-all;">
         ${title}
     </h2>
-    <p style="font-size: 16px; color: #f0ede6; line-height: 1.75; margin: 0 0 16px 0; word-break: keep-all; font-weight: 400;">
-        본 원고는 故 김성수 목사님의 십자가 복음 신학 체계를 바탕으로 AI가 재구성한 묵상 원고입니다.
+    <p style="font-size: 15px; color: #f0ede6; line-height: 1.7; margin: 0 0 16px 0; word-break: keep-all; font-weight: 400;">
+        본 원고는 故 김성수 목사님의 십자가 복음 신학 체계를 바탕으로 작성된 심층 강해 묵상집입니다.
     </p>
     <div style="border-top: 1px dashed rgba(201, 168, 76, 0.4); margin-bottom: 14px;"></div>
-    <div style="font-size: 15px; color: #ffe082; font-weight: 700; line-height: 1.5; word-break: keep-all;">
-        📖 오직 십자가 은혜와 자기 부인
+    <div style="font-size: 14px; color: #ffe082; font-weight: 700; line-height: 1.5; word-break: keep-all;">
+        📖 Compass Devotional Studio · 오직 십자가 은혜와 자기 부인
     </div>
+</div>
+
+<!-- 모바일 최적화 본문 원고 -->
+<div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 800px; margin: 0 auto;">
+    ${formattedParagraphs}
+</div>
+
+<!-- 하단 푸터 카드 -->
+<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-top: 40px; text-align: center; font-size: 14px; color: #64748b;">
+    본 묵상 원고는 <strong>Compass AI Devotional Studio</strong>를 통해 저작되었습니다.<br>
+    오직 예수 그리스도의 십자가 은혜만을 증거합니다.
 </div>
 `;
             navigator.clipboard.writeText(htmlCode).then(() => {
                 const btn = document.getElementById('copyHtmlBtn');
-                btn.innerText = '✅ 모바일 HTML 복사 완료!';
+                btn.innerText = '✅ 본문 전체 HTML 복사 완료!';
                 setTimeout(() => btn.innerText = '📱 모바일 HTML 복사', 2000);
             });
         }
