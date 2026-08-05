@@ -346,13 +346,14 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집 내용 이미지"
             draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
 
-        file_name = f"studio_img_{int(time.time())}_{index_num}.png"
-        file_path = os.path.join(static_gen_dir, file_name)
-        img.save(file_path, 'PNG')
-        return f"/static/generated_images/{file_name}"
+        import io, base64
+        buffer = io.BytesIO()
+        img.save(buffer, format='PNG')
+        img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        return f"data:image/png;base64,{img_str}"
     except Exception as img_err:
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
-        return "/static/default_banner.png"
+        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 
 ROMANS_FIXED_TOPICS = {
     104: {

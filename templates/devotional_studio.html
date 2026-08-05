@@ -800,6 +800,17 @@
             }
         }
 
+        function downloadStudioImage(index) {
+            if (!currentGeneratedImages[index]) return;
+            const imgData = currentGeneratedImages[index];
+            const a = document.createElement('a');
+            a.href = imgData;
+            a.download = `sermon_image_${index + 1}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         function renderGallery(images) {
             const grid = document.getElementById('galleryGrid');
             document.getElementById('galleryCount').innerText = images.length;
@@ -813,7 +824,7 @@
                 <div class="gallery-item">
                     <img src="${imgUrl}" alt="AI 생성 이미지 ${idx+1}">
                     <div class="download-overlay">
-                        <a href="${imgUrl}" download="sermon_image_${idx+1}.png" class="download-btn">📥 다운로드</a>
+                        <button onclick="downloadStudioImage(${idx})" class="download-btn" style="cursor:pointer; border:none;">📥 고화질 다운로드</button>
                     </div>
                 </div>
             `).join('');
