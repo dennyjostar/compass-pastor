@@ -520,9 +520,12 @@
 
                 <!-- 생성된 이미지 갤러리 -->
                 <div class="image-gallery-section">
-                    <h3 style="font-size: 14px; color: var(--gold-light); font-weight: 700; margin-bottom: 8px;">
-                        🖼️ 생성된 AI 이미지 갤러리 (<span id="galleryCount">0</span>장)
-                    </h3>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <h3 style="font-size: 14px; color: var(--gold-light); font-weight: 700; margin: 0;">
+                            🖼️ 생성된 AI 이미지 갤러리 (<span id="galleryCount">0</span>장)
+                        </h3>
+                        <button class="tool-btn tool-btn-gold" id="regenImgBtn" onclick="regenerateImagesOnly()" style="padding: 5px 12px; font-size: 12px;">🎨 이미지만 새로 생성하기</button>
+                    </div>
                     <div id="galleryGrid" class="gallery-grid">
                         <div style="font-size: 12px; color: var(--text-sub); grid-column: 1/-1;">원고 생성 시 선택한 개수와 화풍 스타일대로 이미지가 이곳에 표시됩니다.</div>
                     </div>
@@ -809,6 +812,57 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        }
+
+        async function regenerateImagesOnly() {
+            if (!currentGeneratedContent) {
+                alert("먼저 원고를 생성해 주세요!");
+                return;
+            }
+
+            const category = document.getElementById('bookOrCategory').value || "로마서";
+            const num = document.getElementById('lectureNum').value || "104";
+            const title = document.getElementById('titleInput').value || "故 김성수 목사 묵상";
+            const summary = document.getElementById('summaryInput').value || "";
+            const imageCount = document.getElementById('imageCountSelect').value;
+            const imageStyle = document.getElementById('imageStyleSelect').value;
+
+            const btn = document.getElementById('regenImgBtn');
+            const grid = document.getElementById('galleryGrid');
+
+            btn.disabled = true;
+            btn.innerText = '🎨 이미지만 새로 생성 중...';
+            grid.innerHTML = `<div style="font-size: 13px; color: var(--gold-light); grid-column: 1/-1; text-align: center; padding: 20px;">🎨 이미지를 새로 렌더링하고 있습니다...</div>`;
+
+            try {
+                const res = await fetch('/api/studio/regenerate-images', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        category, num, title, summary,
+                        imageCount: parseInt(imageCount),
+                        imageStyle
+                    })
+                });
+
+                const data = await res.json();
+                if (data.images && data.images.length > 0) {
+                    currentGeneratedImages = data.images;
+                    renderGallery(currentGeneratedImages);
+                    btn.innerText = '✅ 이미지 재생성 완료!';
+                    setTimeout(() => btn.innerText = '🎨 이미지만 새로 생성하기', 2000);
+                } else {
+                    alert("이미지 재생성 실패: " + (data.error || "다시 시도해주세요"));
+                    renderGallery(currentGeneratedImages);
+                    btn.innerText = '🎨 이미지만 새로 생성하기';
+                }
+            } catch (err) {
+                alert("이미지 재생성 중 오류: " + err);
+                renderGallery(currentGeneratedImages);
+                btn.innerText = '🎨 이미지만 새로 생성하기';
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         function renderGallery(images) {

@@ -607,6 +607,32 @@ def get_studio_task_status(task_id):
         return jsonify({'status': 'error', 'error': '작업을 찾을 수 없습니다.'}), 404
     return jsonify(task)
 
+@app.route('/api/studio/regenerate-images', methods=['POST'])
+def regenerate_studio_images():
+    """원고 텍스트는 건드리지 않고 이미지만 새로 단독 생성"""
+    try:
+        data = request.json or {}
+        category = data.get('category', '로마서')
+        num = data.get('num', '104')
+        title = data.get('title', '원고 제목')
+        summary = data.get('summary', '')
+        image_count = int(data.get('imageCount', 3))
+        image_style = data.get('imageStyle', '고전유화')
+
+        generated_images = []
+        for i in range(1, image_count + 1):
+            try:
+                img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
+                generated_images.append(img_url)
+            except Exception as img_e:
+                print(f"[REGEN IMAGE ERROR] {img_e}")
+                generated_images.append("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+
+        return jsonify({'images': generated_images})
+    except Exception as e:
+        print(f"[REGEN IMAGES API ERROR] {e}")
+        return jsonify({"error": str(e)}), 200
+
 
 
 
