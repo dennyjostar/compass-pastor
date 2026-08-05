@@ -203,69 +203,130 @@ def get_romans_lecture_detail(lecture_id):
 def devotional_studio():
     return render_template('devotional_studio.html')
 
-def create_studio_image(title, category, style_name, index_num):
-    """지정한 화풍 스타일과 제목으로 고해상도 묵상집 이미지를 생성"""
+def create_studio_image(title, category, style_name, index_num, total_count=3, num="104", summary=""):
+    """
+    index_num == 1: [첫머리] 블로그 대표 썸네일 카드 이미지
+    index_num == total_count (total_count > 1): [맨 마지막] Compass 앱 홍보 & 맺음 하단 배너 카드 이미지
+    중간 index_num: [본문 중간] 선택 화풍 스타일(유화/수채화/실사/일러스트) 삽화 이미지
+    """
     try:
         from PIL import Image, ImageDraw, ImageFont
-        import random
+        import random, time
 
         static_gen_dir = os.path.join(os.path.dirname(__file__), 'static', 'generated_images')
         os.makedirs(static_gen_dir, exist_ok=True)
 
         width, height = 1200, 675
-        
-        # 화풍별 컬러 펠레트 및 그래픽 스타일
-        styles_map = {
-            "고전유화": {"bg_gradient": ("#0f141f", "#1e160a"), "accent": "#c9a84c", "border": "#8b6e32", "text": "#ffffff", "tag": "🎨 고전 명화 스타일"},
-            "수채화": {"bg_gradient": ("#f7f4ed", "#e6ded1"), "accent": "#5a4020", "border": "#c9a84c", "text": "#1a0f00", "tag": "🖌️ 감성 수채화 스타일"},
-            "시네마틱실사": {"bg_gradient": ("#070b12", "#0f172a"), "accent": "#60a5fa", "border": "#3b82f6", "text": "#ffffff", "tag": "📸 시네마틱 실사"},
-            "현대일러스트": {"bg_gradient": ("#18181b", "#27272a"), "accent": "#f43f5e", "border": "#fb7185", "text": "#ffffff", "tag": "✒️ 현대 일러스트"},
-            "모바일배너": {"bg_gradient": ("#0d1220", "#171f33"), "accent": "#c9a84c", "border": "#fce38a", "text": "#ffffff", "tag": "📱 모바일 카드 배너"}
-        }
-
-        s = styles_map.get(style_name, styles_map["고전유화"])
-        img = Image.new('RGB', (width, height), color=s["bg_gradient"][0])
-        draw = ImageDraw.Draw(img)
-
-        # 폰트 경로 획득
         font_path = 'C:/Windows/Fonts/malgunbd.ttf'
         if not os.path.exists(font_path):
             font_path = 'C:/Windows/Fonts/malgun.ttf'
 
-        font_tag = ImageFont.truetype(font_path, 24)
-        font_title = ImageFont.truetype(font_path, 44)
-        font_sub = ImageFont.truetype(font_path, 28)
+        if index_num == 1:
+            # ── 1. 첫머리 대표 썸네일 카드 이미지 ──
+            img = Image.new('RGB', (width, height), color='#0d1220')
+            draw = ImageDraw.Draw(img)
 
-        # 외곽 테두리 렌더링
-        draw.rounded_rectangle([30, 30, width-30, height-30], radius=20, fill=s["bg_gradient"][1], outline=s["border"], width=3)
+            font_badge = ImageFont.truetype(font_path, 26)
+            font_title = ImageFont.truetype(font_path, 48)
+            font_desc = ImageFont.truetype(font_path, 26)
+            font_footer = ImageFont.truetype(font_path, 25)
 
-        # 태그 뱃지
-        badge_text = f" {s['tag']} #{index_num} "
-        draw.rounded_rectangle([60, 60, 360, 110], radius=12, fill=s["accent"], outline=None)
-        draw.text((75, 72), badge_text, fill="#0d1220" if s["accent"]=="#c9a84c" else "#ffffff", font=font_tag)
+            draw.rounded_rectangle([36, 36, width-36, height-36], radius=22, fill='#131b2e', outline='#c9a84c', width=4)
 
-        # 타이틀
-        draw.text((60, 150), f"[{category}]", fill=s["accent"], font=font_sub)
-        
-        # 제목 줄바꿈 처리
-        if len(title) > 20:
-            t1 = title[:20]
-            t2 = title[20:]
-            draw.text((60, 210), t1, fill=s["text"], font=font_title)
-            draw.text((60, 270), t2, fill=s["text"], font=font_title)
+            badge_text = f" {category} {num}강 · 故 김성수 목사 묵상집 "
+            draw.rounded_rectangle([75, 75, 560, 130], radius=14, fill='#2a2110', outline='#c9a84c', width=2)
+            draw.text((92, 85), badge_text, fill='#fce38a', font=font_badge)
+
+            display_title = title if title else f"{category} {num}강 강해 아카이브"
+            if len(display_title) > 22:
+                draw.text((75, 155), display_title[:22], fill='#ffffff', font=font_title)
+                draw.text((75, 215), display_title[22:], fill='#ffffff', font=font_title)
+            else:
+                draw.text((75, 165), display_title, fill='#ffffff', font=font_title)
+
+            desc1 = f"故 김성수 목사님의 십자가 복음 신학 체계와 기존 설교 데이터베이스를 바탕으로"
+            desc2 = f"AI가 {category} {num}강 본문을 깊이 있는 묵상 원고로 재구성한 아카이브입니다."
+            desc3 = f"인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도의 은혜만을 의지하게 합니다."
+
+            draw.text((75, 290), desc1, fill='#e8ded0', font=font_desc)
+            draw.text((75, 335), desc2, fill='#e8ded0', font=font_desc)
+            draw.text((75, 380), desc3, fill='#e8ded0', font=font_desc)
+
+            draw.line([(75, 465), (width-75, 465)], fill='#3a301d', width=2)
+            footer_text = f"📖 Compass AI Studio  •  오직 십자가 은혜와 약속의 자녀"
+            draw.text((75, 500), footer_text, fill='#fce38a', font=font_footer)
+
+        elif index_num == total_count and total_count > 1:
+            # ── 3. 맨 마지막 맺음말 & Compass 앱 홍보 하단 배너 카드 ──
+            img = Image.new('RGB', (width, height), color='#0a0e17')
+            draw = ImageDraw.Draw(img)
+
+            font_badge = ImageFont.truetype(font_path, 26)
+            font_title = ImageFont.truetype(font_path, 44)
+            font_desc = ImageFont.truetype(font_path, 28)
+            font_btn = ImageFont.truetype(font_path, 30)
+
+            # 테두리
+            draw.rounded_rectangle([36, 36, width-36, height-36], radius=24, fill='#111827', outline='#60a5fa', width=3)
+
+            # 상단 뱃지
+            badge_text = " ✦ COMPASS AI DEVOTIONAL APP ✦ "
+            draw.rounded_rectangle([75, 75, 540, 130], radius=14, fill='#1e293b', outline='#60a5fa', width=2)
+            draw.text((92, 85), badge_text, fill='#93c5fd', font=font_badge)
+
+            # 큰 타이틀
+            draw.text((75, 160), "Compass(나침반) — AI 영적 상담 & 묵상", fill='#ffffff', font=font_title)
+
+            # 설명
+            p1 = "인간의 전적 타락과 무능력을 고백하고 오직 십자가 은혜만을 의지하도록 돕습니다."
+            p2 = "말씀 강해 · 기도문 생성 · 故 김성수 목사 AI 묵상집을 Compass 앱에서 바로 만나보세요."
+            draw.text((75, 250), p1, fill='#d1d5db', font=font_desc)
+            draw.text((75, 300), p2, fill='#d1d5db', font=font_desc)
+
+            # 앱 바로가기 버튼 박스
+            draw.rounded_rectangle([75, 400, 520, 480], radius=20, fill='#c9a84c', outline='#fce38a', width=2)
+            draw.text((105, 420), "📱 Compass 앱 바로가기 ➔", fill='#0d1220', font=font_btn)
+
+            # 하단 서명
+            draw.text((75, 530), "https://web-production-1ffb5.up.railway.app/", fill='#93c5fd', font=font_desc)
+
         else:
-            draw.text((60, 210), title, fill=s["text"], font=font_title)
+            # ── 2. 중간 본문 삽화 이미지 (선택 화풍) ──
+            styles_map = {
+                "고전유화": {"bg": ("#0a0e17", "#1c140a"), "accent": "#c9a84c", "border": "#8b6e32", "text": "#ffffff", "tag": "🎨 고전 명화 스타일"},
+                "수채화": {"bg": ("#f7f4ed", "#e6ded1"), "accent": "#5a4020", "border": "#c9a84c", "text": "#1a0f00", "tag": "🖌️ 감성 수채화 스타일"},
+                "시네마틱실사": {"bg": ("#070b12", "#0f172a"), "accent": "#60a5fa", "border": "#3b82f6", "text": "#ffffff", "tag": "📸 시네마틱 실사"},
+                "현대일러스트": {"bg": ("#18181b", "#27272a"), "accent": "#f43f5e", "border": "#fb7185", "text": "#ffffff", "tag": "✒️ 현대 일러스트"},
+                "모바일배너": {"bg": ("#0d1220", "#171f33"), "accent": "#c9a84c", "border": "#fce38a", "text": "#ffffff", "tag": "📱 모바일 카드 배너"}
+            }
 
-        # 하단 문구
-        footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집"
-        draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
+            s = styles_map.get(style_name, styles_map["고전유화"])
+            img = Image.new('RGB', (width, height), color=s["bg"][0])
+            draw = ImageDraw.Draw(img)
+
+            font_tag = ImageFont.truetype(font_path, 24)
+            font_title = ImageFont.truetype(font_path, 40)
+            font_sub = ImageFont.truetype(font_path, 26)
+
+            draw.rounded_rectangle([30, 30, width-30, height-30], radius=20, fill=s["bg"][1], outline=s["border"], width=3)
+
+            badge_text = f" {s['tag']} 본문 삽화 #{index_num-1} "
+            draw.rounded_rectangle([60, 60, 420, 110], radius=12, fill=s["accent"], outline=None)
+            draw.text((75, 72), badge_text, fill="#0d1220" if s["accent"]=="#c9a84c" else "#ffffff", font=font_tag)
+
+            draw.text((60, 150), f"[{category} {num}강]", fill=s["accent"], font=font_sub)
+            draw.text((60, 210), title[:22] if len(title)>22 else title, fill=s["text"], font=font_title)
+
+            footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집 삽화"
+            draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
 
         file_name = f"studio_img_{int(time.time())}_{index_num}.png"
         file_path = os.path.join(static_gen_dir, file_name)
         img.save(file_path, 'PNG')
-        
         return f"/static/generated_images/{file_name}"
     except Exception as img_err:
+        print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
+        return "/static/default_banner.png"
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
         return "/static/default_banner.png"
 
@@ -353,10 +414,10 @@ def generate_studio_devotional():
         # Gemini API를 이용한 원고 생성
         content = generate_with_gemini(system_instruction, user_prompt)
 
-        # 요청한 개수 및 스타일대로 이미지 생성
+        # 요청한 개수 및 스타일대로 이미지 생성 (1번: 첫머리 썸네일 카드, 중간: 본문 삽화, N번: 맺음말 홍보 카드)
         generated_images = []
         for i in range(1, image_count + 1):
-            img_url = create_studio_image(title, category, image_style, i)
+            img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
             generated_images.append(img_url)
 
         return jsonify({
