@@ -342,8 +342,6 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
     except Exception as img_err:
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
         return "/static/default_banner.png"
-        print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
-        return "/static/default_banner.png"
 
 ROMANS_FIXED_TOPICS = {
     104: {
@@ -542,11 +540,15 @@ def generate_studio_devotional():
         # Gemini API를 이용한 원고 생성
         content = generate_with_gemini(system_instruction, user_prompt)
 
-        # 요청한 개수 및 스타일대로 이미지 생성 (1번: 첫머리 썸네일 카드, 중간: 본문 삽화, N번: 맺음말 홍보 카드)
+        # 요청한 개수 및 스타일대로 이미지 안전 생성 (오류 발생 시 기본 이미지로 폴백)
         generated_images = []
         for i in range(1, image_count + 1):
-            img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
-            generated_images.append(img_url)
+            try:
+                img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
+                generated_images.append(img_url)
+            except Exception as img_e:
+                print(f"[IMAGE LOOP ERROR] {img_e}")
+                generated_images.append("/static/default_banner.png")
 
         return jsonify({
             "content": content,
@@ -556,7 +558,7 @@ def generate_studio_devotional():
 
     except Exception as e:
         print(f"[STUDIO GENERATE ERROR] {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"원고 생성 중 서버 예외가 발생했습니다: {str(e)}"}), 200
 
 
 

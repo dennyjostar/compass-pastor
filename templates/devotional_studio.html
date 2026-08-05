@@ -734,18 +734,18 @@
                     })
                 });
 
-                if (!res.ok) {
+                let data;
+                try {
+                    data = await res.json();
+                } catch(pe) {
                     stopTimerProgress(false);
-                    const errText = await res.text();
-                    alert("서버 응답 오류 (Status " + res.status + "): 잠시 후 다시 시도해 주세요.");
+                    alert("서버 연결에 일시적인 지연이 발생했습니다. 잠시 후 다시 생성 버튼을 눌러주세요.");
                     return;
                 }
 
-                const data = await res.json();
-
                 if (data.error) {
                     stopTimerProgress(false);
-                    alert("원고 생성 오류: " + data.error);
+                    alert("생성 안내: " + data.error);
                     return;
                 }
 
