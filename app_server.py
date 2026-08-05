@@ -209,6 +209,31 @@ def get_romans_lecture_detail(lecture_id):
 def devotional_studio():
     return render_template('devotional_studio.html')
 
+@app.route('/api/studio/next-num', methods=['POST'])
+def get_next_lecture_num():
+    """성경책 및 아카이브 DB를 확인하여 작성할 다음 회차 번호를 자동 반환"""
+    try:
+        data = request.json or {}
+        category = data.get('category', '로마서')
+
+        if '로마서' in category:
+            db_path = os.path.join(os.path.dirname(__file__), 'romans_archive_db.json')
+            if os.path.exists(db_path):
+                with open(db_path, 'r', encoding='utf-8') as f:
+                    lectures = json.load(f)
+                    # blog_url이 연결되었거나 기존 회차 중 마지막 회차 추적
+                    posted_ids = [l['id'] for l in lectures if l.get('blog_url')]
+                    if posted_ids:
+                        return jsonify({"nextNum": max(posted_ids) + 1})
+                    else:
+                        return jsonify({"nextNum": 104})
+            return jsonify({"nextNum": 104})
+
+        return jsonify({"nextNum": 1})
+    except Exception as e:
+        print(f"[NEXT NUM API ERROR] {e}")
+        return jsonify({"nextNum": 104})
+
 def create_studio_image(title, category, style_name, index_num, total_count=3, num="104", summary=""):
     """
     index_num == 1: [대표 썸네일 카드] 블로그 글 첫머리 대표 카드 이미지

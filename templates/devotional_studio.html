@@ -411,13 +411,13 @@
                 <!-- 2. 성경책/카테고리 세부 이름 -->
                 <div class="form-group">
                     <label class="form-label" for="bookOrCategory">성경책 / 분류 이름</label>
-                    <input type="text" id="bookOrCategory" class="form-control" placeholder="예: 로마서, 요한복음, 신앙수필 등" value="로마서">
+                    <input type="text" id="bookOrCategory" class="form-control" placeholder="예: 로마서, 요한복음, 신앙수필 등" value="로마서" onchange="fetchNextNum()">
                 </div>
 
                 <!-- 3. 회차 / 제목 -->
                 <div class="form-group">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <label class="form-label" for="lectureNum" style="margin-bottom:0;">강해 회차 / 편수</label>
+                        <label class="form-label" id="labelNum" for="lectureNum" style="margin-bottom:0;">강해 회차 / 편수</label>
                         <button type="button" class="tool-btn tool-btn-gold" onclick="suggestTopic()" style="padding: 4px 10px; font-size: 12px;">🎲 AI 주제 자동 추천</button>
                     </div>
                     <input type="number" id="lectureNum" class="form-control" value="104" placeholder="예: 104" onchange="suggestTopic()">
@@ -532,19 +532,49 @@
             document.getElementById('charCountLabel').innerText = parseInt(val).toLocaleString() + '자';
         }
 
+        async function fetchNextNum() {
+            const category = document.getElementById('bookOrCategory').value || '로마서';
+            try {
+                const res = await fetch('/api/studio/next-num', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ category })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.nextNum) {
+                        document.getElementById('lectureNum').value = data.nextNum;
+                    }
+                }
+            } catch (e) {
+                console.log("Next num error", e);
+            }
+        }
+
         function toggleGenreInput() {
             const genre = document.getElementById('genreSelect').value;
             const bookInput = document.getElementById('bookOrCategory');
+            const labelNum = document.getElementById('labelNum');
+            
             if (genre === '성경강해') {
                 bookInput.value = '로마서';
+                if (labelNum) labelNum.innerText = '강해 회차 / 편수';
             } else if (genre === '신앙수필') {
                 bookInput.value = '신앙 수필집';
+                if (labelNum) labelNum.innerText = '수필 회차 / 편수';
             } else if (genre === '신학칼럼') {
                 bookInput.value = '신학 칼럼';
+                if (labelNum) labelNum.innerText = '칼럼 회차 / 편수';
             } else {
                 bookInput.value = '자유 카테고리';
+                if (labelNum) labelNum.innerText = '회차 / 편수';
             }
+            fetchNextNum();
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchNextNum();
+        });
 
         async function suggestTopic() {
             const category = document.getElementById('bookOrCategory').value || '로마서';
