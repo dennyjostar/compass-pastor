@@ -703,6 +703,8 @@
             }
         }
 
+        let pollingInterval = null;
+
         async function generateDevotional() {
             const genre = document.getElementById('genreSelect').value;
             const category = document.getElementById('bookOrCategory').value;
@@ -715,6 +717,11 @@
 
             if (!title) {
                 title = `${category} ${num}강 | 하나님의 주권과 은혜`;
+            }
+
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
             }
 
             // 실시간 타이머 & 프로그레스 바 시작
@@ -734,34 +741,60 @@
                     })
                 });
 
-                let data;
-                try {
-                    data = await res.json();
-                } catch(pe) {
+                const initData = await res.json();
+                if (initData.error || !initData.taskId) {
                     stopTimerProgress(false);
-                    alert("서버 연결에 일시적인 지연이 발생했습니다. 잠시 후 다시 생성 버튼을 눌러주세요.");
+                    alert("생성 안내: " + (initData.error || "작업 요청 실패"));
+                    document.getElementById('loadingBox').style.display = 'none';
+                    document.getElementById('outputContent').style.display = 'block';
                     return;
                 }
 
-                if (data.error) {
-                    stopTimerProgress(false);
-                    alert("생성 안내: " + data.error);
-                    return;
-                }
+                const taskId = initData.taskId;
 
-                stopTimerProgress(true);
+                // 1.5초 간격으로 백그라운드 태스크 폴링 (타임아웃 100% 회피)
+                pollingInterval = setInterval(async () => {
+                    try {
+                        const statusRes = await fetch(`/api/studio/task-status/${taskId}`);
+                        if (!statusRes.ok) return;
 
-                currentGeneratedContent = data.content;
-                currentGeneratedImages = data.images || [];
+                        const taskData = await statusRes.json();
+                        
+                        if (taskData.step) {
+                            const stepDetail = document.getElementById('stepDetail');
+                            if (stepDetail) stepDetail.innerText = taskData.step;
+                        }
 
-                // 화면 렌더링
-                document.getElementById('outputContent').innerText = currentGeneratedContent;
-                renderGallery(currentGeneratedImages);
+                        if (taskData.status === 'completed') {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+
+                            stopTimerProgress(true);
+                            currentGeneratedContent = taskData.content;
+                            currentGeneratedImages = taskData.images || [];
+
+                            document.getElementById('outputContent').innerText = currentGeneratedContent;
+                            renderGallery(currentGeneratedImages);
+
+                            document.getElementById('loadingBox').style.display = 'none';
+                            document.getElementById('outputContent').style.display = 'block';
+                        } else if (taskData.status === 'error') {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+
+                            stopTimerProgress(false);
+                            alert("생성 중 오류: " + taskData.error);
+                            document.getElementById('loadingBox').style.display = 'none';
+                            document.getElementById('outputContent').style.display = 'block';
+                        }
+                    } catch (pollErr) {
+                        console.log("Polling error", pollErr);
+                    }
+                }, 1500);
 
             } catch (err) {
                 stopTimerProgress(false);
-                alert("생성 실패: " + err);
-            } finally {
+                alert("생성 요청 실패: " + err);
                 document.getElementById('loadingBox').style.display = 'none';
                 document.getElementById('outputContent').style.display = 'block';
             }

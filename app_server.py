@@ -497,10 +497,13 @@ def suggest_studio_topic():
             "summary": "인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도만을 의지하는 진리의 묵상"
         })
 
-@app.route('/api/studio/generate-text', methods=['POST'])
-def generate_studio_devotional():
+import uuid
+import threading
+
+STUDIO_TASKS = {}
+
+def bg_generate_devotional(task_id, data):
     try:
-        data = request.json or {}
         genre = data.get('genre', '성경강해')
         category = data.get('category', '로마서')
         num = data.get('num', '104')
@@ -510,7 +513,8 @@ def generate_studio_devotional():
         image_count = int(data.get('imageCount', 3))
         image_style = data.get('imageStyle', '고전유화')
 
-        # 시스템 지침 및 김성수 목사 페르소나
+        STUDIO_TASKS[task_id]['step'] = f'Gemini 3.6 Flash AI가 십자가 원고 작성 중... ({target_char_count:,}자 분량)'
+
         system_instruction = f"""당신은 故 김성수 목사님(서머나교회)의 신학 체계와 설교 문체를 바탕으로 묵상집 원고를 저작하는 전문 신학 작가입니다.
 
 [신학 핵심 및 어조]
@@ -548,10 +552,9 @@ def generate_studio_devotional():
 
 ※ 다시 한번 강조: 본문의 모든 헬라어/히브리어/아람어 구절에는 반드시 (한글 발음 - 한글 의미)를 꼭 함께 표시하라."""
 
-        # Gemini API를 이용한 원고 생성
         content = generate_with_gemini(system_instruction, user_prompt)
 
-        # 요청한 개수 및 스타일대로 이미지 안전 생성 (오류 발생 시 기본 이미지로 폴백)
+        STUDIO_TASKS[task_id]['step'] = f'대표 썸네일 카드 및 본문 이미지({image_count}장) 생성 중...'
         generated_images = []
         for i in range(1, image_count + 1):
             try:
@@ -561,15 +564,45 @@ def generate_studio_devotional():
                 print(f"[IMAGE LOOP ERROR] {img_e}")
                 generated_images.append("/static/default_banner.png")
 
-        return jsonify({
-            "content": content,
-            "images": generated_images,
-            "charCount": len(content)
-        })
+        STUDIO_TASKS[task_id]['status'] = 'completed'
+        STUDIO_TASKS[task_id]['content'] = content
+        STUDIO_TASKS[task_id]['images'] = generated_images
+        STUDIO_TASKS[task_id]['charCount'] = len(content)
 
     except Exception as e:
-        print(f"[STUDIO GENERATE ERROR] {e}")
-        return jsonify({"error": f"원고 생성 중 서버 예외가 발생했습니다: {str(e)}"}), 200
+        print(f"[BG TASK ERROR] {e}")
+        STUDIO_TASKS[task_id]['status'] = 'error'
+        STUDIO_TASKS[task_id]['error'] = str(e)
+
+@app.route('/api/studio/generate-text', methods=['POST'])
+def generate_studio_devotional():
+    try:
+        task_id = str(uuid.uuid4())
+        data = request.json or {}
+
+        STUDIO_TASKS[task_id] = {
+            'status': 'processing',
+            'step': 'AI 기획 및 원고 준비 중...',
+            'content': '',
+            'images': [],
+            'error': ''
+        }
+
+        t = threading.Thread(target=bg_generate_devotional, args=(task_id, data))
+        t.daemon = True
+        t.start()
+
+        return jsonify({'taskId': task_id})
+    except Exception as e:
+        print(f"[STUDIO GENERATE INIT ERROR] {e}")
+        return jsonify({"error": str(e)}), 200
+
+@app.route('/api/studio/task-status/<task_id>', methods=['GET'])
+def get_studio_task_status(task_id):
+    task = STUDIO_TASKS.get(task_id)
+    if not task:
+        return jsonify({'status': 'error', 'error': '작업을 찾을 수 없습니다.'}), 404
+    return jsonify(task)
 
 
 
