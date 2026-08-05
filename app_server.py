@@ -205,9 +205,8 @@ def devotional_studio():
 
 def create_studio_image(title, category, style_name, index_num, total_count=3, num="104", summary=""):
     """
-    index_num == 1: [첫머리] 블로그 대표 썸네일 카드 이미지
-    index_num == total_count (total_count > 1): [맨 마지막] Compass 앱 홍보 & 맺음 하단 배너 카드 이미지
-    중간 index_num: [본문 중간] 선택 화풍 스타일(유화/수채화/실사/일러스트) 삽화 이미지
+    index_num == 1: [대표 썸네일 카드] 블로그 글 첫머리 대표 카드 이미지
+    index_num >= 2: [내용 이미지] 지정 화풍 스타일(유화/수채화/실사/일러스트) 본문 삽화 이미지
     """
     try:
         from PIL import Image, ImageDraw, ImageFont
@@ -222,7 +221,7 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             font_path = 'C:/Windows/Fonts/malgun.ttf'
 
         if index_num == 1:
-            # ── 1. 첫머리 대표 썸네일 카드 이미지 ──
+            # ── 1. 대표 썸네일 카드 이미지 ──
             img = Image.new('RGB', (width, height), color='#0d1220')
             draw = ImageDraw.Draw(img)
 
@@ -256,42 +255,8 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             footer_text = f"📖 Compass AI Studio  •  오직 십자가 은혜와 약속의 자녀"
             draw.text((75, 500), footer_text, fill='#fce38a', font=font_footer)
 
-        elif index_num == total_count and total_count > 1:
-            # ── 3. 맨 마지막 맺음말 & Compass 앱 홍보 하단 배너 카드 ──
-            img = Image.new('RGB', (width, height), color='#0a0e17')
-            draw = ImageDraw.Draw(img)
-
-            font_badge = ImageFont.truetype(font_path, 26)
-            font_title = ImageFont.truetype(font_path, 44)
-            font_desc = ImageFont.truetype(font_path, 28)
-            font_btn = ImageFont.truetype(font_path, 30)
-
-            # 테두리
-            draw.rounded_rectangle([36, 36, width-36, height-36], radius=24, fill='#111827', outline='#60a5fa', width=3)
-
-            # 상단 뱃지
-            badge_text = " ✦ COMPASS AI DEVOTIONAL APP ✦ "
-            draw.rounded_rectangle([75, 75, 540, 130], radius=14, fill='#1e293b', outline='#60a5fa', width=2)
-            draw.text((92, 85), badge_text, fill='#93c5fd', font=font_badge)
-
-            # 큰 타이틀
-            draw.text((75, 160), "Compass(나침반) — AI 영적 상담 & 묵상", fill='#ffffff', font=font_title)
-
-            # 설명
-            p1 = "인간의 전적 타락과 무능력을 고백하고 오직 십자가 은혜만을 의지하도록 돕습니다."
-            p2 = "말씀 강해 · 기도문 생성 · 故 김성수 목사 AI 묵상집을 Compass 앱에서 바로 만나보세요."
-            draw.text((75, 250), p1, fill='#d1d5db', font=font_desc)
-            draw.text((75, 300), p2, fill='#d1d5db', font=font_desc)
-
-            # 앱 바로가기 버튼 박스
-            draw.rounded_rectangle([75, 400, 520, 480], radius=20, fill='#c9a84c', outline='#fce38a', width=2)
-            draw.text((105, 420), "📱 Compass 앱 바로가기 ➔", fill='#0d1220', font=font_btn)
-
-            # 하단 서명
-            draw.text((75, 530), "https://web-production-1ffb5.up.railway.app/", fill='#93c5fd', font=font_desc)
-
         else:
-            # ── 2. 중간 본문 삽화 이미지 (선택 화풍) ──
+            # ── 2. 본문 내용 이미지 (선택 화풍 스타일) ──
             styles_map = {
                 "고전유화": {"bg": ("#0a0e17", "#1c140a"), "accent": "#c9a84c", "border": "#8b6e32", "text": "#ffffff", "tag": "🎨 고전 명화 스타일"},
                 "수채화": {"bg": ("#f7f4ed", "#e6ded1"), "accent": "#5a4020", "border": "#c9a84c", "text": "#1a0f00", "tag": "🖌️ 감성 수채화 스타일"},
@@ -310,14 +275,14 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
 
             draw.rounded_rectangle([30, 30, width-30, height-30], radius=20, fill=s["bg"][1], outline=s["border"], width=3)
 
-            badge_text = f" {s['tag']} 본문 삽화 #{index_num-1} "
+            badge_text = f" {s['tag']} 본문 내용 이미지 #{index_num-1} "
             draw.rounded_rectangle([60, 60, 420, 110], radius=12, fill=s["accent"], outline=None)
             draw.text((75, 72), badge_text, fill="#0d1220" if s["accent"]=="#c9a84c" else "#ffffff", font=font_tag)
 
             draw.text((60, 150), f"[{category} {num}강]", fill=s["accent"], font=font_sub)
             draw.text((60, 210), title[:22] if len(title)>22 else title, fill=s["text"], font=font_title)
 
-            footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집 삽화"
+            footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집 내용 이미지"
             draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
 
         file_name = f"studio_img_{int(time.time())}_{index_num}.png"
