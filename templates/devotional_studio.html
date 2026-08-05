@@ -563,9 +563,14 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ category, num, genre })
                 });
-                const data = await res.json();
-                if (data.title) titleInput.value = data.title;
-                if (data.summary) summaryInput.value = data.summary;
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.title) titleInput.value = data.title;
+                    if (data.summary) summaryInput.value = data.summary;
+                } else {
+                    titleInput.value = `${category} ${num}강 | 토기장이의 주권과 하나님의 열심`;
+                    summaryInput.value = `인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도를 의지하는 묵상`;
+                }
             } catch (err) {
                 titleInput.value = `${category} ${num}강 | 하나님의 주권과 십자가 은혜`;
                 summaryInput.value = `인간의 전적 타락과 무능력을 폭로하고 오직 십자가 복음을 붙드는 신학적 묵상`;
@@ -655,11 +660,18 @@
                     })
                 });
 
+                if (!res.ok) {
+                    stopTimerProgress(false);
+                    const errText = await res.text();
+                    alert("서버 응답 오류 (Status " + res.status + "): 잠시 후 다시 시도해 주세요.");
+                    return;
+                }
+
                 const data = await res.json();
 
                 if (data.error) {
                     stopTimerProgress(false);
-                    alert("오류 발생: " + data.error);
+                    alert("원고 생성 오류: " + data.error);
                     return;
                 }
 
