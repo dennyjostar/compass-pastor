@@ -322,16 +322,19 @@
             text-decoration: none;
         }
 
-        /* 로딩 스피너 */
+        /* 로딩 스피너 및 프로그레스 바 UI */
         .loading-spinner {
             display: none;
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
+            background: rgba(18, 24, 38, 0.6);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
         }
 
         .spinner {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border: 4px solid rgba(201, 168, 76, 0.2);
             border-top-color: var(--accent-gold);
             border-radius: 50%;
@@ -339,8 +342,34 @@
             margin: 0 auto 16px;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 16px 0;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #c9a84c 0%, #fce38a 50%, #c9a84c 100%);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .timer-badge {
+            display: inline-block;
+            background: rgba(201, 168, 76, 0.15);
+            color: var(--gold-light);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
         }
     </style>
 </head>
@@ -455,11 +484,22 @@
                     </div>
                 </div>
 
-                <!-- 로딩 표시 -->
+                <!-- 실시간 다이내믹 로딩 표시 -->
                 <div id="loadingBox" class="loading-spinner">
+                    <div class="timer-badge">⏱️ 경과 시간: <span id="timerText">00:00</span></div>
                     <div class="spinner"></div>
-                    <h3 style="color: var(--gold-light); font-size: 18px; margin-bottom: 8px;">김성수 목사의 신학 체계로 원고 및 이미지 생성 중...</h3>
-                    <p style="color: var(--text-sub); font-size: 13px;">지정한 분량과 이미지 개수에 따라 30초~1분 정도 소요될 수 있습니다.</p>
+                    <h3 id="stepTitle" style="color: var(--gold-light); font-size: 18px; margin-bottom: 8px;">
+                        [1/4 단계] Gemini 3.6 Flash AI가 신학적 주제를 기획하는 중...
+                    </h3>
+                    
+                    <!-- 프로그레스 바 -->
+                    <div class="progress-bar-container">
+                        <div id="progressBarFill" class="progress-bar-fill"></div>
+                    </div>
+
+                    <p id="stepDetail" style="color: var(--text-sub); font-size: 13px;">
+                        선택하신 분량과 이미지 개수에 맞춰 AI 원고 작성과 썸네일 카드를 동시 제작 중입니다. (예상 30~50초)
+                    </p>
                 </div>
 
                 <!-- 원고 출력 박스 -->
@@ -532,6 +572,58 @@
             }
         }
 
+        let timerInterval = null;
+        let secondsElapsed = 0;
+
+        function startTimerProgress(targetCharCount, imageCount) {
+            secondsElapsed = 0;
+            const timerText = document.getElementById('timerText');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const stepTitle = document.getElementById('stepTitle');
+            const stepDetail = document.getElementById('stepDetail');
+
+            let estimatedSeconds = 30;
+            if (parseInt(targetCharCount) >= 15000) estimatedSeconds = 50;
+            if (parseInt(targetCharCount) >= 20000) estimatedSeconds = 65;
+
+            progressBarFill.style.width = '0%';
+            timerText.innerText = '00:00';
+
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerText.innerText = `${mins}:${secs}`;
+
+                let percent = Math.min(Math.floor((secondsElapsed / estimatedSeconds) * 95), 95);
+                progressBarFill.style.width = `${percent}%`;
+
+                if (secondsElapsed <= 6) {
+                    stepTitle.innerText = `[1/4 단계] Gemini 3.6 Flash AI가 성경 본문과 구속사 주제를 기획하는 중...`;
+                    stepDetail.innerText = `故 김성수 목사의 신학 체계(인간의 전적 파산, 자기 부인, 십자가 은혜)를 바탕으로 구조화하고 있습니다.`;
+                } else if (secondsElapsed <= 22) {
+                    stepTitle.innerText = `[2/4 단계] 설정하신 분량(${parseInt(targetCharCount).toLocaleString()}자)으로 십자가 원고 작성 중...`;
+                    stepDetail.innerText = `인본주의 종교성 폭로, 헬라어/히브리어 원어 강해, 성도의 자기 부인을 심층 작성 중입니다.`;
+                } else if (secondsElapsed <= 38) {
+                    stepTitle.innerText = `[3/4 단계] 대표 썸네일 카드 및 내용 이미지(${imageCount}장) 자동 생성 중...`;
+                    stepDetail.innerText = `선택하신 이미지 화풍 스타일로 고해상도 썸네일과 본문 삽화 이미지를 생성하고 있습니다.`;
+                } else {
+                    stepTitle.innerText = `[4/4 단계] 최종 묵상 원고 및 이미지 갤러리 정리 중...`;
+                    stepDetail.innerText = `곧 생성이 완료됩니다. 완성 후 텍스트 복사 및 다운로드가 가능합니다.`;
+                }
+            }, 1000);
+        }
+
+        function stopTimerProgress(isSuccess = true) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (isSuccess) {
+                document.getElementById('progressBarFill').style.width = '100%';
+            }
+        }
+
         async function generateDevotional() {
             const genre = document.getElementById('genreSelect').value;
             const category = document.getElementById('bookOrCategory').value;
@@ -546,7 +638,8 @@
                 title = `${category} ${num}강 | 하나님의 주권과 은혜`;
             }
 
-            // 로딩 시작
+            // 실시간 타이머 & 프로그레스 바 시작
+            startTimerProgress(targetCharCount, imageCount);
             document.getElementById('loadingBox').style.display = 'block';
             document.getElementById('outputContent').style.display = 'none';
 
@@ -565,9 +658,12 @@
                 const data = await res.json();
 
                 if (data.error) {
+                    stopTimerProgress(false);
                     alert("오류 발생: " + data.error);
                     return;
                 }
+
+                stopTimerProgress(true);
 
                 currentGeneratedContent = data.content;
                 currentGeneratedImages = data.images || [];
@@ -577,6 +673,7 @@
                 renderGallery(currentGeneratedImages);
 
             } catch (err) {
+                stopTimerProgress(false);
                 alert("생성 실패: " + err);
             } finally {
                 document.getElementById('loadingBox').style.display = 'none';
