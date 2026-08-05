@@ -244,7 +244,9 @@ def get_safe_font(size):
     font_obj = None
     try:
         from PIL import ImageFont
+        bundled_font = os.path.join(os.path.dirname(__file__), 'static', 'fonts', 'NanumGothic.ttf')
         font_paths = [
+            bundled_font,
             'C:/Windows/Fonts/malgunbd.ttf',
             'C:/Windows/Fonts/malgun.ttf',
             '/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf',
