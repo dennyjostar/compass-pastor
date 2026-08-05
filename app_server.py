@@ -234,6 +234,28 @@ def get_next_lecture_num():
         print(f"[NEXT NUM API ERROR] {e}")
         return jsonify({"nextNum": 104})
 
+def get_safe_font(size):
+    """Linux(Railway) 및 Windows 환경에서 폰트 로드 실패로 인한 500 에러를 100% 방지하는 안전 폰트 헬퍼"""
+    try:
+        from PIL import ImageFont
+        font_paths = [
+            'C:/Windows/Fonts/malgunbd.ttf',
+            'C:/Windows/Fonts/malgun.ttf',
+            '/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf',
+            '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
+            '/usr/share/fonts/nhn-nanum/NanumGothic.ttf'
+        ]
+        for p in font_paths:
+            if os.path.exists(p):
+                try:
+                    return ImageFont.truetype(p, size)
+                except Exception:
+                    pass
+        return ImageFont.load_default()
+    except Exception:
+        from PIL import ImageFont
+        return ImageFont.load_default()
+
 def create_studio_image(title, category, style_name, index_num, total_count=3, num="104", summary=""):
     """
     index_num == 1: [대표 썸네일 카드] 블로그 글 첫머리 대표 카드 이미지
@@ -247,19 +269,16 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
         os.makedirs(static_gen_dir, exist_ok=True)
 
         width, height = 1200, 675
-        font_path = 'C:/Windows/Fonts/malgunbd.ttf'
-        if not os.path.exists(font_path):
-            font_path = 'C:/Windows/Fonts/malgun.ttf'
 
         if index_num == 1:
             # ── 1. 대표 썸네일 카드 이미지 ──
             img = Image.new('RGB', (width, height), color='#0d1220')
             draw = ImageDraw.Draw(img)
 
-            font_badge = ImageFont.truetype(font_path, 26)
-            font_title = ImageFont.truetype(font_path, 48)
-            font_desc = ImageFont.truetype(font_path, 26)
-            font_footer = ImageFont.truetype(font_path, 25)
+            font_badge = get_safe_font(26)
+            font_title = get_safe_font(48)
+            font_desc = get_safe_font(26)
+            font_footer = get_safe_font(25)
 
             draw.rounded_rectangle([36, 36, width-36, height-36], radius=22, fill='#131b2e', outline='#c9a84c', width=4)
 
@@ -300,9 +319,9 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             img = Image.new('RGB', (width, height), color=s["bg"][0])
             draw = ImageDraw.Draw(img)
 
-            font_tag = ImageFont.truetype(font_path, 24)
-            font_title = ImageFont.truetype(font_path, 40)
-            font_sub = ImageFont.truetype(font_path, 26)
+            font_tag = get_safe_font(24)
+            font_title = get_safe_font(40)
+            font_sub = get_safe_font(26)
 
             draw.rounded_rectangle([30, 30, width-30, height-30], radius=20, fill=s["bg"][1], outline=s["border"], width=3)
 
