@@ -345,6 +345,37 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
         return "/static/default_banner.png"
 
+ROMANS_FIXED_TOPICS = {
+    104: {
+        "title": "로마서 104강 | 롬 9:14-24 · 토기장이의 주권과 하나님의 열심",
+        "summary": "우리는 과연 스스로의 열심과 행위로 하나님을 만족시킬 수 있는 존재인가? 피조물이 창조주께 '어찌 나를 이같이 만들었나이까' 할 수 없음을 깨닫고 오직 십자가 긍휼만을 의지하는 묵상."
+    },
+    105: {
+        "title": "로마서 105강 | 롬 9:25-33 · 긍휼의 그릇과 걸림돌이 된 반석",
+        "summary": "내 백성 아닌 자를 내 백성이라 부르시는 이방인 칭의의 은혜. 자기 의와 율법주의에 매여 십자가 반석에 부딪혀 넘어진 이스라엘의 교만을 폭로함."
+    },
+    106: {
+        "title": "로마서 106강 | 롬 10:1-13 · 율법의 마침이 되신 그리스도와 마음에 믿는 의",
+        "summary": "하나님의 의를 모르고 자기 의를 세우려 힘써 복종하지 아니한 자들에게, 율법의 완성이 되신 그리스도를 마음에 믿어 의에 이르고 입으로 고백하는 복음의 핵심."
+    },
+    107: {
+        "title": "로마서 107강 | 롬 10:14-21 · 복음을 전하는 아름다운 발과 순종치 아니하는 백성",
+        "summary": "믿음은 들음에서 나며 들음은 그리스도의 말씀으로 말미암느니라. 온종일 불순종하고 거스르는 백성을 향해 손을 벌리시는 하나님의 안타까운 은혜."
+    },
+    108: {
+        "title": "로마서 108강 | 롬 11:1-10 · 은혜로 택하심을 입은 남은 자",
+        "summary": "하나님이 그 미리 아신 자기 백성을 버리지 아니하셨나니, 바알에게 무릎 꿇지 아니한 칠천 명처럼 은혜의 보존으로 남겨두신 약속의 자녀들."
+    },
+    109: {
+        "title": "로마서 109강 | 롬 11:11-24 · 접붙임 받은 돌감람나무와 원 가지의 경고",
+        "summary": "원 가지도 아끼지 아니하셨은즉 이방인 성도들아 자만하지 말라. 뿌리가 거룩한즉 가지도 거룩하며 오직 하나님의 인자하심에 거하라."
+    },
+    110: {
+        "title": "로마서 110강 | 롬 11:25-36 · 깊도다 하나님의 지혜와 지식의 풍성함이여",
+        "summary": "온 이스라엘의 구원 비밀과 만물이 주에게서 나오고 주로 말미암고 주에게로 돌아감에 대한 사도 바울의 위대한 찬가."
+    }
+}
+
 @app.route('/api/studio/suggest-topic', methods=['POST'])
 def suggest_studio_topic():
     try:
@@ -353,6 +384,15 @@ def suggest_studio_topic():
         num = data.get('num', '104')
         genre = data.get('genre', '성경강해')
         
+        # 1. 로마서의 경우 고정 표준 DB 주제 우선 반환
+        if '로마서' in category:
+            try:
+                num_int = int(num)
+                if num_int in ROMANS_FIXED_TOPICS:
+                    return jsonify(ROMANS_FIXED_TOPICS[num_int])
+            except Exception:
+                pass
+
         prompt = f"""故 김성수 목사님의 신학 체계(인간의 전적 무능력, 자기 부인, 십자가 은혜)에 맞춰 다음 묵상 원고의 본문 구절 및 제목, 핵심 질문 주제를 기획하라.
 - 장르: {genre}
 - 성경책/분류: {category}
@@ -380,7 +420,7 @@ def suggest_studio_topic():
     except Exception as e:
         print(f"[SUGGEST TOPIC ERROR] {e}")
         return jsonify({
-            "title": f"{category} {num}강 | 토기장이의 주권과 하나님의 열심",
+            "title": f"{category} {num}강 | 토기장이의 주권과 하나님의 열심 (롬 9:14-24)",
             "summary": "인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도만을 의지하는 진리의 묵상"
         })
 
