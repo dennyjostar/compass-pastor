@@ -634,15 +634,16 @@ def bg_generate_devotional(task_id, data):
 
         content = generate_with_gemini(system_instruction, user_prompt)
 
-        STUDIO_TASKS[task_id]['step'] = f'대표 썸네일 카드 및 본문 이미지({image_count}장) 생성 중...'
+        total_count = 1 + image_count
+        STUDIO_TASKS[task_id]['step'] = f'대표 썸네일 카드 1장 + 본문 맞춤 AI 그림 {image_count}장 생성 중...'
         generated_images = []
-        for i in range(1, image_count + 1):
+        for i in range(1, total_count + 1):
             try:
-                img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
+                img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=total_count, num=num, summary=summary)
                 generated_images.append(img_url)
             except Exception as img_e:
                 print(f"[IMAGE LOOP ERROR] {img_e}")
-                generated_images.append("/static/default_banner.png")
+                generated_images.append("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675'><rect width='1200' height='675' fill='%230d1220'/></svg>")
 
         STUDIO_TASKS[task_id]['status'] = 'completed'
         STUDIO_TASKS[task_id]['content'] = content
@@ -694,16 +695,17 @@ def bg_regenerate_images(task_id, data):
         image_count = int(data.get('imageCount') or 3)
         image_style = data.get('imageStyle') or '고전유화'
 
+        total_count = 1 + image_count
         STUDIO_TASKS[task_id]['step'] = f'AI 예술 그림 {image_count}장 새로 생성 중...'
 
         generated_images = []
-        for i in range(1, image_count + 1):
+        for i in range(1, total_count + 1):
             try:
-                img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
+                img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=total_count, num=num, summary=summary)
                 generated_images.append(img_url)
             except Exception as img_e:
                 print(f"[REGEN IMAGE LOOP ERROR] {img_e}")
-                generated_images.append("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+                generated_images.append("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675'><rect width='1200' height='675' fill='%230d1220'/></svg>")
 
         STUDIO_TASKS[task_id]['status'] = 'completed'
         STUDIO_TASKS[task_id]['images'] = generated_images
