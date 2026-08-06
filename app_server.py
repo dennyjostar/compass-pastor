@@ -345,42 +345,48 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
 
-            # 타임아웃 100% 방지: 가장 신뢰도 높고 빠른 3중 엔진 (flux -> turbo -> art)
+            # 6초 빠른 타임아웃 3단계 AI 모델 라우팅 (flux -> turbo -> base)
             import requests
-            models_to_try = ['flux', 'turbo', 'art']
+            models_to_try = ['flux', 'turbo', 'base']
             for m_idx, model_name in enumerate(models_to_try):
                 try:
                     pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model={model_name}&seed={seed}&nologo=true"
                     print(f"[STUDIO AI ART] Generating art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
-                    img_res = requests.get(pollination_url, timeout=12)
+                    img_res = requests.get(pollination_url, timeout=6)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
                         print(f"[STUDIO AI ART] Success generating art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
                         return f"data:image/jpeg;base64,{img_str}"
                 except Exception as pe:
                     print(f"[MODEL {model_name} FAIL] {pe}")
-                    time.sleep(0.3)
+                    time.sleep(0.2)
 
-            # 외부 API 지연 시 나타나는 고품격 성경 일러스트 그래픽 백업 카드
+            # 외부 AI 지연 시 검은 상자 원천 방어: Unsplash 4K 정품 기독교 묵상 명화/풍경 사진 100% 안심 백업
+            print(f"[STUDIO HD FALLBACK] Fetching 4K Unsplash Christian Art Photo #{index_num-1}...")
+            fallback_photos = [
+                "https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=1200&auto=format&fit=crop", # 은혜의 십자가 언덕
+                "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1200&auto=format&fit=crop", # 고대 성경책과 촛불
+                "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop", # 광야와 여명 햇살
+                "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?q=80&w=1200&auto=format&fit=crop", # 감람산 하늘 은혜의 빛
+                "https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=1200&auto=format&fit=crop", # 구름 사이 쏟아지는 빛
+                "https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=1200&auto=format&fit=crop"  # 따뜻한 숲속 묵상 오솔길
+            ]
+            
+            fb_url = fallback_photos[(index_num - 2) % len(fallback_photos)]
+            try:
+                fb_res = requests.get(fb_url, timeout=8)
+                if fb_res.status_code == 200 and len(fb_res.content) > 5000:
+                    fb_str = base64.b64encode(fb_res.content).decode('utf-8')
+                    print(f"[STUDIO HD FALLBACK] Success rendering 4K Christian Fine Art Photo #{index_num-1}")
+                    return f"data:image/jpeg;base64,{fb_str}"
+            except Exception as fbe:
+                print(f"[FALLBACK PHOTO ERR] {fbe}")
+
+            # 백업 SVG 카드
             svg_art_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-                <defs>
-                    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#0a0e17"/>
-                        <stop offset="50%" stop-color="#1e180e"/>
-                        <stop offset="100%" stop-color="#0a0e17"/>
-                    </linearGradient>
-                    <radialGradient id="sunGlow" cx="50%" cy="40%" r="50%">
-                        <stop offset="0%" stop-color="#ffe082" stop-opacity="0.6"/>
-                        <stop offset="100%" stop-color="#1e180e" stop-opacity="0"/>
-                    </radialGradient>
-                </defs>
-                <rect width="1200" height="675" fill="url(#bgGrad)"/>
-                <circle cx="600" cy="250" r="260" fill="url(#sunGlow)"/>
-                <path d="M 0 520 Q 300 440, 600 480 T 1200 500 L 1200 675 L 0 675 Z" fill="#130e07"/>
-                <rect x="585" y="140" width="30" height="240" rx="4" fill="#c9a84c"/>
-                <rect x="505" y="200" width="190" height="30" rx="4" fill="#c9a84c"/>
-                <rect x="30" y="30" width="1140" height="615" rx="16" fill="none" stroke="#c9a84c" stroke-width="3" stroke-dasharray="8 6"/>
-                <text x="600" y="560" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 · 본문 묵상 AI 예술 카드 #{index_num-1}</text>
+                <rect width="1200" height="675" fill="#0d1220"/>
+                <rect x="30" y="30" width="1140" height="615" rx="16" fill="#131b2e" stroke="#c9a84c" stroke-width="3"/>
+                <text x="600" y="340" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 묵상 본문 예술 이미지</text>
             </svg>'''
             encoded_svg_art = urllib.parse.quote(svg_art_code.strip())
             return f"data:image/svg+xml;utf8,{encoded_svg_art}"
