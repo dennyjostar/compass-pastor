@@ -346,27 +346,42 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
 
-            # 1차 시도: Flux 8K 초고화질 모델, 2차 시도: Turbo 0.5초 초고속 모델 (100% 빠른 성공 보장)
+            # 10초 초고속 타임아웃 3단계 모델 폴백 (flux -> turbo -> pixart)
             import requests
-            models_to_try = ['flux', 'turbo']
+            models_to_try = ['flux', 'turbo', 'pixart']
             for m_idx, model_name in enumerate(models_to_try):
                 try:
                     pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model={model_name}&seed={seed}&nologo=true"
                     print(f"[STUDIO AI ART] Generating 8K art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
-                    img_res = requests.get(pollination_url, timeout=16)
+                    img_res = requests.get(pollination_url, timeout=10)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
                         print(f"[STUDIO AI ART] Success generating 8K art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
                         return f"data:image/jpeg;base64,{img_str}"
                 except Exception as pe:
                     print(f"[POLLINATIONS MODEL {model_name} FAIL] {pe}")
-                    time.sleep(0.5)
+                    time.sleep(0.3)
 
-            # 백업 SVG 카드
+            # 외부 API 지연 시 나타나는 고품격 성경 일러스트 그래픽 백업 카드
             svg_art_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-                <rect width="1200" height="675" fill="#0d1220"/>
-                <rect x="30" y="30" width="1140" height="615" rx="16" fill="#131b2e" stroke="#c9a84c" stroke-width="3"/>
-                <text x="600" y="340" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 묵상 본문 예술 이미지</text>
+                <defs>
+                    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0a0e17"/>
+                        <stop offset="50%" stop-color="#1e180e"/>
+                        <stop offset="100%" stop-color="#0a0e17"/>
+                    </linearGradient>
+                    <radialGradient id="sunGlow" cx="50%" cy="40%" r="50%">
+                        <stop offset="0%" stop-color="#ffe082" stop-opacity="0.6"/>
+                        <stop offset="100%" stop-color="#1e180e" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <rect width="1200" height="675" fill="url(#bgGrad)"/>
+                <circle cx="600" cy="250" r="260" fill="url(#sunGlow)"/>
+                <path d="M 0 520 Q 300 440, 600 480 T 1200 500 L 1200 675 L 0 675 Z" fill="#130e07"/>
+                <rect x="585" y="140" width="30" height="240" rx="4" fill="#c9a84c"/>
+                <rect x="505" y="200" width="190" height="30" rx="4" fill="#c9a84c"/>
+                <rect x="30" y="30" width="1140" height="615" rx="16" fill="none" stroke="#c9a84c" stroke-width="3" stroke-dasharray="8 6"/>
+                <text x="600" y="560" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 · 본문 묵상 AI 예술 카드 #{index_num-1}</text>
             </svg>'''
             encoded_svg_art = urllib.parse.quote(svg_art_code.strip())
             return f"data:image/svg+xml;utf8,{encoded_svg_art}"
