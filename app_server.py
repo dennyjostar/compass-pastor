@@ -366,22 +366,27 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
     except Exception as img_err:
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
         traceback.print_exc()
-        # 다크 테마 플레이스홀더 이미지 생성 (에러에도 예쁜 기본 이미지)
-        try:
-            from PIL import Image, ImageDraw
-            img = Image.new('RGB', (1200, 675), color=(13, 18, 32))
-            draw = ImageDraw.Draw(img)
-            draw.rectangle([30, 30, 1170, 645], fill=(19, 27, 46), outline=(201, 168, 76), width=3)
-            font_fb = get_safe_font(30)
-            draw.text((100, 280), f"{category} {num}강 - 이미지 준비 중", fill=(252, 227, 138), font=font_fb)
-            draw.text((100, 340), "Compass Devotional Studio", fill=(180, 160, 130), font=get_safe_font(24))
-            buffer = io.BytesIO()
-            img.save(buffer, format='PNG')
-            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            return f"data:image/png;base64,{img_str}"
-        except:
-            # 최후의 보루: 다크 색상 1x1 픽셀
-            return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMMY/jPAADzAQHAlLyLAAAAAElFTkSuQmCC"
+
+        # PIL 모듈이 없거나 예외 발생 시, PIL 없이도 100% 렌더링되는 SVG Data URL 카드 생성
+        svg_title = title if title else f"{category} {num}강 묵상"
+        if len(svg_title) > 25:
+            svg_title = svg_title[:25] + "..."
+        
+        svg_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+            <rect width="1200" height="675" fill="#0d1220"/>
+            <rect x="36" y="36" width="1128" height="603" rx="16" fill="#131b2e" stroke="#c9a84c" stroke-width="4"/>
+            <rect x="75" y="75" width="480" height="55" rx="10" fill="#2a2110" stroke="#c9a84c" stroke-width="2"/>
+            <text x="95" y="112" font-family="'Malgun Gothic', sans-serif" font-size="24" font-weight="bold" fill="#fce38a">{category} {num}강 · 故 김성수 목사 묵상집</text>
+            <text x="75" y="210" font-family="'Malgun Gothic', sans-serif" font-size="44" font-weight="bold" fill="#ffffff">{svg_title}</text>
+            <text x="75" y="300" font-family="'Malgun Gothic', sans-serif" font-size="24" fill="#e8ded0">故 김성수 목사님의 십자가 복음 신학 체계와 설교 데이터베이스를 바탕으로</text>
+            <text x="75" y="345" font-family="'Malgun Gothic', sans-serif" font-size="24" fill="#e8ded0">AI가 {category} {num}강 본문을 깊이 있는 묵상 원고로 재구성한 아카이브입니다.</text>
+            <line x1="75" y1="465" x2="1125" y2="465" stroke="#3a301d" stroke-width="2"/>
+            <text x="75" y="520" font-family="'Malgun Gothic', sans-serif" font-size="24" fill="#fce38a">📖 Compass AI Studio • 오직 십자가 은혜와 약속의 자녀</text>
+        </svg>'''
+        
+        import urllib.parse
+        encoded_svg = urllib.parse.quote(svg_code.strip())
+        return f"data:image/svg+xml;utf8,{encoded_svg}"
 
 ROMANS_FIXED_TOPICS = {
     104: {
