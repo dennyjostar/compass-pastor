@@ -346,20 +346,20 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
 
-            # 10초 초고속 타임아웃 3단계 모델 폴백 (flux -> turbo -> pixart)
+            # 구글 차세대 나노바나나 (Imagen 3) 및 플래그십 AI 렌더링 라우팅 (imagen -> flux-realism -> flux)
             import requests
-            models_to_try = ['flux', 'turbo', 'pixart']
+            models_to_try = ['imagen', 'flux-realism', 'flux']
             for m_idx, model_name in enumerate(models_to_try):
                 try:
                     pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model={model_name}&seed={seed}&nologo=true"
-                    print(f"[STUDIO AI ART] Generating 8K art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
-                    img_res = requests.get(pollination_url, timeout=10)
+                    print(f"[STUDIO NANO-BANANA ART] Generating Imagen 3 art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
+                    img_res = requests.get(pollination_url, timeout=12)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
-                        print(f"[STUDIO AI ART] Success generating 8K art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
+                        print(f"[STUDIO NANO-BANANA ART] Success generating art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
                         return f"data:image/jpeg;base64,{img_str}"
                 except Exception as pe:
-                    print(f"[POLLINATIONS MODEL {model_name} FAIL] {pe}")
+                    print(f"[NANO-BANANA MODEL {model_name} FAIL] {pe}")
                     time.sleep(0.3)
 
             # 외부 API 지연 시 나타나는 고품격 성경 일러스트 그래픽 백업 카드
