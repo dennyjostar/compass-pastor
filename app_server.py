@@ -283,43 +283,38 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
         print(f"[STUDIO IMG] Starting image #{index_num}, style={style_name}, title={title[:20]}")
 
         if index_num == 1:
-            # ── 1. 대표 썸네일 카드 이미지 ──
-            img = Image.new('RGB', (width, height), color=(13, 18, 32))
-            draw = ImageDraw.Draw(img)
-
-            font_badge = get_safe_font(26)
-            font_title = get_safe_font(48)
-            font_desc = get_safe_font(26)
-            font_footer = get_safe_font(25)
-
-            # 외곽 프레임 (호환용 rectangle)
-            draw.rectangle([36, 36, width-36, height-36], fill=(19, 27, 46), outline=(201, 168, 76), width=4)
-
-            # 뱃지 바
-            badge_text = f" {category} {num}강 · 故 김성수 목사 묵상집 "
-            draw.rectangle([75, 75, 560, 130], fill=(42, 33, 16), outline=(201, 168, 76), width=2)
-            draw.text((92, 85), badge_text, fill=(252, 227, 138), font=font_badge)
-
-            # 제목
-            display_title = title if title else f"{category} {num}강 강해 아카이브"
-            if len(display_title) > 22:
-                draw.text((75, 155), display_title[:22], fill='white', font=font_title)
-                draw.text((75, 215), display_title[22:44], fill='white', font=font_title)
+            # ── 1. 대표 썸네일 카드 이미지 (원어/특수문자 100% 무결점 SVG 카드) ──
+            safe_title = title if title else f"{category} {num}강 강해 아카이브"
+            # 22자 기준으로 줄바꿈
+            if len(safe_title) > 22:
+                title_line1 = safe_title[:22]
+                title_line2 = safe_title[22:44]
             else:
-                draw.text((75, 165), display_title, fill='white', font=font_title)
+                title_line1 = safe_title
+                title_line2 = ""
 
-            # 설명
-            desc1 = f"故 김성수 목사님의 십자가 복음 신학 체계와 기존 설교 데이터베이스를 바탕으로"
-            desc2 = f"AI가 {category} {num}강 본문을 깊이 있는 묵상 원고로 재구성한 아카이브입니다."
-            desc3 = f"인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도의 은혜만을 의지하게 합니다."
-            draw.text((75, 290), desc1, fill=(232, 222, 208), font=font_desc)
-            draw.text((75, 335), desc2, fill=(232, 222, 208), font=font_desc)
-            draw.text((75, 380), desc3, fill=(232, 222, 208), font=font_desc)
+            title_svg = f'<text x="75" y="210" font-family="\'Apple SD Gothic Neo\', \'Malgun Gothic\', sans-serif" font-size="44" font-weight="bold" fill="#ffffff">{title_line1}</text>'
+            if title_line2:
+                title_svg += f'\n<text x="75" y="265" font-family="\'Apple SD Gothic Neo\', \'Malgun Gothic\', sans-serif" font-size="44" font-weight="bold" fill="#ffffff">{title_line2}</text>'
 
-            # 구분선 & 푸터
-            draw.line([(75, 465), (width-75, 465)], fill=(58, 48, 29), width=2)
-            footer_text = "Compass AI Studio - 오직 십자가 은혜와 약속의 자녀"
-            draw.text((75, 500), footer_text, fill=(252, 227, 138), font=font_footer)
+            desc_y = 330 if title_line2 else 285
+
+            svg_card = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+                <rect width="1200" height="675" fill="#0d1220"/>
+                <rect x="36" y="36" width="1128" height="603" rx="22" fill="#131b2e" stroke="#c9a84c" stroke-width="4"/>
+                <rect x="75" y="75" width="500" height="55" rx="14" fill="#2a2110" stroke="#c9a84c" stroke-width="2"/>
+                <text x="95" y="112" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" font-size="25" font-weight="bold" fill="#fce38a">{category} {num}강 · 故 김성수 목사 묵상집</text>
+                {title_svg}
+                <text x="75" y="{desc_y}" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" font-size="24" fill="#e8ded0">故 김성수 목사님의 십자가 복음 신학 체계와 기존 설교 데이터베이스를 바탕으로</text>
+                <text x="75" y="{desc_y+45}" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" font-size="24" fill="#e8ded0">AI가 {category} {num}강 본문을 깊이 있는 묵상 원고로 재구성한 아카이브입니다.</text>
+                <text x="75" y="{desc_y+90}" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" font-size="24" fill="#e8ded0">인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도의 은혜만을 의지하게 합니다.</text>
+                <line x1="75" y1="520" x2="1125" y2="520" stroke="#3a301d" stroke-width="2"/>
+                <text x="75" y="560" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" font-size="24" fill="#fce38a">📖 Compass AI Studio • 오직 십자가 은혜와 약속의 자녀</text>
+            </svg>'''
+
+            encoded_svg = urllib.parse.quote(svg_card.strip())
+            print(f"[STUDIO IMG] Successfully generated SVG title card #1")
+            return f"data:image/svg+xml;utf8,{encoded_svg}"
 
         else:
             # ── 2. 본문 내용 이미지 (진짜 AI 생성형 예술 그림) ──
