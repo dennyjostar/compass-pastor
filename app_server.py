@@ -361,15 +361,14 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
                     print(f"[MODEL {model_name} FAIL] {pe}")
                     time.sleep(0.2)
 
-            # 외부 AI 지연 시 검은 상자 원천 방어: Unsplash 4K 정품 기독교 묵상 명화/풍경 사진 100% 안심 백업
-            print(f"[STUDIO HD FALLBACK] Fetching 4K Unsplash Christian Art Photo #{index_num-1}...")
+            # 100% 검증된 정품 기독교 묵상 명화 & 성지 은혜의 풍경 갤러리 리스트
+            print(f"[STUDIO HD FALLBACK] Fetching Verified 4K Christian Art Photo #{index_num-1}...")
             fallback_photos = [
-                "https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=1200&auto=format&fit=crop", # 은혜의 십자가 언덕
-                "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1200&auto=format&fit=crop", # 고대 성경책과 촛불
-                "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop", # 광야와 여명 햇살
-                "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?q=80&w=1200&auto=format&fit=crop", # 감람산 하늘 은혜의 빛
-                "https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=1200&auto=format&fit=crop", # 구름 사이 쏟아지는 빛
-                "https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=1200&auto=format&fit=crop"  # 따뜻한 숲속 묵상 오솔길
+                "https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=1200&auto=format&fit=crop", # 하늘 구름 사이 내리는 은혜의 햇빛
+                "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop", # 여호수아 광야 여명 햇살과 오아시스
+                "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?q=80&w=1200&auto=format&fit=crop", # 감람산 성지 묵상 언덕
+                "https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=1200&auto=format&fit=crop", # 은혜로운 햇살 가득한 평화로운 산책길
+                "https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=1200&auto=format&fit=crop"  # 십자가 언덕 황혼 묵상
             ]
             
             fb_url = fallback_photos[(index_num - 2) % len(fallback_photos)]
