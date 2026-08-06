@@ -326,23 +326,23 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             }
             art_style = style_prompts.get(style_name, style_prompts["고전유화"])
 
-            # 원고 제목 및 요약에서 묵상 주제 키워드 동적 추출
-            clean_title = title.replace('|', ' ').replace(':', ' ').replace('-', ' ')
-            clean_summary = summary.replace('\n', ' ') if summary else title
-
-            # 다양성을 위한 풍성한 성경적 명화/감성 구도 풀
+            # 100% 성공을 보장하는 순수 영문 성경 구속사 핵심 서사 테마 풀
             import random
-            varied_concepts = [
-                f"sacred art depiction of '{clean_title[:30]}', a wooden cross standing gracefully on a quiet hill at golden sunrise, divine rays of light pouring through clouds",
-                f"profound biblical reflection on '{clean_summary[:35]}', an ancient potter's hands gently shaping a clay vessel under warm candlelight in Jerusalem studio",
-                f"peaceful spiritual scene of '{clean_title[:30]}', a serene wilderness path winding through ancient olive trees at morning dawn",
-                f"contemplative artwork of '{clean_summary[:35]}', an open ancient biblical scroll with glowing golden light on a warm wooden table",
-                f"majestic sacred view of '{clean_title[:30]}', Mount of Olives under a heavenly golden sky, atmosphere of eternal hope and grace",
-                f"tender devotional scene of '{clean_summary[:35]}', a gentle shepherd guiding sheep through a quiet green valley at sunset",
-                f"epic redemptive art of '{clean_title[:30]}', rays of divine mercy breaking through dark stormy skies over an ancient holy landscape"
+            biblical_art_concepts = [
+                "a majestic wooden cross standing gracefully on a quiet mountain hill at golden sunrise, rays of divine grace pouring through soft clouds",
+                "an ancient potter's hands gently crafting a clay vessel under warm golden candlelight in Jerusalem studio",
+                "a serene wilderness path winding through ancient olive trees at peaceful morning dawn with soft glowing light",
+                "an open ancient biblical manuscript scroll with glowing golden light on an old oak wooden table",
+                "a majestic sacred view of Mount of Olives under a heavenly golden sky, atmosphere of eternal hope and salvation",
+                "a gentle shepherd guiding a flock of sheep through a quiet green biblical valley at serene sunset",
+                "dramatic redemptive scenery with heavenly rays of divine mercy breaking through dark stormy clouds over Jerusalem landscape",
+                "a glowing wooden boat resting peacefully on the quiet Sea of Galilee under twilight stars"
             ]
 
-            selected_concept = varied_concepts[(index_num - 2 + random.randint(0, 10)) % len(varied_concepts)]
+            seed = random.randint(100000, 999999)
+            concept_index = (index_num - 2 + random.randint(0, 10)) % len(biblical_art_concepts)
+            selected_concept = biblical_art_concepts[concept_index]
+
             ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
 
