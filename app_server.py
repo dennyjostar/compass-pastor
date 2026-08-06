@@ -316,13 +316,13 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             return f"data:image/svg+xml;utf8,{encoded_svg}"
 
         else:
-            # ── 2. 본문 내용 이미지 (본문 주제 동적 반영 & Flux 8K Ultra HD AI 그림) ──
+            # ── 2. 본문 내용 이미지 (명화/감성 수채화 고품격 기독교 아트 디렉팅) ──
             style_prompts = {
-                "고전유화": "masterpiece sacred oil painting style, Rembrandt lighting, rich texture, deep spiritual atmosphere, highly detailed, 8k resolution, cinematic lighting, masterpiece",
-                "수채화": "soft emotional watercolor painting style, warm color palette, gentle brush strokes, graceful sunlight, peaceful art, highly detailed, 8k resolution",
-                "시네마틱실사": "cinematic realistic photography, 8k resolution, dramatic lighting, golden hour, epic biblical scenery, hyperrealistic, octane render, photorealistic",
-                "현대일러스트": "modern elegant illustration style, fine line art, subtle golden highlights, graceful composition, beautiful art, 8k resolution",
-                "모바일배너": "dramatic cinematic landscape, high contrast, warm golden lighting, peaceful biblical atmosphere, stunning visual, 8k resolution"
+                "고전유화": "masterpiece sacred oil painting, Caravaggio chiaroscuro lighting, Rembrandt atmosphere, museum quality biblical art, rich oil texture, profound spiritual reverence, timeless masterpiece",
+                "수채화": "soft emotional watercolor, gentle warm morning sunlight, peaceful spiritual sanctuary, graceful artistic brushstrokes, pastel color harmony, beautiful devotional illustration",
+                "시네마틱실사": "epic cinematic photography of biblical ancient landscape, dramatic golden hour, rays of divine grace breaking through soft clouds, National Geographic style, profound spiritual awe",
+                "현대일러스트": "modern elegant line illustration, subtle gold foil accents, refined spiritual artwork, warm minimalist aesthetic, graceful storybook illustration, peaceful atmosphere",
+                "모바일배너": "dramatic cinematic landscape banner art, glowing horizon, inspiring spiritual atmosphere, high contrast aesthetic, breathtaking composition"
             }
             art_style = style_prompts.get(style_name, style_prompts["고전유화"])
 
@@ -330,16 +330,16 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             clean_title = title.replace('|', ' ').replace(':', ' ').replace('-', ' ')
             clean_summary = summary.replace('\n', ' ') if summary else title
 
-            # 다양성을 위한 풍성한 성경적 테마 영문 키워드 풀 (index_num & 난수 매핑)
+            # 다양성을 위한 풍성한 성경적 명화/감성 구도 풀
             import random
             varied_concepts = [
-                f"biblical sacred scene illustrating '{clean_title[:35]}', glowing wooden cross on a hill under dramatic golden sky",
-                f"spiritual scene of '{clean_summary[:40]}', ancient potter shaping clay vessel in Jerusalem studio with sunlight",
-                f"sacred art depiction of '{clean_title[:35]}', peaceful desert wilderness path with glowing sunrise and ancient olive trees",
-                f"devotional illustration of '{clean_summary[:40]}', ancient biblical manuscript scroll with warm candlelight",
-                f"epic sacred landscape of '{clean_title[:35]}', Mount of Olives under heavenly glowing sky with rays of grace",
-                f"sacred biblical reflection on '{clean_summary[:40]}', shepherd caring for sheep in ancient green valley",
-                f"dramatic redemptive scene of '{clean_title[:35]}', rays of divine mercy breaking through dark storm clouds over Jerusalem"
+                f"sacred art depiction of '{clean_title[:30]}', a wooden cross standing gracefully on a quiet hill at golden sunrise, divine rays of light pouring through clouds",
+                f"profound biblical reflection on '{clean_summary[:35]}', an ancient potter's hands gently shaping a clay vessel under warm candlelight in Jerusalem studio",
+                f"peaceful spiritual scene of '{clean_title[:30]}', a serene wilderness path winding through ancient olive trees at morning dawn",
+                f"contemplative artwork of '{clean_summary[:35]}', an open ancient biblical scroll with glowing golden light on a warm wooden table",
+                f"majestic sacred view of '{clean_title[:30]}', Mount of Olives under a heavenly golden sky, atmosphere of eternal hope and grace",
+                f"tender devotional scene of '{clean_summary[:35]}', a gentle shepherd guiding sheep through a quiet green valley at sunset",
+                f"epic redemptive art of '{clean_title[:30]}', rays of divine mercy breaking through dark stormy skies over an ancient holy landscape"
             ]
 
             selected_concept = varied_concepts[(index_num - 2 + random.randint(0, 10)) % len(varied_concepts)]
