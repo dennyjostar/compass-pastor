@@ -274,18 +274,17 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
     index_num == 1: [대표 썸네일 카드] 블로그 글 첫머리 대표 카드 이미지
     index_num >= 2: [내용 이미지] 지정 화풍 스타일(유화/수채화/실사/일러스트) 본문 삽화 이미지
     """
+    import io, base64, traceback
     try:
-        from PIL import Image, ImageDraw, ImageFont
-        import random, time
-
-        static_gen_dir = os.path.join(os.path.dirname(__file__), 'static', 'generated_images')
-        os.makedirs(static_gen_dir, exist_ok=True)
+        from PIL import Image, ImageDraw
+        import time
 
         width, height = 1200, 675
+        print(f"[STUDIO IMG] Starting image #{index_num}, style={style_name}, title={title[:20]}")
 
         if index_num == 1:
             # ── 1. 대표 썸네일 카드 이미지 ──
-            img = Image.new('RGB', (width, height), color='#0d1220')
+            img = Image.new('RGB', (width, height), color=(13, 18, 32))
             draw = ImageDraw.Draw(img)
 
             font_badge = get_safe_font(26)
@@ -293,39 +292,43 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             font_desc = get_safe_font(26)
             font_footer = get_safe_font(25)
 
-            draw.rounded_rectangle([36, 36, width-36, height-36], radius=22, fill='#131b2e', outline='#c9a84c', width=4)
+            # 외곽 프레임 (호환용 rectangle)
+            draw.rectangle([36, 36, width-36, height-36], fill=(19, 27, 46), outline=(201, 168, 76), width=4)
 
+            # 뱃지 바
             badge_text = f" {category} {num}강 · 故 김성수 목사 묵상집 "
-            draw.rounded_rectangle([75, 75, 560, 130], radius=14, fill='#2a2110', outline='#c9a84c', width=2)
-            draw.text((92, 85), badge_text, fill='#fce38a', font=font_badge)
+            draw.rectangle([75, 75, 560, 130], fill=(42, 33, 16), outline=(201, 168, 76), width=2)
+            draw.text((92, 85), badge_text, fill=(252, 227, 138), font=font_badge)
 
+            # 제목
             display_title = title if title else f"{category} {num}강 강해 아카이브"
             if len(display_title) > 22:
-                draw.text((75, 155), display_title[:22], fill='#ffffff', font=font_title)
-                draw.text((75, 215), display_title[22:], fill='#ffffff', font=font_title)
+                draw.text((75, 155), display_title[:22], fill='white', font=font_title)
+                draw.text((75, 215), display_title[22:44], fill='white', font=font_title)
             else:
-                draw.text((75, 165), display_title, fill='#ffffff', font=font_title)
+                draw.text((75, 165), display_title, fill='white', font=font_title)
 
+            # 설명
             desc1 = f"故 김성수 목사님의 십자가 복음 신학 체계와 기존 설교 데이터베이스를 바탕으로"
             desc2 = f"AI가 {category} {num}강 본문을 깊이 있는 묵상 원고로 재구성한 아카이브입니다."
             desc3 = f"인간의 전적 타락과 무능력을 폭로하고 오직 십자가 예수 그리스도의 은혜만을 의지하게 합니다."
+            draw.text((75, 290), desc1, fill=(232, 222, 208), font=font_desc)
+            draw.text((75, 335), desc2, fill=(232, 222, 208), font=font_desc)
+            draw.text((75, 380), desc3, fill=(232, 222, 208), font=font_desc)
 
-            draw.text((75, 290), desc1, fill='#e8ded0', font=font_desc)
-            draw.text((75, 335), desc2, fill='#e8ded0', font=font_desc)
-            draw.text((75, 380), desc3, fill='#e8ded0', font=font_desc)
-
-            draw.line([(75, 465), (width-75, 465)], fill='#3a301d', width=2)
-            footer_text = f"📖 Compass AI Studio  •  오직 십자가 은혜와 약속의 자녀"
-            draw.text((75, 500), footer_text, fill='#fce38a', font=font_footer)
+            # 구분선 & 푸터
+            draw.line([(75, 465), (width-75, 465)], fill=(58, 48, 29), width=2)
+            footer_text = "Compass AI Studio - 오직 십자가 은혜와 약속의 자녀"
+            draw.text((75, 500), footer_text, fill=(252, 227, 138), font=font_footer)
 
         else:
             # ── 2. 본문 내용 이미지 (선택 화풍 스타일) ──
             styles_map = {
-                "고전유화": {"bg": ("#0a0e17", "#1c140a"), "accent": "#c9a84c", "border": "#8b6e32", "text": "#ffffff", "tag": "🎨 고전 명화 스타일"},
-                "수채화": {"bg": ("#f7f4ed", "#e6ded1"), "accent": "#5a4020", "border": "#c9a84c", "text": "#1a0f00", "tag": "🖌️ 감성 수채화 스타일"},
-                "시네마틱실사": {"bg": ("#070b12", "#0f172a"), "accent": "#60a5fa", "border": "#3b82f6", "text": "#ffffff", "tag": "📸 시네마틱 실사"},
-                "현대일러스트": {"bg": ("#18181b", "#27272a"), "accent": "#f43f5e", "border": "#fb7185", "text": "#ffffff", "tag": "✒️ 현대 일러스트"},
-                "모바일배너": {"bg": ("#0d1220", "#171f33"), "accent": "#c9a84c", "border": "#fce38a", "text": "#ffffff", "tag": "📱 모바일 카드 배너"}
+                "고전유화": {"bg": ((10,14,23), (28,20,10)), "accent": (201,168,76), "border": (139,110,50), "text": (255,255,255), "tag": "고전 명화 스타일"},
+                "수채화": {"bg": ((247,244,237), (230,222,209)), "accent": (90,64,32), "border": (201,168,76), "text": (26,15,0), "tag": "감성 수채화 스타일"},
+                "시네마틱실사": {"bg": ((7,11,18), (15,23,42)), "accent": (96,165,250), "border": (59,130,246), "text": (255,255,255), "tag": "시네마틱 실사"},
+                "현대일러스트": {"bg": ((24,24,27), (39,39,42)), "accent": (244,63,94), "border": (251,113,133), "text": (255,255,255), "tag": "현대 일러스트"},
+                "모바일배너": {"bg": ((13,18,32), (23,31,51)), "accent": (201,168,76), "border": (252,227,138), "text": (255,255,255), "tag": "모바일 카드 배너"}
             }
 
             s = styles_map.get(style_name, styles_map["고전유화"])
@@ -336,26 +339,49 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             font_title = get_safe_font(40)
             font_sub = get_safe_font(26)
 
-            draw.rounded_rectangle([30, 30, width-30, height-30], radius=20, fill=s["bg"][1], outline=s["border"], width=3)
+            # 외곽 프레임
+            draw.rectangle([30, 30, width-30, height-30], fill=s["bg"][1], outline=s["border"], width=3)
 
-            badge_text = f" {s['tag']} 본문 내용 이미지 #{index_num-1} "
-            draw.rounded_rectangle([60, 60, 420, 110], radius=12, fill=s["accent"], outline=None)
-            draw.text((75, 72), badge_text, fill="#0d1220" if s["accent"]=="#c9a84c" else "#ffffff", font=font_tag)
+            # 뱃지
+            badge_text = f" {s['tag']} #{index_num-1} "
+            draw.rectangle([60, 60, 420, 110], fill=s["accent"])
+            badge_fill = (13,18,32) if s["accent"] == (201,168,76) else (255,255,255)
+            draw.text((75, 72), badge_text, fill=badge_fill, font=font_tag)
 
+            # 성경 정보 & 제목
             draw.text((60, 150), f"[{category} {num}강]", fill=s["accent"], font=font_sub)
-            draw.text((60, 210), title[:22] if len(title)>22 else title, fill=s["text"], font=font_title)
+            draw.text((60, 210), title[:22] if len(title) > 22 else title, fill=s["text"], font=font_title)
 
-            footer_msg = "Compass Devotional Studio · 故 김성수 목사 묵상집 내용 이미지"
+            # 푸터
+            footer_msg = "Compass Devotional Studio - 故 김성수 목사 묵상집"
             draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
 
-        import io, base64
+        # Base64로 직접 인코딩하여 반환
         buffer = io.BytesIO()
         img.save(buffer, format='PNG')
         img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        print(f"[STUDIO IMG] Successfully generated image #{index_num} (base64 len={len(img_str)})")
         return f"data:image/png;base64,{img_str}"
+
     except Exception as img_err:
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
-        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        traceback.print_exc()
+        # 다크 테마 플레이스홀더 이미지 생성 (에러에도 예쁜 기본 이미지)
+        try:
+            from PIL import Image, ImageDraw
+            img = Image.new('RGB', (1200, 675), color=(13, 18, 32))
+            draw = ImageDraw.Draw(img)
+            draw.rectangle([30, 30, 1170, 645], fill=(19, 27, 46), outline=(201, 168, 76), width=3)
+            font_fb = get_safe_font(30)
+            draw.text((100, 280), f"{category} {num}강 - 이미지 준비 중", fill=(252, 227, 138), font=font_fb)
+            draw.text((100, 340), "Compass Devotional Studio", fill=(180, 160, 130), font=get_safe_font(24))
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            return f"data:image/png;base64,{img_str}"
+        except:
+            # 최후의 보루: 다크 색상 1x1 픽셀
+            return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMMY/jPAADzAQHAlLyLAAAAAElFTkSuQmCC"
 
 ROMANS_FIXED_TOPICS = {
     104: {
@@ -633,6 +659,49 @@ def regenerate_studio_images():
         print(f"[REGEN IMAGES API ERROR] {e}")
         return jsonify({"error": str(e)}), 200
 
+@app.route('/api/studio/diagnose', methods=['GET'])
+def diagnose_studio():
+    """서버 환경 진단: Pillow 버전, 폰트 경로, 이미지 생성 테스트"""
+    info = {}
+    try:
+        import PIL
+        info['pillow_version'] = PIL.__version__
+    except:
+        info['pillow_version'] = 'NOT INSTALLED'
+
+    # 폰트 검색
+    bundled = os.path.join(os.path.dirname(__file__), 'static', 'fonts', 'NanumGothic.ttf')
+    font_paths = [
+        bundled,
+        '/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf',
+        '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
+        '/usr/share/fonts/nhn-nanum/NanumGothic.ttf'
+    ]
+    info['bundled_font_exists'] = os.path.exists(bundled)
+    info['bundled_font_path'] = bundled
+    info['found_fonts'] = [p for p in font_paths if os.path.exists(p)]
+
+    # 테스트 이미지 생성
+    try:
+        from PIL import Image, ImageDraw
+        img = Image.new('RGB', (100, 50), color=(13, 18, 32))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([5, 5, 95, 45], fill=(19, 27, 46), outline=(201, 168, 76), width=2)
+        font = get_safe_font(14)
+        draw.text((10, 15), "Test OK", fill='white', font=font)
+        info['test_image'] = 'SUCCESS'
+        info['font_type'] = str(type(font))
+    except Exception as e:
+        info['test_image'] = f'FAILED: {e}'
+
+    # rounded_rectangle 지원 여부
+    try:
+        from PIL import ImageDraw
+        info['has_rounded_rectangle'] = hasattr(ImageDraw.ImageDraw, 'rounded_rectangle')
+    except:
+        info['has_rounded_rectangle'] = False
+
+    return jsonify(info)
 
 
 
