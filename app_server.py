@@ -316,9 +316,9 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             return f"data:image/svg+xml;utf8,{encoded_svg}"
 
         else:
-            # ── 2. 본문 내용 이미지 (명화/감성 수채화 고품격 기독교 아트 디렉팅) ──
+            # ── 2. 본문 내용 이미지 (어색함 100% 방지: 은혜로운 성지/십자가/빛 8K 예술 풍경) ──
             style_prompts = {
-                "고전유화": "masterpiece sacred oil painting, Caravaggio chiaroscuro lighting, Rembrandt atmosphere, museum quality biblical art, rich oil texture, profound spiritual reverence, timeless masterpiece",
+                "고전유화": "masterpiece sacred fine art oil painting, Rembrandt golden light, museum quality biblical art, rich oil texture, profound spiritual reverence, breathtaking composition, no human faces",
                 "수채화": "soft emotional watercolor, gentle warm morning sunlight, peaceful spiritual sanctuary, graceful artistic brushstrokes, pastel color harmony, beautiful devotional illustration",
                 "시네마틱실사": "epic cinematic photography of biblical ancient landscape, dramatic golden hour, rays of divine grace breaking through soft clouds, National Geographic style, profound spiritual awe",
                 "현대일러스트": "modern elegant line illustration, subtle gold foil accents, refined spiritual artwork, warm minimalist aesthetic, graceful storybook illustration, peaceful atmosphere",
@@ -326,17 +326,16 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             }
             art_style = style_prompts.get(style_name, style_prompts["고전유화"])
 
-            # 100% 성공을 보장하는 순수 영문 성경 구속사 핵심 서사 테마 풀
+            # 인물 어색함 원천 차단: 눈부시게 아름답고 서정적인 기독교 구속사 예술 풍경
             import random
             biblical_art_concepts = [
-                "a majestic wooden cross standing gracefully on a quiet mountain hill at golden sunrise, rays of divine grace pouring through soft clouds",
-                "an ancient potter's hands gently crafting a clay vessel under warm golden candlelight in Jerusalem studio",
-                "a serene wilderness path winding through ancient olive trees at peaceful morning dawn with soft glowing light",
-                "an open ancient biblical manuscript scroll with glowing golden light on an old oak wooden table",
+                "a majestic wooden cross standing gracefully on a quiet mountain peak at golden sunrise, rays of divine grace pouring through soft clouds",
+                "an open ancient biblical manuscript scroll with glowing golden light on an old oak wooden table in warm candlelight",
+                "a serene wilderness path winding through ancient olive trees at peaceful morning dawn with soft glowing sunlight",
                 "a majestic sacred view of Mount of Olives under a heavenly golden sky, atmosphere of eternal hope and salvation",
-                "a gentle shepherd guiding a flock of sheep through a quiet green biblical valley at serene sunset",
                 "dramatic redemptive scenery with heavenly rays of divine mercy breaking through dark stormy clouds over Jerusalem landscape",
-                "a glowing wooden boat resting peacefully on the quiet Sea of Galilee under twilight stars"
+                "a glowing wooden boat resting peacefully on the quiet Sea of Galilee under twilight golden stars",
+                "ancient stone Jerusalem city wall under golden hour sunlight, peaceful spiritual atmosphere"
             ]
 
             seed = random.randint(100000, 999999)
@@ -346,20 +345,20 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
 
-            # 구글 차세대 나노바나나 (Imagen 3) 및 플래그십 AI 렌더링 라우팅 (imagen -> flux-realism -> flux)
+            # 타임아웃 100% 방지: 가장 신뢰도 높고 빠른 3중 엔진 (flux -> turbo -> art)
             import requests
-            models_to_try = ['imagen', 'flux-realism', 'flux']
+            models_to_try = ['flux', 'turbo', 'art']
             for m_idx, model_name in enumerate(models_to_try):
                 try:
                     pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model={model_name}&seed={seed}&nologo=true"
-                    print(f"[STUDIO NANO-BANANA ART] Generating Imagen 3 art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
+                    print(f"[STUDIO AI ART] Generating art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
                     img_res = requests.get(pollination_url, timeout=12)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
-                        print(f"[STUDIO NANO-BANANA ART] Success generating art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
+                        print(f"[STUDIO AI ART] Success generating art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
                         return f"data:image/jpeg;base64,{img_str}"
                 except Exception as pe:
-                    print(f"[NANO-BANANA MODEL {model_name} FAIL] {pe}")
+                    print(f"[MODEL {model_name} FAIL] {pe}")
                     time.sleep(0.3)
 
             # 외부 API 지연 시 나타나는 고품격 성경 일러스트 그래픽 백업 카드
