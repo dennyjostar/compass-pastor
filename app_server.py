@@ -662,12 +662,13 @@ def get_studio_task_status(task_id):
 
 def bg_regenerate_images(task_id, data):
     try:
-        category = data.get('category', '로마서')
-        num = data.get('num', '104')
-        title = data.get('title', '원고 제목')
-        summary = data.get('summary', '')
-        image_count = int(data.get('imageCount', 3))
-        image_style = data.get('imageStyle', '고전유화')
+        data = data or {}
+        category = data.get('category') or '로마서'
+        num = data.get('num') or '104'
+        title = data.get('title') or f"{category} {num}강 | 하나님의 주권과 은혜"
+        summary = data.get('summary') or ''
+        image_count = int(data.get('imageCount') or 3)
+        image_style = data.get('imageStyle') or '고전유화'
 
         STUDIO_TASKS[task_id]['step'] = f'AI 예술 그림 {image_count}장 새로 생성 중...'
 

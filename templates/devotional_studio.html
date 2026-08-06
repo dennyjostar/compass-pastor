@@ -820,19 +820,26 @@
                 return;
             }
 
-            const category = document.getElementById('bookOrCategory').value || "로마서";
-            const num = document.getElementById('lectureNum').value || "104";
-            const title = document.getElementById('titleInput').value || "故 김성수 목사 묵상";
-            const summary = document.getElementById('summaryInput').value || "";
-            const imageCount = document.getElementById('imageCountSelect').value;
-            const imageStyle = document.getElementById('imageStyleSelect').value;
+            const category = document.getElementById('bookOrCategory')?.value || "로마서";
+            const num = document.getElementById('lectureNum')?.value || "104";
+            let title = document.getElementById('titleInput')?.value?.trim() || "";
+            if (!title) {
+                title = `${category} ${num}강 | 하나님의 주권과 은혜`;
+            }
+            const summary = document.getElementById('summaryInput')?.value?.trim() || "";
+            const imageCount = document.getElementById('imageCountSelect')?.value || "3";
+            const imageStyle = document.getElementById('imageStyleSelect')?.value || "고전유화";
 
             const btn = document.getElementById('regenImgBtn');
             const grid = document.getElementById('galleryGrid');
 
-            btn.disabled = true;
-            btn.innerText = '🎨 이미지만 새로 생성 중...';
-            grid.innerHTML = `<div style="font-size: 13px; color: var(--gold-light); grid-column: 1/-1; text-align: center; padding: 20px;">🎨 AI 예술 이미지를 새로 제작하고 있습니다...</div>`;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = '🎨 이미지만 새로 생성 중...';
+            }
+            if (grid) {
+                grid.innerHTML = `<div style="font-size: 13px; color: var(--gold-light); grid-column: 1/-1; text-align: center; padding: 20px;">🎨 AI 예술 이미지를 새로 제작하고 있습니다...</div>`;
+            }
 
             try {
                 const res = await fetch('/api/studio/regenerate-images', {
