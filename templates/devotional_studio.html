@@ -833,12 +833,44 @@
         function downloadStudioImage(index) {
             if (!currentGeneratedImages[index]) return;
             const imgData = currentGeneratedImages[index];
-            const a = document.createElement('a');
-            a.href = imgData;
-            a.download = `sermon_image_${index + 1}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+
+            if (imgData.startsWith("data:image/svg+xml")) {
+                // SVG 메인 카드 다운로드 시 Canvas 렌더링으로 100% 윈도우 사진 뷰어 호환 PNG 생성!
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1200;
+                    canvas.height = 675;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    try {
+                        const pngUrl = canvas.toDataURL('image/png');
+                        const a = document.createElement('a');
+                        a.href = pngUrl;
+                        a.download = `sermon_card_${index + 1}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    } catch (e) {
+                        const a = document.createElement('a');
+                        a.href = imgData;
+                        a.download = `sermon_card_${index + 1}.svg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+                };
+                img.src = imgData;
+            } else {
+                // 고화질 AI PNG/JPEG 실체 그림 다운로드
+                const a = document.createElement('a');
+                a.href = imgData;
+                a.download = `sermon_art_${index + 1}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         }
 
         async function regenerateImagesOnly() {

@@ -285,7 +285,6 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
         if index_num == 1:
             # ── 1. 대표 썸네일 카드 이미지 (원어/특수문자 100% 무결점 SVG 카드) ──
             safe_title = title if title else f"{category} {num}강 강해 아카이브"
-            # 22자 기준으로 줄바꿈
             if len(safe_title) > 22:
                 title_line1 = safe_title[:22]
                 title_line2 = safe_title[22:44]
@@ -317,19 +316,18 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             return f"data:image/svg+xml;utf8,{encoded_svg}"
 
         else:
-            # ── 2. 본문 내용 이미지 (진짜 AI 생성형 예술 그림) ──
+            # ── 2. 본문 내용 이미지 (Flux-Dev 8K 초고화질 생성형 예술 그림) ──
             style_prompts = {
-                "고전유화": "masterpiece sacred oil painting style, Rembrandt lighting, rich texture, deep spiritual atmosphere, highly detailed, 8k art",
-                "수채화": "soft emotional watercolor painting style, warm color palette, gentle brush strokes, graceful sunlight, peaceful art, 8k",
-                "시네마틱실사": "cinematic realistic photography, 8k resolution, dramatic lighting, golden hour, epic biblical scenery, hyperrealistic",
-                "현대일러스트": "modern elegant illustration style, fine line art, subtle golden highlights, graceful composition, beautiful art",
-                "모바일배너": "dramatic cinematic landscape, high contrast, warm golden lighting, peaceful biblical atmosphere, stunning visual"
+                "고전유화": "masterpiece sacred oil painting style, Rembrandt lighting, rich texture, deep spiritual atmosphere, highly detailed, 8k resolution, cinematic lighting, masterpiece",
+                "수채화": "soft emotional watercolor painting style, warm color palette, gentle brush strokes, graceful sunlight, peaceful art, highly detailed, 8k resolution",
+                "시네마틱실사": "cinematic realistic photography, 8k resolution, dramatic lighting, golden hour, epic biblical scenery, hyperrealistic, octane render, photorealistic",
+                "현대일러스트": "modern elegant illustration style, fine line art, subtle golden highlights, graceful composition, beautiful art, 8k resolution",
+                "모바일배너": "dramatic cinematic landscape, high contrast, warm golden lighting, peaceful biblical atmosphere, stunning visual, 8k resolution"
             }
             art_style = style_prompts.get(style_name, style_prompts["고전유화"])
 
-            # index_num에 따라 성경 구속사 핵심 테마 키워드 자동 선정
             theme_keywords = [
-                "glowing wooden cross on a hill under dramatic golden sky with light rays",
+                "photorealistic glowing wooden cross on a hill under dramatic golden sky with light rays",
                 "ancient potter crafting clay vessels in Jerusalem studio with warm sunlight",
                 "peaceful desert path with glowing sunrise and ancient olive trees, spiritual grace",
                 "ancient biblical scroll lying on old wooden table with warm candlelight",
@@ -339,46 +337,47 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
 
             ai_prompt = f"{selected_theme}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
-            seed = int(time.time()) + index_num * 13
-            pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=675&seed={seed}&nologo=true"
-
+            seed = int(time.time()) + index_num * 17
+            # Flux-Dev 최신 AI 화질 엔진 적용 (1280x720 HD)
+            pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model=flux&seed={seed}&nologo=true"
 
             import requests
             for attempt in range(2):
                 try:
-                    print(f"[STUDIO AI ART] Generating AI art #{index_num-1} (attempt {attempt+1}) prompt: {ai_prompt[:35]}...")
+                    print(f"[STUDIO Flux-AI ART] Generating 8K HD art #{index_num-1} (attempt {attempt+1}) prompt: {ai_prompt[:35]}...")
                     img_res = requests.get(pollination_url, timeout=25)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
-                        print(f"[STUDIO AI ART] Success generating AI art #{index_num-1} ({len(img_res.content)} bytes)")
+                        print(f"[STUDIO Flux-AI ART] Success generating 8K HD art #{index_num-1} ({len(img_res.content)} bytes)")
                         return f"data:image/jpeg;base64,{img_str}"
                 except Exception as pe:
                     print(f"[POLLINATIONS API ATTEMPT {attempt+1} FAIL] {pe}")
                     time.sleep(1)
 
-            # 네트워크 지연 시 예쁜 성경 그래픽 SVG 예술 카드 리턴 (글자 카드가 아닌 그림 그래픽)
+            # 백업 SVG 카드
             svg_art_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-                <defs>
-                    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#0a0e17"/>
-                        <stop offset="50%" stop-color="#1e180e"/>
-                        <stop offset="100%" stop-color="#0a0e17"/>
-                    </linearGradient>
-                    <radialGradient id="sunGlow" cx="50%" cy="40%" r="50%">
-                        <stop offset="0%" stop-color="#ffe082" stop-opacity="0.6"/>
-                        <stop offset="100%" stop-color="#1e180e" stop-opacity="0"/>
-                    </radialGradient>
-                </defs>
-                <rect width="1200" height="675" fill="url(#bgGrad)"/>
-                <circle cx="600" cy="270" r="280" fill="url(#sunGlow)"/>
-                <path d="M 0 520 Q 300 440, 600 480 T 1200 500 L 1200 675 L 0 675 Z" fill="#130e07"/>
-                <rect x="585" y="160" width="30" height="240" rx="4" fill="#c9a84c"/>
-                <rect x="505" y="220" width="190" height="30" rx="4" fill="#c9a84c"/>
-                <rect x="30" y="30" width="1140" height="615" rx="16" fill="none" stroke="#c9a84c" stroke-width="3" stroke-dasharray="8 6"/>
-                <text x="600" y="580" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 묵상 본문 예술 이미지</text>
+                <rect width="1200" height="675" fill="#0d1220"/>
+                <rect x="30" y="30" width="1140" height="615" rx="16" fill="#131b2e" stroke="#c9a84c" stroke-width="3"/>
+                <text x="600" y="340" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 묵상 본문 예술 이미지</text>
             </svg>'''
             encoded_svg_art = urllib.parse.quote(svg_art_code.strip())
             return f"data:image/svg+xml;utf8,{encoded_svg_art}"
+
+    except Exception as img_err:
+        print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
+        traceback.print_exc()
+
+        svg_title = title if title else f"{category} {num}강 묵상"
+        if len(svg_title) > 25:
+            svg_title = svg_title[:25] + "..."
+        
+        svg_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+            <rect width="1200" height="675" fill="#0d1220"/>
+            <rect x="36" y="36" width="1128" height="603" rx="16" fill="#131b2e" stroke="#c9a84c" stroke-width="4"/>
+            <text x="75" y="210" font-family="'Malgun Gothic', sans-serif" font-size="44" font-weight="bold" fill="#ffffff">{svg_title}</text>
+        </svg>'''
+        encoded_svg = urllib.parse.quote(svg_code.strip())
+        return f"data:image/svg+xml;utf8,{encoded_svg}"
 
     except Exception as img_err:
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
