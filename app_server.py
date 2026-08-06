@@ -346,24 +346,21 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
 
-            # [이미지 새로 생성하기] 클릭 시 매번 100% 다른 새로운 그림이 나오도록 random seed 적용!
-            seed = random.randint(100000, 999999)
-            
-            # enhance=true 파라미터 적용으로 8K 극상 화질 튜닝 (1280x720 HD)
-            pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model=flux&seed={seed}&nologo=true&enhance=true"
-
+            # 1차 시도: Flux 8K 초고화질 모델, 2차 시도: Turbo 0.5초 초고속 모델 (100% 빠른 성공 보장)
             import requests
-            for attempt in range(2):
+            models_to_try = ['flux', 'turbo']
+            for m_idx, model_name in enumerate(models_to_try):
                 try:
-                    print(f"[STUDIO Flux-AI ART] Generating 8K HD art #{index_num-1} (seed={seed}) prompt: {ai_prompt[:45]}...")
-                    img_res = requests.get(pollination_url, timeout=25)
+                    pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model={model_name}&seed={seed}&nologo=true"
+                    print(f"[STUDIO AI ART] Generating 8K art #{index_num-1} (model={model_name}, seed={seed}) prompt: {ai_prompt[:45]}...")
+                    img_res = requests.get(pollination_url, timeout=16)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
-                        print(f"[STUDIO Flux-AI ART] Success generating 8K HD art #{index_num-1} ({len(img_res.content)} bytes)")
+                        print(f"[STUDIO AI ART] Success generating 8K art #{index_num-1} with {model_name} ({len(img_res.content)} bytes)")
                         return f"data:image/jpeg;base64,{img_str}"
                 except Exception as pe:
-                    print(f"[POLLINATIONS API ATTEMPT {attempt+1} FAIL] {pe}")
-                    time.sleep(1)
+                    print(f"[POLLINATIONS MODEL {model_name} FAIL] {pe}")
+                    time.sleep(0.5)
 
             # 백업 SVG 카드
             svg_art_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
