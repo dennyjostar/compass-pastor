@@ -660,11 +660,8 @@ def get_studio_task_status(task_id):
         return jsonify({'status': 'error', 'error': '작업을 찾을 수 없습니다.'}), 404
     return jsonify(task)
 
-@app.route('/api/studio/regenerate-images', methods=['POST'])
-def regenerate_studio_images():
-    """원고 텍스트는 건드리지 않고 이미지만 새로 단독 생성"""
+def bg_regenerate_images(task_id, data):
     try:
-        data = request.json or {}
         category = data.get('category', '로마서')
         num = data.get('num', '104')
         title = data.get('title', '원고 제목')
@@ -672,16 +669,45 @@ def regenerate_studio_images():
         image_count = int(data.get('imageCount', 3))
         image_style = data.get('imageStyle', '고전유화')
 
+        STUDIO_TASKS[task_id]['step'] = f'AI 예술 그림 {image_count}장 새로 생성 중...'
+
         generated_images = []
         for i in range(1, image_count + 1):
             try:
                 img_url = create_studio_image(title=title, category=category, style_name=image_style, index_num=i, total_count=image_count, num=num, summary=summary)
                 generated_images.append(img_url)
             except Exception as img_e:
-                print(f"[REGEN IMAGE ERROR] {img_e}")
+                print(f"[REGEN IMAGE LOOP ERROR] {img_e}")
                 generated_images.append("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
 
-        return jsonify({'images': generated_images})
+        STUDIO_TASKS[task_id]['status'] = 'completed'
+        STUDIO_TASKS[task_id]['images'] = generated_images
+
+    except Exception as e:
+        print(f"[BG REGEN IMAGES ERROR] {e}")
+        STUDIO_TASKS[task_id]['status'] = 'error'
+        STUDIO_TASKS[task_id]['error'] = str(e)
+
+@app.route('/api/studio/regenerate-images', methods=['POST'])
+def regenerate_studio_images():
+    """원고 텍스트는 건드리지 않고 이미지만 새로 비동기 단독 생성"""
+    try:
+        task_id = str(uuid.uuid4())
+        data = request.json or {}
+
+        STUDIO_TASKS[task_id] = {
+            'status': 'processing',
+            'step': 'AI 이미지 세트 새로 제작 중...',
+            'content': '',
+            'images': [],
+            'error': ''
+        }
+
+        t = threading.Thread(target=bg_regenerate_images, args=(task_id, data))
+        t.daemon = True
+        t.start()
+
+        return jsonify({'taskId': task_id})
     except Exception as e:
         print(f"[REGEN IMAGES API ERROR] {e}")
         return jsonify({"error": str(e)}), 200

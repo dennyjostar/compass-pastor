@@ -832,7 +832,7 @@
 
             btn.disabled = true;
             btn.innerText = '🎨 이미지만 새로 생성 중...';
-            grid.innerHTML = `<div style="font-size: 13px; color: var(--gold-light); grid-column: 1/-1; text-align: center; padding: 20px;">🎨 이미지를 새로 렌더링하고 있습니다...</div>`;
+            grid.innerHTML = `<div style="font-size: 13px; color: var(--gold-light); grid-column: 1/-1; text-align: center; padding: 20px;">🎨 AI 예술 이미지를 새로 제작하고 있습니다...</div>`;
 
             try {
                 const res = await fetch('/api/studio/regenerate-images', {
@@ -845,23 +845,49 @@
                     })
                 });
 
-                const data = await res.json();
-                if (data.images && data.images.length > 0) {
-                    currentGeneratedImages = data.images;
+                const initData = await res.json();
+                if (initData.error || !initData.taskId) {
+                    alert("이미지 재생성 실패: " + (initData.error || "다시 시도해주세요"));
                     renderGallery(currentGeneratedImages);
-                    btn.innerText = '✅ 이미지 재생성 완료!';
-                    setTimeout(() => btn.innerText = '🎨 이미지만 새로 생성하기', 2000);
-                } else {
-                    alert("이미지 재생성 실패: " + (data.error || "다시 시도해주세요"));
-                    renderGallery(currentGeneratedImages);
+                    btn.disabled = false;
                     btn.innerText = '🎨 이미지만 새로 생성하기';
+                    return;
                 }
+
+                const taskId = initData.taskId;
+
+                // 1.5초 간격으로 백그라운드 태스크 폴링 (타임아웃 100% 차단)
+                let regenPoll = setInterval(async () => {
+                    try {
+                        const statusRes = await fetch(`/api/studio/task-status/${taskId}`);
+                        if (!statusRes.ok) return;
+
+                        const taskData = await statusRes.json();
+
+                        if (taskData.status === 'completed') {
+                            clearInterval(regenPoll);
+                            currentGeneratedImages = taskData.images || [];
+                            renderGallery(currentGeneratedImages);
+                            btn.disabled = false;
+                            btn.innerText = '✅ 이미지 재생성 완료!';
+                            setTimeout(() => btn.innerText = '🎨 이미지만 새로 생성하기', 2000);
+                        } else if (taskData.status === 'error') {
+                            clearInterval(regenPoll);
+                            alert("이미지 재생성 중 오류: " + taskData.error);
+                            renderGallery(currentGeneratedImages);
+                            btn.disabled = false;
+                            btn.innerText = '🎨 이미지만 새로 생성하기';
+                        }
+                    } catch (pollErr) {
+                        console.log("Image regen polling error", pollErr);
+                    }
+                }, 1500);
+
             } catch (err) {
-                alert("이미지 재생성 중 오류: " + err);
+                alert("이미지 재생성 요청 실패: " + err);
                 renderGallery(currentGeneratedImages);
-                btn.innerText = '🎨 이미지만 새로 생성하기';
-            } finally {
                 btn.disabled = false;
+                btn.innerText = '🎨 이미지만 새로 생성하기';
             }
         }
 
