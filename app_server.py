@@ -316,7 +316,7 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             return f"data:image/svg+xml;utf8,{encoded_svg}"
 
         else:
-            # ── 2. 본문 내용 이미지 (Flux-Dev 8K 초고화질 생성형 예술 그림) ──
+            # ── 2. 본문 내용 이미지 (본문 주제 동적 반영 & Flux 8K Ultra HD AI 그림) ──
             style_prompts = {
                 "고전유화": "masterpiece sacred oil painting style, Rembrandt lighting, rich texture, deep spiritual atmosphere, highly detailed, 8k resolution, cinematic lighting, masterpiece",
                 "수채화": "soft emotional watercolor painting style, warm color palette, gentle brush strokes, graceful sunlight, peaceful art, highly detailed, 8k resolution",
@@ -326,25 +326,36 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             }
             art_style = style_prompts.get(style_name, style_prompts["고전유화"])
 
-            theme_keywords = [
-                "photorealistic glowing wooden cross on a hill under dramatic golden sky with light rays",
-                "ancient potter crafting clay vessels in Jerusalem studio with warm sunlight",
-                "peaceful desert path with glowing sunrise and ancient olive trees, spiritual grace",
-                "ancient biblical scroll lying on old wooden table with warm candlelight",
-                "majestic Mount of Olives landscape under heavenly sky, spiritual hope"
-            ]
-            selected_theme = theme_keywords[(index_num - 2) % len(theme_keywords)]
+            # 원고 제목 및 요약에서 묵상 주제 키워드 동적 추출
+            clean_title = title.replace('|', ' ').replace(':', ' ').replace('-', ' ')
+            clean_summary = summary.replace('\n', ' ') if summary else title
 
-            ai_prompt = f"{selected_theme}, {art_style}"
+            # 다양성을 위한 풍성한 성경적 테마 영문 키워드 풀 (index_num & 난수 매핑)
+            import random
+            varied_concepts = [
+                f"biblical sacred scene illustrating '{clean_title[:35]}', glowing wooden cross on a hill under dramatic golden sky",
+                f"spiritual scene of '{clean_summary[:40]}', ancient potter shaping clay vessel in Jerusalem studio with sunlight",
+                f"sacred art depiction of '{clean_title[:35]}', peaceful desert wilderness path with glowing sunrise and ancient olive trees",
+                f"devotional illustration of '{clean_summary[:40]}', ancient biblical manuscript scroll with warm candlelight",
+                f"epic sacred landscape of '{clean_title[:35]}', Mount of Olives under heavenly glowing sky with rays of grace",
+                f"sacred biblical reflection on '{clean_summary[:40]}', shepherd caring for sheep in ancient green valley",
+                f"dramatic redemptive scene of '{clean_title[:35]}', rays of divine mercy breaking through dark storm clouds over Jerusalem"
+            ]
+
+            selected_concept = varied_concepts[(index_num - 2 + random.randint(0, 10)) % len(varied_concepts)]
+            ai_prompt = f"{selected_concept}, {art_style}"
             encoded_prompt = urllib.parse.quote(ai_prompt)
-            seed = int(time.time()) + index_num * 17
-            # Flux-Dev 최신 AI 화질 엔진 적용 (1280x720 HD)
-            pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model=flux&seed={seed}&nologo=true"
+
+            # [이미지 새로 생성하기] 클릭 시 매번 100% 다른 새로운 그림이 나오도록 random seed 적용!
+            seed = random.randint(100000, 999999)
+            
+            # enhance=true 파라미터 적용으로 8K 극상 화질 튜닝 (1280x720 HD)
+            pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model=flux&seed={seed}&nologo=true&enhance=true"
 
             import requests
             for attempt in range(2):
                 try:
-                    print(f"[STUDIO Flux-AI ART] Generating 8K HD art #{index_num-1} (attempt {attempt+1}) prompt: {ai_prompt[:35]}...")
+                    print(f"[STUDIO Flux-AI ART] Generating 8K HD art #{index_num-1} (seed={seed}) prompt: {ai_prompt[:45]}...")
                     img_res = requests.get(pollination_url, timeout=25)
                     if img_res.status_code == 200 and len(img_res.content) > 5000:
                         img_str = base64.b64encode(img_res.content).decode('utf-8')
