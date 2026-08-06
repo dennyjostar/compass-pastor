@@ -274,7 +274,7 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
     index_num == 1: [대표 썸네일 카드] 블로그 글 첫머리 대표 카드 이미지
     index_num >= 2: [내용 이미지] 지정 화풍 스타일(유화/수채화/실사/일러스트) 본문 삽화 이미지
     """
-    import io, base64, traceback
+    import io, base64, traceback, urllib.parse
     try:
         from PIL import Image, ImageDraw
         import time
@@ -322,7 +322,43 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             draw.text((75, 500), footer_text, fill=(252, 227, 138), font=font_footer)
 
         else:
-            # ── 2. 본문 내용 이미지 (선택 화풍 스타일) ──
+            # ── 2. 본문 내용 이미지 (진짜 AI 생성형 예술 그림) ──
+            style_prompts = {
+                "고전유화": "masterpiece sacred oil painting style, Rembrandt lighting, rich texture, deep spiritual atmosphere, highly detailed, 8k art",
+                "수채화": "soft emotional watercolor painting style, warm color palette, gentle brush strokes, graceful sunlight, peaceful art, 8k",
+                "시네마틱실사": "cinematic realistic photography, 8k resolution, dramatic lighting, golden hour, epic biblical scenery, hyperrealistic",
+                "현대일러스트": "modern elegant illustration style, fine line art, subtle golden highlights, graceful composition, beautiful art",
+                "모바일배너": "dramatic cinematic landscape, high contrast, warm golden lighting, peaceful biblical atmosphere, stunning visual"
+            }
+            art_style = style_prompts.get(style_name, style_prompts["고전유화"])
+
+            # index_num에 따라 성경 구속사 핵심 테마 키워드 자동 선정
+            theme_keywords = [
+                "glowing wooden cross on a hill under dramatic golden sky with light rays",
+                "ancient potter crafting clay vessels in Jerusalem studio with warm sunlight",
+                "peaceful desert path with glowing sunrise and ancient olive trees, spiritual grace",
+                "ancient biblical scroll lying on old wooden table with warm candlelight",
+                "majestic Mount of Olives landscape under heavenly sky, spiritual hope"
+            ]
+            selected_theme = theme_keywords[(index_num - 2) % len(theme_keywords)]
+
+            ai_prompt = f"{selected_theme}, {art_style}"
+            encoded_prompt = urllib.parse.quote(ai_prompt)
+            seed = int(time.time()) + index_num * 13
+            pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=675&seed={seed}&nologo=true"
+
+            try:
+                import requests
+                print(f"[STUDIO AI ART] Generating AI art #{index_num-1} with prompt: {ai_prompt[:40]}...")
+                img_res = requests.get(pollination_url, timeout=12)
+                if img_res.status_code == 200 and len(img_res.content) > 5000:
+                    img_str = base64.b64encode(img_res.content).decode('utf-8')
+                    print(f"[STUDIO AI ART] Success generating AI art #{index_num-1} ({len(img_res.content)} bytes)")
+                    return f"data:image/jpeg;base64,{img_str}"
+            except Exception as pe:
+                print(f"[POLLINATIONS API EXCEPTION] {pe}, falling back to PIL render")
+
+            # API 연결 불가 시 PIL로 백업 예술 이미지 구성
             styles_map = {
                 "고전유화": {"bg": ((10,14,23), (28,20,10)), "accent": (201,168,76), "border": (139,110,50), "text": (255,255,255), "tag": "고전 명화 스타일"},
                 "수채화": {"bg": ((247,244,237), (230,222,209)), "accent": (90,64,32), "border": (201,168,76), "text": (26,15,0), "tag": "감성 수채화 스타일"},
@@ -339,20 +375,13 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             font_title = get_safe_font(40)
             font_sub = get_safe_font(26)
 
-            # 외곽 프레임
             draw.rectangle([30, 30, width-30, height-30], fill=s["bg"][1], outline=s["border"], width=3)
-
-            # 뱃지
             badge_text = f" {s['tag']} #{index_num-1} "
             draw.rectangle([60, 60, 420, 110], fill=s["accent"])
             badge_fill = (13,18,32) if s["accent"] == (201,168,76) else (255,255,255)
             draw.text((75, 72), badge_text, fill=badge_fill, font=font_tag)
-
-            # 성경 정보 & 제목
             draw.text((60, 150), f"[{category} {num}강]", fill=s["accent"], font=font_sub)
             draw.text((60, 210), title[:22] if len(title) > 22 else title, fill=s["text"], font=font_title)
-
-            # 푸터
             footer_msg = "Compass Devotional Studio - 故 김성수 목사 묵상집"
             draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
 
