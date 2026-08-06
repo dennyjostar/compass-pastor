@@ -347,50 +347,43 @@ def create_studio_image(title, category, style_name, index_num, total_count=3, n
             seed = int(time.time()) + index_num * 13
             pollination_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=675&seed={seed}&nologo=true"
 
-            try:
-                import requests
-                print(f"[STUDIO AI ART] Generating AI art #{index_num-1} with prompt: {ai_prompt[:40]}...")
-                img_res = requests.get(pollination_url, timeout=12)
-                if img_res.status_code == 200 and len(img_res.content) > 5000:
-                    img_str = base64.b64encode(img_res.content).decode('utf-8')
-                    print(f"[STUDIO AI ART] Success generating AI art #{index_num-1} ({len(img_res.content)} bytes)")
-                    return f"data:image/jpeg;base64,{img_str}"
-            except Exception as pe:
-                print(f"[POLLINATIONS API EXCEPTION] {pe}, falling back to PIL render")
 
-            # API 연결 불가 시 PIL로 백업 예술 이미지 구성
-            styles_map = {
-                "고전유화": {"bg": ((10,14,23), (28,20,10)), "accent": (201,168,76), "border": (139,110,50), "text": (255,255,255), "tag": "고전 명화 스타일"},
-                "수채화": {"bg": ((247,244,237), (230,222,209)), "accent": (90,64,32), "border": (201,168,76), "text": (26,15,0), "tag": "감성 수채화 스타일"},
-                "시네마틱실사": {"bg": ((7,11,18), (15,23,42)), "accent": (96,165,250), "border": (59,130,246), "text": (255,255,255), "tag": "시네마틱 실사"},
-                "현대일러스트": {"bg": ((24,24,27), (39,39,42)), "accent": (244,63,94), "border": (251,113,133), "text": (255,255,255), "tag": "현대 일러스트"},
-                "모바일배너": {"bg": ((13,18,32), (23,31,51)), "accent": (201,168,76), "border": (252,227,138), "text": (255,255,255), "tag": "모바일 카드 배너"}
-            }
+            import requests
+            for attempt in range(2):
+                try:
+                    print(f"[STUDIO AI ART] Generating AI art #{index_num-1} (attempt {attempt+1}) prompt: {ai_prompt[:35]}...")
+                    img_res = requests.get(pollination_url, timeout=25)
+                    if img_res.status_code == 200 and len(img_res.content) > 5000:
+                        img_str = base64.b64encode(img_res.content).decode('utf-8')
+                        print(f"[STUDIO AI ART] Success generating AI art #{index_num-1} ({len(img_res.content)} bytes)")
+                        return f"data:image/jpeg;base64,{img_str}"
+                except Exception as pe:
+                    print(f"[POLLINATIONS API ATTEMPT {attempt+1} FAIL] {pe}")
+                    time.sleep(1)
 
-            s = styles_map.get(style_name, styles_map["고전유화"])
-            img = Image.new('RGB', (width, height), color=s["bg"][0])
-            draw = ImageDraw.Draw(img)
-
-            font_tag = get_safe_font(24)
-            font_title = get_safe_font(40)
-            font_sub = get_safe_font(26)
-
-            draw.rectangle([30, 30, width-30, height-30], fill=s["bg"][1], outline=s["border"], width=3)
-            badge_text = f" {s['tag']} #{index_num-1} "
-            draw.rectangle([60, 60, 420, 110], fill=s["accent"])
-            badge_fill = (13,18,32) if s["accent"] == (201,168,76) else (255,255,255)
-            draw.text((75, 72), badge_text, fill=badge_fill, font=font_tag)
-            draw.text((60, 150), f"[{category} {num}강]", fill=s["accent"], font=font_sub)
-            draw.text((60, 210), title[:22] if len(title) > 22 else title, fill=s["text"], font=font_title)
-            footer_msg = "Compass Devotional Studio - 故 김성수 목사 묵상집"
-            draw.text((60, height-80), footer_msg, fill=s["accent"], font=font_tag)
-
-        # Base64로 직접 인코딩하여 반환
-        buffer = io.BytesIO()
-        img.save(buffer, format='PNG')
-        img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
-        print(f"[STUDIO IMG] Successfully generated image #{index_num} (base64 len={len(img_str)})")
-        return f"data:image/png;base64,{img_str}"
+            # 네트워크 지연 시 예쁜 성경 그래픽 SVG 예술 카드 리턴 (글자 카드가 아닌 그림 그래픽)
+            svg_art_code = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+                <defs>
+                    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0a0e17"/>
+                        <stop offset="50%" stop-color="#1e180e"/>
+                        <stop offset="100%" stop-color="#0a0e17"/>
+                    </linearGradient>
+                    <radialGradient id="sunGlow" cx="50%" cy="40%" r="50%">
+                        <stop offset="0%" stop-color="#ffe082" stop-opacity="0.6"/>
+                        <stop offset="100%" stop-color="#1e180e" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <rect width="1200" height="675" fill="url(#bgGrad)"/>
+                <circle cx="600" cy="270" r="280" fill="url(#sunGlow)"/>
+                <path d="M 0 520 Q 300 440, 600 480 T 1200 500 L 1200 675 L 0 675 Z" fill="#130e07"/>
+                <rect x="585" y="160" width="30" height="240" rx="4" fill="#c9a84c"/>
+                <rect x="505" y="220" width="190" height="30" rx="4" fill="#c9a84c"/>
+                <rect x="30" y="30" width="1140" height="615" rx="16" fill="none" stroke="#c9a84c" stroke-width="3" stroke-dasharray="8 6"/>
+                <text x="600" y="580" text-anchor="middle" font-family="'Malgun Gothic', sans-serif" font-size="28" font-weight="bold" fill="#ffe082">📖 {category} {num}강 묵상 본문 예술 이미지</text>
+            </svg>'''
+            encoded_svg_art = urllib.parse.quote(svg_art_code.strip())
+            return f"data:image/svg+xml;utf8,{encoded_svg_art}"
 
     except Exception as img_err:
         print(f"[STUDIO IMAGE GENERATION ERROR] {img_err}")
