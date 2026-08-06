@@ -538,6 +538,27 @@
         let currentGeneratedContent = "";
         let currentGeneratedImages = [];
 
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedContent = localStorage.getItem('lastDevotionalContent');
+            const savedImages = localStorage.getItem('lastDevotionalImages');
+
+            if (savedContent) {
+                currentGeneratedContent = savedContent;
+                const outputBox = document.getElementById('outputContent');
+                if (outputBox) {
+                    outputBox.innerText = currentGeneratedContent;
+                    outputBox.style.display = 'block';
+                }
+            }
+
+            if (savedImages) {
+                try {
+                    currentGeneratedImages = JSON.parse(savedImages);
+                    renderGallery(currentGeneratedImages);
+                } catch (e) {}
+            }
+        });
+
         function updateCharLabel() {
             const val = document.getElementById('charCountSelect').value;
             document.getElementById('charCountLabel').innerText = parseInt(val).toLocaleString() + '자';
@@ -776,6 +797,12 @@
                             currentGeneratedContent = taskData.content;
                             currentGeneratedImages = taskData.images || [];
 
+                            // 브라우저 localStorage에 자동 보관 (새로고침 하더라도 100% 자동 복원)
+                            try {
+                                localStorage.setItem('lastDevotionalContent', currentGeneratedContent);
+                                localStorage.setItem('lastDevotionalImages', JSON.stringify(currentGeneratedImages));
+                            } catch (se) {}
+
                             document.getElementById('outputContent').innerText = currentGeneratedContent;
                             renderGallery(currentGeneratedImages);
 
@@ -816,8 +843,19 @@
 
         async function regenerateImagesOnly() {
             if (!currentGeneratedContent) {
-                alert("먼저 원고를 생성해 주세요!");
-                return;
+                const saved = localStorage.getItem('lastDevotionalContent');
+                if (saved) {
+                    currentGeneratedContent = saved;
+                    const outputBox = document.getElementById('outputContent');
+                    if (outputBox) {
+                        outputBox.innerText = currentGeneratedContent;
+                        outputBox.style.display = 'block';
+                    }
+                } else {
+                    // 작성된 원고가 아예 없을 때 이미지만 누르면 원고+이미지 자동 통합 생성 연동
+                    generateDevotional();
+                    return;
+                }
             }
 
             const category = document.getElementById('bookOrCategory')?.value || "로마서";
@@ -874,6 +912,11 @@
                         if (taskData.status === 'completed') {
                             clearInterval(regenPoll);
                             currentGeneratedImages = taskData.images || [];
+
+                            try {
+                                localStorage.setItem('lastDevotionalImages', JSON.stringify(currentGeneratedImages));
+                            } catch (se) {}
+
                             renderGallery(currentGeneratedImages);
                             btn.disabled = false;
                             btn.innerText = '✅ 이미지 재생성 완료!';
