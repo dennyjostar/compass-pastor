@@ -459,18 +459,19 @@
                 <!-- 6. 이미지 개수 선택 -->
                 <div class="form-group">
                     <label class="form-label" for="imageCountSelect">AI 블로그 이미지 개수</label>
-                    <select id="imageCountSelect" class="form-select">
-                        <option value="1">1장 (메인 대표 썸네일)</option>
-                        <option value="2">2장 (썸네일 + 본문 삽화)</option>
-                        <option value="3" selected>3장 (서론, 본문, 결론 세트)</option>
+                    <select id="imageCountSelect" class="form-select" onchange="handleImageCountChange()">
+                        <option value="0" selected>⚡ 0장 (이미지 없이 원고만 초고속 생성 - 권장)</option>
+                        <option value="1">1장 (메인 대표 썸네일 카드만)</option>
+                        <option value="2">2장 (썸네일 + 본문 삽화 1장)</option>
+                        <option value="3">3장 (서론, 본문, 결론 세트)</option>
                         <option value="5">5장 (단락별 세트)</option>
                     </select>
                 </div>
 
                 <!-- 7. 이미지 화풍/스타일 선택 -->
-                <div class="form-group">
+                <div class="form-group" id="imageStyleGroup" style="opacity: 0.5; pointer-events: none;">
                     <label class="form-label" for="imageStyleSelect">이미지 화풍 (Style)</label>
-                    <select id="imageStyleSelect" class="form-select">
+                    <select id="imageStyleSelect" class="form-select" disabled>
                         <option value="고전유화">🎨 고전 유화 명화 (Classical Oil)</option>
                         <option value="수채화">🖌️ 감성 수채화 (Soft Watercolor)</option>
                         <option value="시네마틱실사">📸 시네마틱 실사 (Cinematic Realism)</option>
@@ -479,7 +480,7 @@
                     </select>
                 </div>
 
-                <button class="btn-generate" onclick="generateDevotional()">✨ AI 원고 & 이미지 생성하기</button>
+                <button class="btn-generate" id="mainGenerateBtn" onclick="generateDevotional()">✨ AI 묵상 원고 생성하기</button>
             </aside>
 
             <!-- 오른쪽: 생성 원고 미리보기 및 툴바 -->
@@ -518,8 +519,8 @@
                     </div>
                 </div>
 
-                <!-- 생성된 이미지 갤러리 -->
-                <div class="image-gallery-section">
+                <!-- 생성된 이미지 갤러리 (이미지가 있을 때만 노출) -->
+                <div class="image-gallery-section" id="imageGallerySection" style="display: none;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                         <h3 style="font-size: 14px; color: var(--gold-light); font-weight: 700; margin: 0;">
                             🖼️ 생성된 AI 이미지 갤러리 (<span id="galleryCount">0</span>)
@@ -554,8 +555,14 @@
             if (savedImages) {
                 try {
                     currentGeneratedImages = JSON.parse(savedImages);
-                    renderGallery(currentGeneratedImages);
+                    const countSelect = document.getElementById('imageCountSelect');
+                    if (countSelect && parseInt(countSelect.value) > 0) {
+                        renderGallery(currentGeneratedImages);
+                    }
                 } catch (e) {}
+            }
+            if (typeof handleImageCountChange === 'function') {
+                handleImageCountChange();
             }
         });
 
@@ -675,6 +682,25 @@
             }
         }
 
+        function handleImageCountChange() {
+            const count = parseInt(document.getElementById('imageCountSelect').value);
+            const styleGroup = document.getElementById('imageStyleGroup');
+            const styleSelect = document.getElementById('imageStyleSelect');
+            const mainBtn = document.getElementById('mainGenerateBtn');
+
+            if (count === 0) {
+                styleGroup.style.opacity = '0.4';
+                styleGroup.style.pointerEvents = 'none';
+                styleSelect.disabled = true;
+                if (mainBtn) mainBtn.innerText = '✨ AI 묵상 원고 생성하기 (초고속)';
+            } else {
+                styleGroup.style.opacity = '1.0';
+                styleGroup.style.pointerEvents = 'auto';
+                styleSelect.disabled = false;
+                if (mainBtn) mainBtn.innerText = '✨ AI 원고 & 이미지 생성하기';
+            }
+        }
+
         let timerInterval = null;
         let secondsElapsed = 0;
 
@@ -685,9 +711,10 @@
             const stepTitle = document.getElementById('stepTitle');
             const stepDetail = document.getElementById('stepDetail');
 
-            let estimatedSeconds = 30;
-            if (parseInt(targetCharCount) >= 15000) estimatedSeconds = 50;
-            if (parseInt(targetCharCount) >= 20000) estimatedSeconds = 65;
+            const isNoImages = parseInt(imageCount) === 0;
+            let estimatedSeconds = isNoImages ? 15 : 35;
+            if (parseInt(targetCharCount) >= 15000) estimatedSeconds = isNoImages ? 25 : 55;
+            if (parseInt(targetCharCount) >= 20000) estimatedSeconds = isNoImages ? 35 : 70;
 
             progressBarFill.style.width = '0%';
             timerText.innerText = '00:00';
@@ -701,18 +728,28 @@
                 let percent = Math.min(Math.floor((secondsElapsed / estimatedSeconds) * 95), 95);
                 progressBarFill.style.width = `${percent}%`;
 
-                if (secondsElapsed <= 6) {
-                    stepTitle.innerText = `[1/4 단계] Gemini 3.6 Flash AI가 성경 본문과 구속사 주제를 기획하는 중...`;
-                    stepDetail.innerText = `故 김성수 목사의 신학 체계(인간의 전적 파산, 자기 부인, 십자가 은혜)를 바탕으로 구조화하고 있습니다.`;
-                } else if (secondsElapsed <= 22) {
-                    stepTitle.innerText = `[2/4 단계] 설정하신 분량(${parseInt(targetCharCount).toLocaleString()}자)으로 십자가 원고 작성 중...`;
-                    stepDetail.innerText = `인본주의 종교성 폭로, 헬라어/히브리어 원어 강해, 성도의 자기 부인을 심층 작성 중입니다.`;
-                } else if (secondsElapsed <= 38) {
-                    stepTitle.innerText = `[3/4 단계] 대표 썸네일 카드 및 내용 이미지(${imageCount}장) 자동 생성 중...`;
-                    stepDetail.innerText = `선택하신 이미지 화풍 스타일로 고해상도 썸네일과 본문 삽화 이미지를 생성하고 있습니다.`;
+                if (isNoImages) {
+                    if (secondsElapsed <= 5) {
+                        stepTitle.innerText = `[1/2 단계] Gemini 3.6 Flash AI가 성경 본문과 구속사 주제를 기획하는 중...`;
+                        stepDetail.innerText = `故 김성수 목사의 신학 체계(인간의 전적 파산, 자기 부인, 십자가 은혜)를 바탕으로 구조화하고 있습니다.`;
+                    } else {
+                        stepTitle.innerText = `[2/2 단계] 설정하신 분량(${parseInt(targetCharCount).toLocaleString()}자)으로 십자가 원고 심층 집필 중...`;
+                        stepDetail.innerText = `인본주의 종교성 폭로, 헬라어/히브리어 원어 강해, 성도의 자기 부인을 심층 작성 중입니다. (이미지 없이 초고속 완료)`;
+                    }
                 } else {
-                    stepTitle.innerText = `[4/4 단계] 최종 묵상 원고 및 이미지 갤러리 정리 중...`;
-                    stepDetail.innerText = `곧 생성이 완료됩니다. 완성 후 텍스트 복사 및 다운로드가 가능합니다.`;
+                    if (secondsElapsed <= 6) {
+                        stepTitle.innerText = `[1/4 단계] Gemini 3.6 Flash AI가 성경 본문과 구속사 주제를 기획하는 중...`;
+                        stepDetail.innerText = `故 김성수 목사의 신학 체계(인간의 전적 파산, 자기 부인, 십자가 은혜)를 바탕으로 구조화하고 있습니다.`;
+                    } else if (secondsElapsed <= 22) {
+                        stepTitle.innerText = `[2/4 단계] 설정하신 분량(${parseInt(targetCharCount).toLocaleString()}자)으로 십자가 원고 작성 중...`;
+                        stepDetail.innerText = `인본주의 종교성 폭로, 헬라어/히브리어 원어 강해, 성도의 자기 부인을 심층 작성 중입니다.`;
+                    } else if (secondsElapsed <= 38) {
+                        stepTitle.innerText = `[3/4 단계] 대표 썸네일 카드 및 내용 이미지(${imageCount}장) 자동 생성 중...`;
+                        stepDetail.innerText = `선택하신 이미지 화풍 스타일로 고해상도 썸네일과 본문 삽화 이미지를 생성하고 있습니다.`;
+                    } else {
+                        stepTitle.innerText = `[4/4 단계] 최종 묵상 원고 및 이미지 갤러리 정리 중...`;
+                        stepDetail.innerText = `곧 생성이 완료됩니다. 완성 후 텍스트 복사 및 다운로드가 가능합니다.`;
+                    }
                 }
             }, 1000);
         }
@@ -974,16 +1011,23 @@
         }
 
         function renderGallery(images) {
+            const gallerySection = document.getElementById('imageGallerySection') || document.querySelector('.image-gallery-section');
             const grid = document.getElementById('galleryGrid');
             const totalCount = images ? images.length : 0;
             const bodyCount = Math.max(0, totalCount - 1);
 
-            document.getElementById('galleryCount').innerText = `${totalCount}장 (대표 카드 1장 + 본문 그림 ${bodyCount}장)`;
+            const countEl = document.getElementById('galleryCount');
+            if (countEl) {
+                countEl.innerText = `${totalCount}장 (대표 카드 1장 + 본문 그림 ${bodyCount}장)`;
+            }
 
             if (!images || images.length === 0) {
-                grid.innerHTML = `<div style="font-size: 12px; color: var(--text-sub); grid-column: 1/-1;">생성된 이미지가 없습니다.</div>`;
+                if (gallerySection) gallerySection.style.display = 'none';
+                if (grid) grid.innerHTML = `<div style="font-size: 12px; color: var(--text-sub); grid-column: 1/-1;">생성된 이미지가 없습니다.</div>`;
                 return;
             }
+
+            if (gallerySection) gallerySection.style.display = 'block';
 
             grid.innerHTML = images.map((imgUrl, idx) => {
                 const labelText = (idx === 0) ? '📌 대표 썸네일 카드' : `🎨 본문 AI 그림 #${idx}`;
