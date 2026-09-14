@@ -409,9 +409,9 @@
                 </div>
 
                 <!-- 2. 성경책/카테고리 세부 이름 -->
-                <div class="form-group">
-                    <label class="form-label" for="bookOrCategory">성경책 / 분류 이름</label>
-                    <input type="text" id="bookOrCategory" class="form-control" placeholder="예: 로마서, 요한복음, 신앙수필 등" value="로마서" onchange="fetchNextNum()">
+                <div class="form-group" id="categoryGroup">
+                    <label class="form-label" id="labelCategory" for="bookOrCategory">성경책 / 분류 이름</label>
+                    <input type="text" id="bookOrCategory" class="form-control" placeholder="예: 로마서, 요한복음, 신앙수필 등" value="로마서" onchange="if(document.getElementById('genreSelect').value === '성경강해') fetchNextNum()">
                 </div>
 
                 <!-- 로마서 남은 강해 커리큘럼 선택 드롭다운 -->
@@ -423,23 +423,23 @@
                 </div>
 
                 <!-- 3. 회차 / 제목 -->
-                <div class="form-group">
+                <div class="form-group" id="lectureNumGroup">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                         <label class="form-label" id="labelNum" for="lectureNum" style="margin-bottom:0;">강해 회차 / 편수</label>
-                        <button type="button" class="tool-btn tool-btn-gold" onclick="suggestTopic()" style="padding: 4px 10px; font-size: 12px;">🎲 AI 주제 자동 추천</button>
+                        <button type="button" class="tool-btn tool-btn-gold" id="suggestTopicBtn" onclick="suggestTopic()" style="padding: 4px 10px; font-size: 12px;">🎲 AI 주제 자동 추천</button>
                     </div>
-                    <input type="number" id="lectureNum" class="form-control" value="104" placeholder="예: 104" onchange="suggestTopic()">
+                    <input type="number" id="lectureNum" class="form-control" value="104" placeholder="예: 104">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="titleInput">제목 / 구절 <span style="font-size: 11px; color: var(--gold-light); font-weight: normal;">(비워두면 AI가 자동 기획)</span></label>
-                    <input type="text" id="titleInput" class="form-control" placeholder="비워두시거나 [🎲 AI 주제 자동 추천]을 누르세요.">
+                    <label class="form-label" id="labelTitle" for="titleInput">제목 / 구절 <span style="font-size: 11px; color: var(--gold-light); font-weight: normal;">(원하시는 주제나 성경 구절 직접 입력)</span></label>
+                    <input type="text" id="titleInput" class="form-control" placeholder="예: 십자가와 자기 부인, 창세기 22:1-19, 하나님의 은혜 등">
                 </div>
 
                 <!-- 4. 핵심 주제 / 원고 구상 -->
                 <div class="form-group">
-                    <label class="form-label" for="summaryInput">핵심 주제 / 메인 질문 <span style="font-size: 11px; color: var(--gold-light); font-weight: normal;">(비워두면 AI가 자동 기획)</span></label>
-                    <textarea id="summaryInput" class="form-control" placeholder="원고에서 강조하고 싶은 내용이 있으면 적으세요. 비워두시면 AI가 깊이 있는 주제를 자동 선정합니다."></textarea>
+                    <label class="form-label" id="labelSummary" for="summaryInput">핵심 주제 / 원고 구상 <span style="font-size: 11px; color: var(--gold-light); font-weight: normal;">(선택 사항)</span></label>
+                    <textarea id="summaryInput" class="form-control" placeholder="원고에서 특별히 강조하고 싶은 묵상 내용이나 성경 구절을 적으세요. (비워두셔도 AI가 깊이 있게 작성합니다)"></textarea>
                 </div>
 
                 <!-- 5. 글자 수 설정 -->
@@ -594,21 +594,50 @@
             const genre = document.getElementById('genreSelect').value;
             const bookInput = document.getElementById('bookOrCategory');
             const labelNum = document.getElementById('labelNum');
+            const labelCategory = document.getElementById('labelCategory');
+            const romansGroup = document.getElementById('romansCurriculumGroup');
+            const titleInput = document.getElementById('titleInput');
+            const summaryInput = document.getElementById('summaryInput');
             
             if (genre === '성경강해') {
+                if (romansGroup) romansGroup.style.display = 'block';
+                if (labelCategory) labelCategory.innerText = '성경책 / 분류 이름';
                 bookInput.value = '로마서';
                 if (labelNum) labelNum.innerText = '강해 회차 / 편수';
+                fetchNextNum();
             } else if (genre === '신앙수필') {
+                if (romansGroup) romansGroup.style.display = 'none';
+                if (labelCategory) labelCategory.innerText = '수필집 분류 이름';
                 bookInput.value = '신앙 수필집';
                 if (labelNum) labelNum.innerText = '수필 회차 / 편수';
+                fetchNextNum();
             } else if (genre === '신학칼럼') {
+                if (romansGroup) romansGroup.style.display = 'none';
+                if (labelCategory) labelCategory.innerText = '칼럼 분류 이름';
                 bookInput.value = '신학 칼럼';
                 if (labelNum) labelNum.innerText = '칼럼 회차 / 편수';
-            } else {
-                bookInput.value = '자유 카테고리';
-                if (labelNum) labelNum.innerText = '회차 / 편수';
+                fetchNextNum();
+            } else { // 자유주제
+                if (romansGroup) romansGroup.style.display = 'none';
+                if (labelCategory) labelCategory.innerText = '분류 / 카테고리 (선택)';
+                bookInput.value = '자유주제';
+                if (labelNum) labelNum.innerText = '번호 / 편수 (선택)';
+                const lectureNumEl = document.getElementById('lectureNum');
+                if (lectureNumEl) lectureNumEl.value = '1';
+                
+                // 자유주제일 때는 사용자가 직접 입력해야 하므로 로마서/강해 자동생성 제목을 비워줌
+                if (titleInput && (titleInput.value.includes('강 |') || titleInput.value.includes('로마서'))) {
+                    titleInput.value = '';
+                }
+                if (summaryInput && (summaryInput.value.includes('로마서') || summaryInput.value.includes('강해'))) {
+                    summaryInput.value = '';
+                }
+                if (titleInput) {
+                    titleInput.placeholder = '원하시는 자유 주제나 성경 구절을 직접 입력하세요 (예: 십자가와 자기 부인, 창세기 22장 등)';
+                    titleInput.focus();
+                }
+                // 자유주제는 이전 회차 번호 조회 불필요
             }
-            fetchNextNum();
         }
 
         async function loadRomansCurriculum() {
@@ -640,6 +669,7 @@
             if (!selectedOpt.value) return;
 
             document.getElementById('genreSelect').value = '성경강해';
+            toggleGenreInput();
             document.getElementById('bookOrCategory').value = '로마서';
             document.getElementById('lectureNum').value = selectedOpt.value;
             document.getElementById('titleInput').value = selectedOpt.dataset.title;
@@ -658,6 +688,13 @@
 
             const titleInput = document.getElementById('titleInput');
             const summaryInput = document.getElementById('summaryInput');
+
+            // 이미 사용자가 제목을 직접 작성한 경우 덮어쓰기 방지 확인
+            if (titleInput && titleInput.value.trim().length > 0) {
+                if (!confirm(`현재 입력된 제목("${titleInput.value}")이 지워지고 AI 추천 내용으로 변경됩니다. 계속하시겠습니까?`)) {
+                    return;
+                }
+            }
 
             titleInput.value = "AI가 최적의 구절과 제목을 찾는 중...";
             summaryInput.value = "AI가 십자가 복음 중심의 메인 질문을 기획하는 중...";
@@ -777,7 +814,11 @@
             const imageStyle = document.getElementById('imageStyleSelect').value;
 
             if (!title) {
-                title = `${category} ${num}강 | 하나님의 주권과 은혜`;
+                if (genre === '자유주제') {
+                    title = summary ? summary.substring(0, 40) : '십자가 은혜와 하나님의 주권';
+                } else {
+                    title = `${category} ${num}강 | 하나님의 주권과 은혜`;
+                }
             }
 
             if (pollingInterval) {

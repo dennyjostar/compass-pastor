@@ -663,11 +663,12 @@ def bg_generate_devotional(task_id, data):
 - 반드시 공백 포함 {target_char_count:,}자 이상으로 작성하라.
 - 단락을 충분히 깊고 입체적으로 전개하라."""
 
+        category_header = f"{category} {num}강" if "강해" in genre else f"{category}"
         user_prompt = f"""다음 정보로 {genre} 원고를 공백 포함 {target_char_count:,}자 이상으로 완성하라.
 
-- 분류: {category} {num}강
-- 제목: {title}
-- 핵심 주제/질문: {summary}
+- 분류: {category_header}
+- 제목 / 성경 본문 구절: {title}
+- 핵심 주제 / 구상 내용: {summary}
 
 {structure_desc}
 
